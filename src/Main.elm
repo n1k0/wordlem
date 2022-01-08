@@ -132,15 +132,16 @@ hasWon attempts =
                 last
 
 
+checkGame : WordToFind -> List Attempt -> Model
+checkGame word attempts =
+    if hasWon attempts then
+        Won attempts
 
--- gameState : Model -> GameState
--- gameState model =
---     if hasWon model.attempts then
---         Won
---     else if List.length model.attempts >= maxAttempts then
---         Lost
---     else
---         Ongoing
+    else if List.length attempts >= maxAttempts then
+        Lost word attempts
+
+    else
+        Ongoing word attempts "" Nothing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -161,7 +162,7 @@ update msg model =
         ( Submit, Ongoing word attempts input _ ) ->
             case validateAttempt word input of
                 Ok attempt ->
-                    ( Ongoing word (attempt :: attempts) "" Nothing
+                    ( checkGame word (attempt :: attempts)
                     , Cmd.none
                     )
 
