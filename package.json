@@ -1,6 +1,10 @@
 {
   "scripts": {
-    "start": "elm-live src/Main.elm -d public -- --output=public/elm.js"
+    "build": "npm run copy-assets && npm run elm:build",
+    "copy-assets": "rm -rf build && mkdir build && cp -R public/ build",
+    "deploy": "npm run build && gh-pages --dist build/",
+    "elm:build": "elm make src/Main.elm --optimize --output=build/app.js",
+    "start": "elm-live src/Main.elm -d public -- --output=public/app.js"
   },
   "dependencies": {
     "elm-live": "^4.0.2",
