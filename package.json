@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "elm-live src/Main.elm -d public -- --output=public/elm.js"
+  },
   "dependencies": {
     "elm-live": "^4.0.2",
     "elm-tooling": "^1.7.0",
