@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Random
 import Set exposing (Set)
+import String.Extra as SE
 import Words exposing (words)
 
 
@@ -81,18 +82,21 @@ randomWord =
 validateAttempt : WordToFind -> UserInput -> Result String Attempt
 validateAttempt word input =
     let
+        normalize =
+            String.toLower >> String.trim >> SE.removeAccents >> String.replace "œ" "oe"
+
         ( wordChars, inputChars ) =
-            ( String.toList word
-            , input |> String.toLower |> String.trim |> String.toList
+            ( String.toList (normalize word)
+            , String.toList (normalize input)
             )
     in
     if List.any (Char.isAlpha >> not) inputChars then
-        Err "Le mot ne peut contenir que des lettres"
+        Err <| "Le mot ne peut contenir que des lettres: " ++ input
 
-    else if String.length input /= 5 then
+    else if List.length inputChars /= 5 then
         Err "Le mot doit comporter 5 lettres"
 
-    else if not (List.member (String.toLower input) words) then
+    else if not (List.member (normalize input) words) then
         Err <| "Désolé, " ++ input ++ " doit être un mot du dictionnaire"
 
     else
