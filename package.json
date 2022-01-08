@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "elm-live": "^4.0.2",
+    "elm-tooling": "^1.7.0",
+    "gh-pages": "^3.2.3"
+  }
+}
