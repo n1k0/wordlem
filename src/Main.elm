@@ -9,20 +9,12 @@ import Set exposing (Set)
 import Words exposing (words)
 
 
-type alias Model =
-    { gameState : GameState
-    , attempts : List Attempt
-    , word : Maybe WordToFind
-    , currentTry : UserInput
-    , error : Maybe String
-    }
-
-
-type GameState
-    = Errored String
-    | Ongoing
-    | Won
-    | Lost
+type Model
+    = Idle
+    | Errored String
+    | Ongoing WordToFind (List Attempt) UserInput (Maybe AttemptError)
+    | Lost WordToFind (List Attempt)
+    | Won (List Attempt)
 
 
 type Letter
@@ -33,6 +25,10 @@ type Letter
 
 type alias Attempt =
     List Letter
+
+
+type alias AttemptError =
+    String
 
 
 type alias UserInput =
@@ -46,7 +42,7 @@ type alias WordToFind =
 type Msg
     = NewGame
     | NewWord (Maybe WordToFind)
-    | Submit (Maybe WordToFind)
+    | Submit
     | UpdateTry UserInput
 
 
@@ -57,12 +53,7 @@ maxAttempts =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { gameState = Ongoing
-      , attempts = []
-      , word = Nothing
-      , currentTry = ""
-      , error = Nothing
-      }
+    ( Idle
     , Random.generate NewWord randomWord
     )
 
@@ -87,8 +78,8 @@ randomWord =
             )
 
 
-try : WordToFind -> UserInput -> Result String Attempt
-try word input =
+validateAttempt : WordToFind -> UserInput -> Result String Attempt
+validateAttempt word input =
     let
         ( wordChars, inputChars ) =
             ( String.toList word
@@ -141,49 +132,44 @@ hasWon attempts =
                 last
 
 
-gameState : Model -> GameState
-gameState model =
-    if hasWon model.attempts then
-        Won
 
-    else if List.length model.attempts >= maxAttempts then
-        Lost
-
-    else
-        Ongoing
+-- gameState : Model -> GameState
+-- gameState model =
+--     if hasWon model.attempts then
+--         Won
+--     else if List.length model.attempts >= maxAttempts then
+--         Lost
+--     else
+--         Ongoing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ attempts, currentTry } as model) =
-    case msg of
-        NewGame ->
+update msg model =
+    case ( msg, model ) of
+        ( NewGame, _ ) ->
             init ()
 
-        NewWord (Just string) ->
-            ( { model | word = Just string }, Cmd.none )
+        ( NewWord (Just newWord), Idle ) ->
+            ( Ongoing newWord [] "" Nothing, Cmd.none )
 
-        NewWord Nothing ->
-            ( { model | gameState = Errored "Impossible de trouver un mot à deviner" }, Cmd.none )
+        ( NewWord Nothing, Idle ) ->
+            ( Errored "Impossible de trouver un mot à deviner", Cmd.none )
 
-        UpdateTry string ->
-            ( { model | currentTry = string }, Cmd.none )
+        ( UpdateTry newInput, Ongoing word attempts _ maybeError ) ->
+            ( Ongoing word attempts newInput maybeError, Cmd.none )
 
-        Submit (Just wordToFind) ->
-            case try wordToFind currentTry of
+        ( Submit, Ongoing word attempts input _ ) ->
+            case validateAttempt word input of
                 Ok attempt ->
-                    ( { model
-                        | attempts = attempt :: attempts
-                        , currentTry = ""
-                        , error = Nothing
-                      }
+                    ( Ongoing word (attempt :: attempts) "" Nothing
                     , Cmd.none
                     )
 
                 Err error ->
-                    ( { model | error = Just error }, Cmd.none )
+                    ( Ongoing word attempts input (Just error), Cmd.none )
 
-        Submit Nothing ->
-            ( model, Cmd.none )
+        _ ->
+            ( Errored "Le jeu est en erreur :(", Cmd.none )
 
 
 charToText : Char -> Html Msg
@@ -256,29 +242,38 @@ viewUnusedLetters attempts =
         text ""
 
 
+viewAttempts : List Attempt -> Html Msg
+viewAttempts =
+    List.reverse
+        >> List.map viewAttempt
+        >> table [ class "table" ]
+
+
 view : Model -> Html Msg
-view ({ error, attempts, word, currentTry } as model) =
+view model =
     div []
         [ p []
             [ text "Devinez un mot français de 5 lettres en "
             , strong [] [ text <| String.fromInt maxAttempts ]
             , text " tentatives ou moins\u{00A0}!"
             ]
-        , attempts
-            |> List.reverse
-            |> List.map viewAttempt
-            |> table [ class "table" ]
-        , case gameState model of
+        , case model of
+            Idle ->
+                text "Chargement d'une nouvelle partie"
+
             Errored gameError ->
                 div []
-                    [ h3 [] [ text "Le jeu n'a pas pu se lancer\u{00A0}:" ]
-                    , text gameError
+                    [ div [ class "alert alert-info" ]
+                        [ text "Le jeu n'a pas pu se lancer\u{00A0}:"
+                        , text gameError
+                        ]
                     , newGameButton
                     ]
 
-            Won ->
+            Won attempts ->
                 div []
-                    [ h3 []
+                    [ viewAttempts attempts
+                    , h3 []
                         [ text "Vous avez gagné "
                         , if List.length attempts == 1 then
                             strong [] [ text "en un seul coup, bravo\u{00A0}!" ]
@@ -293,45 +288,42 @@ view ({ error, attempts, word, currentTry } as model) =
                     , newGameButton
                     ]
 
-            Lost ->
+            Lost word attempts ->
                 div []
-                    [ h3 [] [ text "Perdu\u{00A0}!" ]
-                    , case word of
-                        Just wordToFind ->
-                            p []
-                                [ text "Le mot à deviner était "
-                                , strong []
-                                    [ a
-                                        [ href ("https://www.larousse.fr/dictionnaires/francais/" ++ wordToFind)
-                                        , target "_blank"
-                                        ]
-                                        [ text (String.toUpper wordToFind) ]
-                                    ]
-                                , text "."
+                    [ viewAttempts attempts
+                    , h3 [] [ text "Perdu\u{00A0}!" ]
+                    , p []
+                        [ text "Le mot à deviner était "
+                        , strong []
+                            [ a
+                                [ href ("https://www.larousse.fr/dictionnaires/francais/" ++ word)
+                                , target "_blank"
                                 ]
-
-                        Nothing ->
-                            text ""
+                                [ text (String.toUpper word) ]
+                            ]
+                        , text "."
+                        ]
                     , viewUnusedLetters attempts
                     , newGameButton
                     ]
 
-            Ongoing ->
+            Ongoing _ attempts input maybeError ->
                 div []
-                    [ viewUnusedLetters attempts
-                    , case error of
-                        Just error_ ->
-                            div [ class "alert alert-info" ] [ text error_ ]
+                    [ viewAttempts attempts
+                    , viewUnusedLetters attempts
+                    , case maybeError of
+                        Just error ->
+                            div [ class "alert alert-info" ] [ text error ]
 
                         Nothing ->
                             text ""
-                    , Html.form [ class "input-group", onSubmit (Submit word) ]
-                        [ input
+                    , Html.form [ class "input-group", onSubmit Submit ]
+                        [ Html.input
                             [ type_ "text"
                             , class "form-control"
                             , maxlength 5
                             , onInput UpdateTry
-                            , value currentTry
+                            , value input
                             ]
                             []
                         , button [ class "btn btn-primary" ] [ text "Envoyer" ]
