@@ -5441,7 +5441,7 @@ var $author$project$Main$getWords = function (lang) {
 };
 var $author$project$Main$initialModel = function (lang) {
 	return {
-		h: lang,
+		e: lang,
 		l: $author$project$Main$Idle,
 		F: $author$project$Main$getWords(lang)
 	};
@@ -5560,7 +5560,7 @@ var $author$project$Main$randomWord = function (words) {
 };
 var $author$project$Main$init = function (flags) {
 	var model = $author$project$Main$initialModel(
-		$author$project$Main$parseLang(flags.h));
+		$author$project$Main$parseLang(flags.e));
 	return _Utils_Tuple2(
 		model,
 		A2(
@@ -5583,9 +5583,10 @@ var $author$project$Main$Lost = F2(
 	function (a, b) {
 		return {$: 3, a: a, b: b};
 	});
-var $author$project$Main$Won = function (a) {
-	return {$: 4, a: a};
-};
+var $author$project$Main$Won = F2(
+	function (a, b) {
+		return {$: 4, a: a, b: b};
+	});
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
@@ -5641,7 +5642,7 @@ var $author$project$Main$hasWon = function (attempts) {
 var $author$project$Main$maxAttempts = 6;
 var $author$project$Main$checkGame = F2(
 	function (word, attempts) {
-		return $author$project$Main$hasWon(attempts) ? $author$project$Main$Won(attempts) : ((_Utils_cmp(
+		return $author$project$Main$hasWon(attempts) ? A2($author$project$Main$Won, word, attempts) : ((_Utils_cmp(
 			$elm$core$List$length(attempts),
 			$author$project$Main$maxAttempts) > -1) ? A2($author$project$Main$Lost, word, attempts) : A4($author$project$Main$Ongoing, word, attempts, '', $elm$core$Maybe$Nothing));
 	});
@@ -5814,7 +5815,7 @@ var $author$project$Main$update = F2(
 				switch (_v0.a.$) {
 					case 0:
 						var _v1 = _v0.a;
-						var newModel = $author$project$Main$initialModel(model.h);
+						var newModel = $author$project$Main$initialModel(model.e);
 						return _Utils_Tuple2(
 							newModel,
 							A2(
@@ -5875,7 +5876,7 @@ var $author$project$Main$update = F2(
 							var word = _v7.a;
 							var attempts = _v7.b;
 							var input = _v7.c;
-							var _v8 = A3($author$project$Main$validateAttempt, model.h, word, input);
+							var _v8 = A3($author$project$Main$validateAttempt, model.e, word, input);
 							if (!_v8.$) {
 								var attempt = _v8.a;
 								return _Utils_Tuple2(
@@ -5911,7 +5912,7 @@ var $author$project$Main$update = F2(
 						var $temp$msg = $author$project$Main$NewGame,
 							$temp$model = _Utils_update(
 							model,
-							{h: lang});
+							{e: lang});
 						msg = $temp$msg;
 						model = $temp$model;
 						continue update;
@@ -5930,7 +5931,6 @@ var $author$project$Main$Submit = {$: 2};
 var $author$project$Main$UpdateTry = function (a) {
 	return {$: 4, a: a};
 };
-var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -5941,15 +5941,45 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$html$Html$form = _VirtualDom_node('form');
-var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $elm$core$String$toUpper = _String_toUpper;
+var $author$project$Main$definitionLink = F2(
+	function (lang, word) {
+		return A2(
+			$elm$html$Html$a,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('fw-bold'),
+					$elm$html$Html$Attributes$href(
+					function () {
+						if (lang === 1) {
+							return 'https://www.cnrtl.fr/definition/' + word;
+						} else {
+							return 'https://www.oxfordlearnersdictionaries.com/definition/english/' + word;
+						}
+					}()),
+					$elm$html$Html$Attributes$title('Lookup the definition of this word (new window)'),
+					$elm$html$Html$Attributes$target('_blank')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					$elm$core$String$toUpper(word))
+				]));
+	});
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$form = _VirtualDom_node('form');
+var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$Attributes$maxlength = function (n) {
 	return A2(
@@ -5975,8 +6005,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$json$Json$Decode$succeed(msg));
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$newGameButton = A2(
 	$elm$html$Html$p,
 	_List_fromArray(
@@ -6147,8 +6175,6 @@ var $author$project$Main$selectLang = function (lang) {
 };
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$strong = _VirtualDom_node('strong');
-var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $elm$core$String$toUpper = _String_toUpper;
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$core$String$fromList = _String_fromList;
@@ -6467,7 +6493,7 @@ var $author$project$Main$view = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				$author$project$Main$selectLang(model.h),
+				$author$project$Main$selectLang(model.e),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
@@ -6480,7 +6506,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text(
-								$author$project$Main$langToString(model.h))
+								$author$project$Main$langToString(model.e))
 							])),
 						$elm$html$Html$text(' word in '),
 						A2(
@@ -6519,7 +6545,8 @@ var $author$project$Main$view = function (model) {
 									$author$project$Main$newGameButton
 								]));
 					case 4:
-						var attempts = _v0.a;
+						var word = _v0.a;
+						var attempts = _v0.b;
 						return A2(
 							$elm$html$Html$div,
 							_List_Nil,
@@ -6531,19 +6558,20 @@ var $author$project$Main$view = function (model) {
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('You have won '),
+											$elm$html$Html$text('You have guessed '),
+											A2($author$project$Main$definitionLink, model.e, word),
 											($elm$core$List$length(attempts) === 1) ? A2(
 											$elm$html$Html$strong,
 											_List_Nil,
 											_List_fromArray(
 												[
-													$elm$html$Html$text('on your first try, congrats!')
+													$elm$html$Html$text(' on your first try, congrats!')
 												])) : A2(
 											$elm$html$Html$span,
 											_List_Nil,
 											_List_fromArray(
 												[
-													$elm$html$Html$text('in '),
+													$elm$html$Html$text(' in '),
 													A2(
 													$elm$html$Html$strong,
 													_List_Nil,
@@ -6580,32 +6608,7 @@ var $author$project$Main$view = function (model) {
 									_List_fromArray(
 										[
 											$elm$html$Html$text('The word to guess was '),
-											A2(
-											$elm$html$Html$strong,
-											_List_Nil,
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$a,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$href(
-															function () {
-																var _v1 = model.h;
-																if (_v1 === 1) {
-																	return 'https://www.cnrtl.fr/definition/' + word;
-																} else {
-																	return 'https://www.oxfordlearnersdictionaries.com/definition/english/' + word;
-																}
-															}()),
-															$elm$html$Html$Attributes$target('_blank')
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text(
-															$elm$core$String$toUpper(word))
-														]))
-												])),
+											A2($author$project$Main$definitionLink, model.e, word),
 											$elm$html$Html$text('.')
 										])),
 									$author$project$Main$viewUnusedLetters(attempts),
@@ -6679,7 +6682,7 @@ var $author$project$Main$view = function (model) {
 									_List_fromArray(
 										[
 											$elm$html$Html$text(
-											'Enter a 5 letters ' + ($author$project$Main$langToString(model.h) + ' word'))
+											'Enter a 5 letters ' + ($author$project$Main$langToString(model.e) + ' word'))
 										]))
 								]));
 				}
@@ -6698,6 +6701,6 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 		$elm$json$Json$Decode$andThen,
 		function (lang) {
 			return $elm$json$Json$Decode$succeed(
-				{h: lang});
+				{e: lang});
 		},
 		A2($elm$json$Json$Decode$field, 'lang', $elm$json$Json$Decode$string)))(0)}});}(this));
