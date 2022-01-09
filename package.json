@@ -4,10 +4,12 @@
     "copy-assets": "rm -rf build && mkdir build && cp -R public/ build",
     "deploy": "npm run build && gh-pages --dist build/",
     "elm:build": "elm make src/Main.elm --optimize --output=build/app.js",
-    "start": "elm-live src/Main.elm -d public -- --output=public/app.js"
+    "start": "elm-live src/Main.elm -d public -- --output=public/app.js",
+    "test": "elm-test"
   },
   "dependencies": {
     "elm-live": "^4.0.2",
+    "elm-test": "^0.19.1-revision7",
     "elm-tooling": "^1.7.0",
     "gh-pages": "^3.2.3"
   }

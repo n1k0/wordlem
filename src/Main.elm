@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
 import Browser
 import Html exposing (..)
@@ -37,6 +37,7 @@ type Letter
     = Unused Char
     | Correct Char
     | Misplaced Char
+    | Handled Char
 
 
 type alias Attempt =
@@ -140,7 +141,11 @@ validateAttempt : Lang -> WordToFind -> UserInput -> Result String Attempt
 validateAttempt lang word input =
     let
         normalize =
-            String.toLower >> String.trim >> SE.removeAccents >> String.replace "œ" "oe"
+            String.toLower
+                >> String.trim
+                >> SE.removeAccents
+                -- French being French…
+                >> String.replace "œ" "oe"
 
         ( wordChars, inputChars ) =
             ( String.toList (normalize word)
@@ -157,21 +162,74 @@ validateAttempt lang word input =
         Err <| "Sorry, " ++ input ++ " must be a known word from our " ++ langToString lang ++ " dictionary"
 
     else
-        Ok
-            (List.map2
-                (\a b ->
-                    if a == b then
-                        Correct a
+        wordChars
+            |> List.map2 (mapChars wordChars) inputChars
+            |> handleCorrectDuplicates
+            |> handleMisplacedDuplicates wordChars
+            |> Ok
 
-                    else if List.member a wordChars then
-                        Misplaced a
+
+mapChars : List Char -> Char -> Char -> Letter
+mapChars wordChars inputChar wordChar =
+    if inputChar == wordChar then
+        Correct inputChar
+
+    else if List.member inputChar wordChars then
+        Misplaced inputChar
+
+    else
+        Unused inputChar
+
+
+{-| Find correctly placed letters; for each, if there's only one occurence in the word,
+then check for misplaced same letter in the attempt and mark them as Handled.
+-}
+handleCorrectDuplicates : Attempt -> Attempt
+handleCorrectDuplicates attempt =
+    attempt
+        |> List.map
+            (\letter ->
+                case letter of
+                    Misplaced c ->
+                        if List.length (List.filter (isCorrectChar c) attempt) == 1 then
+                            Handled c
+
+                        else
+                            letter
+
+                    _ ->
+                        letter
+            )
+
+
+{-| If a word contains a single A, and you provide an attempt with 3 As, you'll have 3
+misplaced As while we only want one, ideally the first one, with others marked as Handled.
+-}
+handleMisplacedDuplicates : List Char -> Attempt -> Attempt
+handleMisplacedDuplicates wordChars =
+    List.foldl
+        (\letter acc ->
+            case letter of
+                Misplaced c ->
+                    let
+                        ( nbCharInWord, nbCharInAcc ) =
+                            -- count number of this char in target word
+                            ( List.length (List.filter ((==) c) wordChars)
+                              -- number of already misplaced char for in accumulator
+                            , List.length (List.filter (isMisplacedChar c) acc)
+                            )
+                    in
+                    if nbCharInAcc >= nbCharInWord then
+                        -- there's enough misplaced letters for this char already
+                        acc ++ [ Handled c ]
 
                     else
-                        Unused a
-                )
-                inputChars
-                wordChars
-            )
+                        acc ++ [ letter ]
+
+                _ ->
+                    acc ++ [ letter ]
+        )
+        []
 
 
 hasWon : List Attempt -> Bool
@@ -272,12 +330,15 @@ viewAttempt attempt =
 
                     Unused char ->
                         td [ class "letter unused bg-secondary" ] [ charToText char ]
+
+                    Handled char ->
+                        td [ class "letter handled bg-secondary" ] [ charToText char ]
             )
         |> tr []
 
 
-isCorrect : Char -> Letter -> Bool
-isCorrect char letter =
+isCorrectChar : Char -> Letter -> Bool
+isCorrectChar char letter =
     case letter of
         Correct c ->
             c == char
@@ -286,8 +347,8 @@ isCorrect char letter =
             False
 
 
-isMisplaced : Char -> Letter -> Bool
-isMisplaced char letter =
+isMisplacedChar : Char -> Letter -> Bool
+isMisplacedChar char letter =
     case letter of
         Misplaced c ->
             c == char
@@ -296,8 +357,8 @@ isMisplaced char letter =
             False
 
 
-isUnused : Char -> Letter -> Bool
-isUnused char letter =
+isUnusedChar : Char -> Letter -> Bool
+isUnusedChar char letter =
     case letter of
         Unused c ->
             c == char
@@ -308,8 +369,8 @@ isUnused char letter =
 
 newGameButton : Html Msg
 newGameButton =
-    p [ class "mt-2" ]
-        [ button [ class "btn btn-primary w-100", onClick NewGame ]
+    p [ class "mt-3" ]
+        [ button [ class "btn btn-lg btn-primary w-100", onClick NewGame ]
             [ text "Play again" ]
         ]
 
@@ -321,9 +382,9 @@ keyboard attempts =
             (\c ->
                 let
                     ( hasCorrect, hasMisplaced, hasUnused ) =
-                        ( attempts |> List.any (List.any (isCorrect c))
-                        , attempts |> List.any (List.any (isMisplaced c))
-                        , attempts |> List.any (List.any (isUnused c))
+                        ( attempts |> List.any (List.any (isCorrectChar c))
+                        , attempts |> List.any (List.any (isMisplacedChar c))
+                        , attempts |> List.any (List.any (isUnusedChar c))
                         )
                 in
                 ( c
@@ -359,7 +420,7 @@ viewKeyboard attempts =
                             div [ class "text-decoration-line-through text-secondary" ]
                                 [ charToText char ]
 
-                        Nothing ->
+                        _ ->
                             div [] [ charToText char ]
                 )
             |> div [ class "d-flex w-100 justify-content-between fw-bold" ]
