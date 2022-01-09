@@ -408,7 +408,7 @@ view model =
                                 [ href
                                     (case model.lang of
                                         French ->
-                                            "https://www.larousse.fr/dictionnaires/francais/" ++ word
+                                            "https://www.cnrtl.fr/definition/" ++ word
 
                                         English ->
                                             "https://www.oxfordlearnersdictionaries.com/definition/english/" ++ word
