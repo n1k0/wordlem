@@ -6593,7 +6593,7 @@ var $author$project$Main$view = function (model) {
 															function () {
 																var _v1 = model.h;
 																if (_v1 === 1) {
-																	return 'https://www.larousse.fr/dictionnaires/francais/' + word;
+																	return 'https://www.cnrtl.fr/definition/' + word;
 																} else {
 																	return 'https://www.oxfordlearnersdictionaries.com/definition/english/' + word;
 																}
