@@ -31,7 +31,7 @@ type GameState
     | Errored String
     | Ongoing WordToFind (List Attempt) UserInput (Maybe AttemptError)
     | Lost WordToFind (List Attempt)
-    | Won (List Attempt)
+    | Won WordToFind (List Attempt)
 
 
 type Letter
@@ -197,7 +197,7 @@ hasWon attempts =
 checkGame : WordToFind -> List Attempt -> GameState
 checkGame word attempts =
     if hasWon attempts then
-        Won attempts
+        Won word attempts
 
     else if List.length attempts >= maxAttempts then
         Lost word attempts
@@ -355,6 +355,24 @@ selectLang lang =
         ]
 
 
+definitionLink : Lang -> WordToFind -> Html Msg
+definitionLink lang word =
+    a
+        [ class "fw-bold"
+        , href
+            (case lang of
+                French ->
+                    "https://www.cnrtl.fr/definition/" ++ word
+
+                English ->
+                    "https://www.oxfordlearnersdictionaries.com/definition/english/" ++ word
+            )
+        , title "Lookup the definition of this word (new window)"
+        , target "_blank"
+        ]
+        [ text (String.toUpper word) ]
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -379,17 +397,18 @@ view model =
                     , newGameButton
                     ]
 
-            Won attempts ->
+            Won word attempts ->
                 div []
                     [ viewAttempts attempts
                     , h3 []
-                        [ text "You have won "
+                        [ text "You have guessed "
+                        , definitionLink model.lang word
                         , if List.length attempts == 1 then
-                            strong [] [ text "on your first try, congrats!" ]
+                            strong [] [ text " on your first try, congrats!" ]
 
                           else
                             span []
-                                [ text "in "
+                                [ text " in "
                                 , strong [] [ text (String.fromInt (List.length attempts)) ]
                                 , text " attempts!"
                                 ]
@@ -403,20 +422,7 @@ view model =
                     , h3 [] [ text "This one was hard!" ]
                     , p []
                         [ text "The word to guess was "
-                        , strong []
-                            [ a
-                                [ href
-                                    (case model.lang of
-                                        French ->
-                                            "https://www.cnrtl.fr/definition/" ++ word
-
-                                        English ->
-                                            "https://www.oxfordlearnersdictionaries.com/definition/english/" ++ word
-                                    )
-                                , target "_blank"
-                                ]
-                                [ text (String.toUpper word) ]
-                            ]
+                        , definitionLink model.lang word
                         , text "."
                         ]
                     , viewUnusedLetters attempts
