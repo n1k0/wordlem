@@ -6137,7 +6137,8 @@ var $author$project$Main$selectLang = function (lang) {
 										_Utils_Tuple2('active', !lang)
 									])),
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$SwitchLang(0))
+								$author$project$Main$SwitchLang(0)),
+								$elm$html$Html$Attributes$title('Switch to English dictionary')
 							]),
 						_List_fromArray(
 							[
@@ -6164,7 +6165,8 @@ var $author$project$Main$selectLang = function (lang) {
 										_Utils_Tuple2('active', lang === 1)
 									])),
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$SwitchLang(1))
+								$author$project$Main$SwitchLang(1)),
+								$elm$html$Html$Attributes$title('Switch to French dictionary')
 							]),
 						_List_fromArray(
 							[
@@ -6489,7 +6491,10 @@ var $author$project$Main$view = function (model) {
 									$author$project$Main$viewAttempts(attempts),
 									A2(
 									$elm$html$Html$h3,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('mb-3')
+										]),
 									_List_fromArray(
 										[
 											$elm$html$Html$text('This one was hard!')
