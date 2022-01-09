@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <title>Wordlem</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A simplistic port of the popular Wordle game in Elm.">
+  <meta name="description" content="Un portage simpliste de Wordle en Elm.">
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="light dark">
   <link rel="stylesheet"
@@ -33,9 +33,8 @@
         <h1>Wordlem</h1>
       </div>
       <div class="col-sm-9 text-end d-flex justify-content-end align-items-center">
-        <small class="text-muted text-start text-sm-end">
-          A simplistic port of the popular
-          <a href="https://www.powerlanguage.co.uk/wordle/">Wordle game</a>
+        <small class="text-start text-sm-end">
+          A simplistic port of the <a href="https://www.powerlanguage.co.uk/wordle/">Wordle game</a>
           in <a href="https://elm-lang.org/">Elm</a>.
        </small>
       </div>
@@ -43,6 +42,11 @@
     <main></main>
   </div>
   <script src="app.js"></script>
-  <script>Elm.Main.init({ node: document.querySelector("main") })</script>
+  <script>
+    Elm.Main.init({
+      node: document.querySelector("main"),
+      flags: { lang: navigator.language || "en" }
+    });
+  </script>
 </body>
 </html>
