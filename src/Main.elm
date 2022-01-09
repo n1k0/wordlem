@@ -382,6 +382,7 @@ selectLang lang =
                 , class "nav-link"
                 , classList [ ( "active", lang == English ) ]
                 , onClick (SwitchLang English)
+                , title "Switch to English dictionary"
                 ]
                 [ text "English" ]
             ]
@@ -391,6 +392,7 @@ selectLang lang =
                 , class "nav-link"
                 , classList [ ( "active", lang == French ) ]
                 , onClick (SwitchLang French)
+                , title "Switch to French dictionary"
                 ]
                 [ text "French" ]
             ]
@@ -461,7 +463,7 @@ view model =
             Lost word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [] [ text "This one was hard!" ]
+                    , h3 [ class "mb-3" ] [ text "This one was hard!" ]
                     , p []
                         [ text "The word to guess was "
                         , definitionLink model.lang word
