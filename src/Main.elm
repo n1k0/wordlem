@@ -21,6 +21,7 @@ type Lang
 
 type alias Model =
     { lang : Lang
+    , words : List WordToFind
     , state : GameState
     }
 
@@ -71,17 +72,20 @@ maxAttempts =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        lang =
-            parseLang flags.lang
+        model =
+            initialModel (parseLang flags.lang)
     in
-    ( initialModel lang
-    , Random.generate NewWord (randomWord lang)
+    ( model
+    , Random.generate NewWord (randomWord model.words)
     )
 
 
 initialModel : Lang -> Model
 initialModel lang =
-    { lang = lang, state = Idle }
+    { lang = lang
+    , words = getWords lang
+    , state = Idle
+    }
 
 
 parseLang : String -> Lang
@@ -113,12 +117,8 @@ getWords lang =
             Words.french
 
 
-randomWord : Lang -> Random.Generator (Maybe WordToFind)
-randomWord lang =
-    let
-        words =
-            getWords lang
-    in
+randomWord : List WordToFind -> Random.Generator (Maybe WordToFind)
+randomWord words =
     Random.int 0 (List.length words - 1)
         |> Random.andThen
             (\int ->
@@ -149,13 +149,13 @@ validateAttempt lang word input =
             )
     in
     if List.any (Char.isAlpha >> not) inputChars then
-        Err <| "Le mot ne peut contenir que des lettres: " ++ input
+        Err <| "The word must contains only alphabetic characters: " ++ input
 
     else if List.length inputChars /= 5 then
-        Err "Le mot doit comporter 5 lettres"
+        Err "The word must be 5 letters long"
 
     else if not (List.member (normalize input) (getWords lang)) then
-        Err <| "Désolé, " ++ input ++ " doit être un mot du dictionnaire"
+        Err <| "Sorry, " ++ input ++ " must be a known word from our " ++ langToString lang ++ " dictionary"
 
     else
         Ok
@@ -210,8 +210,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
         ( NewGame, _ ) ->
-            ( initialModel model.lang
-            , Random.generate NewWord (randomWord model.lang)
+            let
+                newModel =
+                    initialModel model.lang
+            in
+            ( newModel
+            , Random.generate NewWord (randomWord newModel.words)
             )
 
         ( NewWord (Just newWord), Idle ) ->
@@ -220,7 +224,7 @@ update msg model =
             )
 
         ( NewWord Nothing, Idle ) ->
-            ( { model | state = Errored "Impossible de trouver un mot à deviner" }
+            ( { model | state = Errored "Unable to pick a word." }
             , Cmd.none
             )
 
@@ -242,12 +246,10 @@ update msg model =
                     )
 
         ( SwitchLang lang, _ ) ->
-            ( initialModel lang
-            , Random.generate NewWord (randomWord model.lang)
-            )
+            update NewGame { model | lang = lang }
 
         _ ->
-            ( { model | state = Errored "Le jeu est en erreur :(" }
+            ( { model | state = Errored "General game state error. This is bad." }
             , Cmd.none
             )
 
@@ -297,9 +299,9 @@ unusedLetters =
 
 newGameButton : Html Msg
 newGameButton =
-    p []
-        [ button [ class "btn btn-primary", onClick NewGame ]
-            [ text "Nouvelle partie" ]
+    p [ class "mt-2" ]
+        [ button [ class "btn btn-primary w-100", onClick NewGame ]
+            [ text "Play again" ]
         ]
 
 
@@ -311,7 +313,7 @@ viewUnusedLetters attempts =
     in
     if List.length unused > 0 then
         div [ class "mb-3" ]
-            [ h4 [ class "mb-3" ] [ text "Lettres écartées" ]
+            [ h4 [ class "mb-3" ] [ text "Unused letters" ]
             , unused
                 |> List.map (charToText >> List.singleton >> code [])
                 |> List.intersperse (text ", ")
@@ -331,33 +333,25 @@ viewAttempts =
 
 selectLang : Lang -> Html Msg
 selectLang lang =
-    div
-        [ class "btn-group"
-        , attribute "role" "group"
-        , attribute "aria-label" "Language"
-        ]
-        [ input
-            [ type_ "radio"
-            , class "btn-check"
-            , name "lang"
-            , id "lang-fr"
-            , autocomplete False
-            , checked (lang == French)
-            , onClick (SwitchLang French)
+    div [ class "nav nav-pills nav-fill mb-3" ]
+        [ li [ class "nav-item" ]
+            [ button
+                [ type_ "button"
+                , class "nav-link"
+                , classList [ ( "active", lang == English ) ]
+                , onClick (SwitchLang English)
+                ]
+                [ text "English" ]
             ]
-            []
-        , label [ class "btn btn-outline-primary", for "lang-fr" ] [ text "French" ]
-        , input
-            [ type_ "radio"
-            , class "btn-check"
-            , name "lang"
-            , id "lang-en"
-            , autocomplete False
-            , checked (lang == English)
-            , onClick (SwitchLang English)
+        , li [ class "nav-item" ]
+            [ button
+                [ type_ "button"
+                , class "nav-link"
+                , classList [ ( "active", lang == French ) ]
+                , onClick (SwitchLang French)
+                ]
+                [ text "French" ]
             ]
-            []
-        , label [ class "btn btn-outline-primary", for "lang-en" ] [ text "English" ]
         ]
 
 
@@ -366,20 +360,20 @@ view model =
     div []
         [ selectLang model.lang
         , p []
-            [ text "Devinez un mot "
-            , text (langToString model.lang)
-            , text " de 5 lettres en "
+            [ text "Guess a 5 letters "
+            , strong [] [ text (langToString model.lang) ]
+            , text " word in "
             , strong [] [ text <| String.fromInt maxAttempts ]
-            , text " tentatives ou moins\u{00A0}!"
+            , text " attempts or less!"
             ]
         , case model.state of
             Idle ->
-                text "Chargement d'une nouvelle partie"
+                text "Loading game…"
 
             Errored gameError ->
                 div []
                     [ div [ class "alert alert-info" ]
-                        [ text "Le jeu n'a pas pu se lancer\u{00A0}:"
+                        [ text "Game data couldn't be loaded:"
                         , text gameError
                         ]
                     , newGameButton
@@ -389,15 +383,15 @@ view model =
                 div []
                     [ viewAttempts attempts
                     , h3 []
-                        [ text "Vous avez gagné "
+                        [ text "You have won "
                         , if List.length attempts == 1 then
-                            strong [] [ text "en un seul coup, bravo\u{00A0}!" ]
+                            strong [] [ text "on your first try, congrats!" ]
 
                           else
                             span []
-                                [ text "en "
+                                [ text "in "
                                 , strong [] [ text (String.fromInt (List.length attempts)) ]
-                                , text " coups\u{00A0}!"
+                                , text " attempts!"
                                 ]
                         ]
                     , newGameButton
@@ -406,12 +400,19 @@ view model =
             Lost word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [] [ text "Perdu\u{00A0}!" ]
+                    , h3 [] [ text "This one was hard!" ]
                     , p []
-                        [ text "Le mot à deviner était "
+                        [ text "The word to guess was "
                         , strong []
                             [ a
-                                [ href ("https://www.larousse.fr/dictionnaires/francais/" ++ word)
+                                [ href
+                                    (case model.lang of
+                                        French ->
+                                            "https://www.larousse.fr/dictionnaires/francais/" ++ word
+
+                                        English ->
+                                            "https://www.oxfordlearnersdictionaries.com/definition/english/" ++ word
+                                    )
                                 , target "_blank"
                                 ]
                                 [ text (String.toUpper word) ]
