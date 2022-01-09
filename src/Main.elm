@@ -5,7 +5,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Random
-import Set exposing (Set)
 import String.Extra as SE
 import Words
 
@@ -277,24 +276,34 @@ viewAttempt attempt =
         |> tr []
 
 
-unusedLetters : List Attempt -> Set Char
-unusedLetters =
-    List.foldl
-        (\attempt unused ->
-            attempt
-                |> List.filterMap
-                    (\letter ->
-                        case letter of
-                            Unused char ->
-                                Just char
+isCorrect : Char -> Letter -> Bool
+isCorrect char letter =
+    case letter of
+        Correct c ->
+            c == char
 
-                            _ ->
-                                Nothing
-                    )
-                |> Set.fromList
-                |> Set.union unused
-        )
-        (Set.fromList [])
+        _ ->
+            False
+
+
+isMisplaced : Char -> Letter -> Bool
+isMisplaced char letter =
+    case letter of
+        Misplaced c ->
+            c == char
+
+        _ ->
+            False
+
+
+isUnused : Char -> Letter -> Bool
+isUnused char letter =
+    case letter of
+        Unused c ->
+            c == char
+
+        _ ->
+            False
 
 
 newGameButton : Html Msg
@@ -305,23 +314,56 @@ newGameButton =
         ]
 
 
-viewUnusedLetters : List Attempt -> Html Msg
-viewUnusedLetters attempts =
-    let
-        unused =
-            attempts |> unusedLetters |> Set.toList
-    in
-    if List.length unused > 0 then
-        div [ class "mb-3" ]
-            [ h4 [ class "mb-3" ] [ text "Unused letters" ]
-            , unused
-                |> List.map (charToText >> List.singleton >> code [])
-                |> List.intersperse (text ", ")
-                |> div []
-            ]
+keyboard : List Attempt -> List ( Char, Maybe Letter )
+keyboard attempts =
+    String.toList "abcdefghijklmnopqrstuvwxyz"
+        |> List.map
+            (\c ->
+                let
+                    ( hasCorrect, hasMisplaced, hasUnused ) =
+                        ( attempts |> List.any (List.any (isCorrect c))
+                        , attempts |> List.any (List.any (isMisplaced c))
+                        , attempts |> List.any (List.any (isUnused c))
+                        )
+                in
+                ( c
+                , if hasCorrect then
+                    Just (Correct c)
 
-    else
-        text ""
+                  else if hasMisplaced then
+                    Just (Misplaced c)
+
+                  else if hasUnused then
+                    Just (Unused c)
+
+                  else
+                    Nothing
+                )
+            )
+
+
+viewKeyboard : List Attempt -> Html Msg
+viewKeyboard attempts =
+    div [ class "mb-3" ]
+        [ keyboard attempts
+            |> List.map
+                (\( char, letter ) ->
+                    case letter of
+                        Just (Correct _) ->
+                            div [ class "text-success" ] [ charToText char ]
+
+                        Just (Misplaced _) ->
+                            div [ class "text-warning" ] [ charToText char ]
+
+                        Just (Unused _) ->
+                            div [ class "text-decoration-line-through text-secondary" ]
+                                [ charToText char ]
+
+                        Nothing ->
+                            div [] [ charToText char ]
+                )
+            |> div [ class "d-flex w-100 justify-content-between fw-bold" ]
+        ]
 
 
 viewAttempts : List Attempt -> Html Msg
@@ -425,14 +467,14 @@ view model =
                         , definitionLink model.lang word
                         , text "."
                         ]
-                    , viewUnusedLetters attempts
+                    , viewKeyboard attempts
                     , newGameButton
                     ]
 
             Ongoing _ attempts input maybeError ->
                 div []
                     [ viewAttempts attempts
-                    , viewUnusedLetters attempts
+                    , viewKeyboard attempts
                     , case maybeError of
                         Just error ->
                             div [ class "alert alert-info" ] [ text error ]
