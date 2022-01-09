@@ -42,6 +42,11 @@
     <main></main>
   </div>
   <script src="app.js"></script>
-  <script>Elm.Main.init({ node: document.querySelector("main") })</script>
+  <script>
+    Elm.Main.init({
+      node: document.querySelector("main"),
+      flags: { lang: navigator.language || "en" }
+    });
+  </script>
 </body>
 </html>

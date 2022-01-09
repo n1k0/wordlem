@@ -7,10 +7,25 @@ import Html.Events exposing (..)
 import Random
 import Set exposing (Set)
 import String.Extra as SE
-import Words exposing (words)
+import Words
 
 
-type Model
+type alias Flags =
+    { lang : String }
+
+
+type Lang
+    = English
+    | French
+
+
+type alias Model =
+    { lang : Lang
+    , state : GameState
+    }
+
+
+type GameState
     = Idle
     | Errored String
     | Ongoing WordToFind (List Attempt) UserInput (Maybe AttemptError)
@@ -44,6 +59,7 @@ type Msg
     = NewGame
     | NewWord (Maybe WordToFind)
     | Submit
+    | SwitchLang Lang
     | UpdateTry UserInput
 
 
@@ -52,15 +68,57 @@ maxAttempts =
     6
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Idle
-    , Random.generate NewWord randomWord
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    let
+        lang =
+            parseLang flags.lang
+    in
+    ( initialModel lang
+    , Random.generate NewWord (randomWord lang)
     )
 
 
-randomWord : Random.Generator (Maybe WordToFind)
-randomWord =
+initialModel : Lang -> Model
+initialModel lang =
+    { lang = lang, state = Idle }
+
+
+parseLang : String -> Lang
+parseLang string =
+    if String.startsWith "fr" string then
+        French
+
+    else
+        English
+
+
+langToString : Lang -> String
+langToString lang =
+    case lang of
+        English ->
+            "English"
+
+        French ->
+            "French"
+
+
+getWords : Lang -> List WordToFind
+getWords lang =
+    case lang of
+        English ->
+            Words.english
+
+        French ->
+            Words.french
+
+
+randomWord : Lang -> Random.Generator (Maybe WordToFind)
+randomWord lang =
+    let
+        words =
+            getWords lang
+    in
     Random.int 0 (List.length words - 1)
         |> Random.andThen
             (\int ->
@@ -79,8 +137,8 @@ randomWord =
             )
 
 
-validateAttempt : WordToFind -> UserInput -> Result String Attempt
-validateAttempt word input =
+validateAttempt : Lang -> WordToFind -> UserInput -> Result String Attempt
+validateAttempt lang word input =
     let
         normalize =
             String.toLower >> String.trim >> SE.removeAccents >> String.replace "œ" "oe"
@@ -96,7 +154,7 @@ validateAttempt word input =
     else if List.length inputChars /= 5 then
         Err "Le mot doit comporter 5 lettres"
 
-    else if not (List.member (normalize input) words) then
+    else if not (List.member (normalize input) (getWords lang)) then
         Err <| "Désolé, " ++ input ++ " doit être un mot du dictionnaire"
 
     else
@@ -136,7 +194,7 @@ hasWon attempts =
                 last
 
 
-checkGame : WordToFind -> List Attempt -> Model
+checkGame : WordToFind -> List Attempt -> GameState
 checkGame word attempts =
     if hasWon attempts then
         Won attempts
@@ -150,31 +208,48 @@ checkGame word attempts =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
+    case ( msg, model.state ) of
         ( NewGame, _ ) ->
-            init ()
+            ( initialModel model.lang
+            , Random.generate NewWord (randomWord model.lang)
+            )
 
         ( NewWord (Just newWord), Idle ) ->
-            ( Ongoing newWord [] "" Nothing, Cmd.none )
+            ( { model | state = Ongoing newWord [] "" Nothing }
+            , Cmd.none
+            )
 
         ( NewWord Nothing, Idle ) ->
-            ( Errored "Impossible de trouver un mot à deviner", Cmd.none )
+            ( { model | state = Errored "Impossible de trouver un mot à deviner" }
+            , Cmd.none
+            )
 
         ( UpdateTry newInput, Ongoing word attempts _ maybeError ) ->
-            ( Ongoing word attempts newInput maybeError, Cmd.none )
+            ( { model | state = Ongoing word attempts newInput maybeError }
+            , Cmd.none
+            )
 
         ( Submit, Ongoing word attempts input _ ) ->
-            case validateAttempt word input of
+            case validateAttempt model.lang word input of
                 Ok attempt ->
-                    ( checkGame word (attempt :: attempts)
+                    ( { model | state = checkGame word (attempt :: attempts) }
                     , Cmd.none
                     )
 
                 Err error ->
-                    ( Ongoing word attempts input (Just error), Cmd.none )
+                    ( { model | state = Ongoing word attempts input (Just error) }
+                    , Cmd.none
+                    )
+
+        ( SwitchLang lang, _ ) ->
+            ( initialModel lang
+            , Random.generate NewWord (randomWord model.lang)
+            )
 
         _ ->
-            ( Errored "Le jeu est en erreur :(", Cmd.none )
+            ( { model | state = Errored "Le jeu est en erreur :(" }
+            , Cmd.none
+            )
 
 
 charToText : Char -> Html Msg
@@ -254,15 +329,50 @@ viewAttempts =
         >> table [ class "table" ]
 
 
+selectLang : Lang -> Html Msg
+selectLang lang =
+    div
+        [ class "btn-group"
+        , attribute "role" "group"
+        , attribute "aria-label" "Language"
+        ]
+        [ input
+            [ type_ "radio"
+            , class "btn-check"
+            , name "lang"
+            , id "lang-fr"
+            , autocomplete False
+            , checked (lang == French)
+            , onClick (SwitchLang French)
+            ]
+            []
+        , label [ class "btn btn-outline-primary", for "lang-fr" ] [ text "French" ]
+        , input
+            [ type_ "radio"
+            , class "btn-check"
+            , name "lang"
+            , id "lang-en"
+            , autocomplete False
+            , checked (lang == English)
+            , onClick (SwitchLang English)
+            ]
+            []
+        , label [ class "btn btn-outline-primary", for "lang-en" ] [ text "English" ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     div []
-        [ p []
-            [ text "Devinez un mot français de 5 lettres en "
+        [ selectLang model.lang
+        , p []
+            [ text "Devinez un mot "
+            , text (langToString model.lang)
+            , text " de 5 lettres en "
             , strong [] [ text <| String.fromInt maxAttempts ]
             , text " tentatives ou moins\u{00A0}!"
             ]
-        , case model of
+        , case model.state of
             Idle ->
                 text "Chargement d'une nouvelle partie"
 
@@ -333,12 +443,13 @@ view model =
                             []
                         , button [ class "btn btn-primary" ] [ text "Envoyer" ]
                         ]
-                    , div [ class "form-text" ] [ text "Entrez un mot français de 5 lettres" ]
+                    , div [ class "form-text" ]
+                        [ text <| "Enter a 5 letters " ++ langToString model.lang ++ " word" ]
                     ]
         ]
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { init = init
