@@ -6251,207 +6251,67 @@ var $author$project$Main$viewAttempts = A2(
 				[
 					$elm$html$Html$Attributes$class('table')
 				]))));
-var $elm$html$Html$code = _VirtualDom_node('code');
-var $elm$html$Html$h4 = _VirtualDom_node('h4');
-var $elm$core$List$intersperse = F2(
-	function (sep, xs) {
-		if (!xs.b) {
-			return _List_Nil;
+var $author$project$Main$isCorrect = F2(
+	function (_char, letter) {
+		if (letter.$ === 1) {
+			var c = letter.a;
+			return _Utils_eq(c, _char);
 		} else {
-			var hd = xs.a;
-			var tl = xs.b;
-			var step = F2(
-				function (x, rest) {
-					return A2(
-						$elm$core$List$cons,
-						sep,
-						A2($elm$core$List$cons, x, rest));
-				});
-			var spersed = A3($elm$core$List$foldr, step, _List_Nil, tl);
-			return A2($elm$core$List$cons, hd, spersed);
+			return false;
 		}
 	});
-var $elm$core$Set$Set_elm_builtin = $elm$core$Basics$identity;
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Set$empty = $elm$core$Dict$empty;
-var $elm$core$Dict$Black = 1;
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = 0;
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
-					rRight);
-			}
+var $author$project$Main$isMisplaced = F2(
+	function (_char, letter) {
+		if (letter.$ === 2) {
+			var c = letter.a;
+			return _Utils_eq(c, _char);
 		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
+			return false;
 		}
 	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+var $author$project$Main$isUnused = F2(
+	function (_char, letter) {
+		if (!letter.$) {
+			var c = letter.a;
+			return _Utils_eq(c, _char);
 		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1) {
-				case 0:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 1:
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
+			return false;
 		}
 	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0;
-		return A3($elm$core$Dict$insert, key, 0, dict);
-	});
-var $elm$core$Set$fromList = function (list) {
-	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
+var $author$project$Main$keyboard = function (attempts) {
+	return A2(
+		$elm$core$List$map,
+		function (c) {
+			var _v0 = _Utils_Tuple3(
+				A2(
+					$elm$core$List$any,
+					$elm$core$List$any(
+						$author$project$Main$isCorrect(c)),
+					attempts),
+				A2(
+					$elm$core$List$any,
+					$elm$core$List$any(
+						$author$project$Main$isMisplaced(c)),
+					attempts),
+				A2(
+					$elm$core$List$any,
+					$elm$core$List$any(
+						$author$project$Main$isUnused(c)),
+					attempts));
+			var hasCorrect = _v0.a;
+			var hasMisplaced = _v0.b;
+			var hasUnused = _v0.c;
+			return _Utils_Tuple2(
+				c,
+				hasCorrect ? $elm$core$Maybe$Just(
+					$author$project$Main$Correct(c)) : (hasMisplaced ? $elm$core$Maybe$Just(
+					$author$project$Main$Misplaced(c)) : (hasUnused ? $elm$core$Maybe$Just(
+					$author$project$Main$Unused(c)) : $elm$core$Maybe$Nothing)));
+		},
+		$elm$core$String$toList('abcdefghijklmnopqrstuvwxyz'));
 };
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === -2) {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $elm$core$Set$union = F2(
-	function (_v0, _v1) {
-		var dict1 = _v0;
-		var dict2 = _v1;
-		return A2($elm$core$Dict$union, dict1, dict2);
-	});
-var $author$project$Main$unusedLetters = A2(
-	$elm$core$List$foldl,
-	F2(
-		function (attempt, unused) {
-			return A2(
-				$elm$core$Set$union,
-				unused,
-				$elm$core$Set$fromList(
-					A2(
-						$elm$core$List$filterMap,
-						function (letter) {
-							if (!letter.$) {
-								var _char = letter.a;
-								return $elm$core$Maybe$Just(_char);
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						},
-						attempt)));
-		}),
-	$elm$core$Set$fromList(_List_Nil));
-var $author$project$Main$viewUnusedLetters = function (attempts) {
-	var unused = $elm$core$Set$toList(
-		$author$project$Main$unusedLetters(attempts));
-	return ($elm$core$List$length(unused) > 0) ? A2(
+var $author$project$Main$viewKeyboard = function (attempts) {
+	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
@@ -6460,32 +6320,64 @@ var $author$project$Main$viewUnusedLetters = function (attempts) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$h4,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('mb-3')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Unused letters')
-					])),
-				A2(
 				$elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('d-flex w-100 justify-content-between fw-bold')
+					]),
 				A2(
-					$elm$core$List$intersperse,
-					$elm$html$Html$text(', '),
-					A2(
-						$elm$core$List$map,
-						A2(
-							$elm$core$Basics$composeR,
-							$author$project$Main$charToText,
-							A2(
-								$elm$core$Basics$composeR,
-								$elm$core$List$singleton,
-								$elm$html$Html$code(_List_Nil))),
-						unused)))
-			])) : $elm$html$Html$text('');
+					$elm$core$List$map,
+					function (_v0) {
+						var _char = _v0.a;
+						var letter = _v0.b;
+						if (!letter.$) {
+							switch (letter.a.$) {
+								case 1:
+									return A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('text-success')
+											]),
+										_List_fromArray(
+											[
+												$author$project$Main$charToText(_char)
+											]));
+								case 2:
+									return A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('text-warning')
+											]),
+										_List_fromArray(
+											[
+												$author$project$Main$charToText(_char)
+											]));
+								default:
+									return A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('text-decoration-line-through text-secondary')
+											]),
+										_List_fromArray(
+											[
+												$author$project$Main$charToText(_char)
+											]));
+							}
+						} else {
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$charToText(_char)
+									]));
+						}
+					},
+					$author$project$Main$keyboard(attempts)))
+			]));
 };
 var $author$project$Main$view = function (model) {
 	return A2(
@@ -6611,7 +6503,7 @@ var $author$project$Main$view = function (model) {
 											A2($author$project$Main$definitionLink, model.e, word),
 											$elm$html$Html$text('.')
 										])),
-									$author$project$Main$viewUnusedLetters(attempts),
+									$author$project$Main$viewKeyboard(attempts),
 									$author$project$Main$newGameButton
 								]));
 					default:
@@ -6624,7 +6516,7 @@ var $author$project$Main$view = function (model) {
 							_List_fromArray(
 								[
 									$author$project$Main$viewAttempts(attempts),
-									$author$project$Main$viewUnusedLetters(attempts),
+									$author$project$Main$viewKeyboard(attempts),
 									function () {
 									if (!maybeError.$) {
 										var error = maybeError.a;
