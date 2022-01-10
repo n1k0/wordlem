@@ -638,6 +638,10 @@ view model =
                             , onInput UpdateTry
                             , value input
                             , autocomplete False
+                            , spellcheck False
+                            , attribute "inputmode" "text"
+                            , attribute "autocapitalize" "on"
+                            , attribute "enterkeyhint" "send"
                             ]
                             []
                         , button [ class "btn btn-primary" ]
