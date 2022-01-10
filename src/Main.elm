@@ -465,9 +465,31 @@ viewAttempts =
         >> table [ class "table" ]
 
 
+definitionLink : Lang -> WordToFind -> Html Msg
+definitionLink lang word =
+    p [ class "text-center" ]
+        [ a
+            [ class "btn btn-primary w-100"
+            , target "_blank"
+            , href
+                (case lang of
+                    French ->
+                        "https://fr.wiktionary.org/wiki/" ++ word
+
+                    English ->
+                        "https://en.wiktionary.org/wiki/" ++ word
+                )
+            ]
+            [ "Definition of {0} on Wiktionary"
+                |> translate lang [ String.toUpper word ]
+                |> text
+            ]
+        ]
+
+
 selectLang : Lang -> Html Msg
 selectLang lang =
-    div [ class "nav nav-pills nav-fill mb-3" ]
+    div [ class "nav nav-pills nav-fill" ]
         [ li [ class "nav-item" ]
             [ button
                 [ type_ "button"
@@ -495,55 +517,32 @@ selectLang lang =
         ]
 
 
-definitionLink : Lang -> WordToFind -> Html Msg
-definitionLink lang word =
-    p [ class "text-center" ]
-        [ a
-            [ class "btn btn-primary w-100"
-            , target "_blank"
-            , href
-                (case lang of
-                    French ->
-                        "https://fr.wiktionary.org/wiki/" ++ word
-
-                    English ->
-                        "https://en.wiktionary.org/wiki/" ++ word
-                )
-            ]
-            [ "Lookup the definition of {0} on Wikktionary"
-                |> translate lang [ String.toUpper word ]
-                |> text
-            ]
-        ]
-
-
-layout : Lang -> List (Html msg) -> Html msg
+layout : Lang -> List (Html Msg) -> Html Msg
 layout lang content =
     div [ class "game container" ]
-        [ div [ class "row mt-4 mb-3" ]
-            [ div [ class "col-sm-3" ]
-                [ h1 [] [ text "Wordlem" ] ]
-            , div [ class "col-sm-9 text-end d-flex justify-content-end align-items-center" ]
-                [ small [ class "text-start text-sm-end" ]
-                    [ "A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2})."
-                        |> translate lang
-                            [ "https://github.com/n1k0/wordlem"
-                            , "https://www.powerlanguage.co.uk/wordle/"
-                            , "https://elm-lang.org/"
-                            ]
-                        |> Markdown.toHtml []
-                    ]
-                ]
+        [ div [ class "d-flex justify-content-between align-items-center my-3" ]
+            [ h1 [ class "p-0" ] [ text "Wordlem" ]
+            , selectLang lang
             ]
         , main_ [] content
+        , footer [ class "border-top mt-3 pt-2" ]
+            [ "Inspired by [Wordle]({0}) - [Source code]({1})"
+                |> translate lang
+                    [ "https://www.powerlanguage.co.uk/wordle/"
+                    , "https://github.com/n1k0/wordlem"
+                    ]
+                |> Markdown.toHtml
+                    [ class "text-center text-muted"
+                    , style "font-size" ".8em"
+                    ]
+            ]
         ]
 
 
 view : Model -> Html Msg
 view model =
     layout model.lang
-        [ selectLang model.lang
-        , p []
+        [ p []
             [ "Guess a 5 letters {0} word in {1} attempts or less!"
                 |> translate model.lang
                     [ langToString model.lang
@@ -613,7 +612,7 @@ view model =
 
                         Nothing ->
                             text ""
-                    , Html.form [ class "input-group", onSubmit Submit ]
+                    , Html.form [ class "input-group mb-0", onSubmit Submit ]
                         [ Html.input
                             [ type_ "text"
                             , class "form-control"
@@ -650,10 +649,7 @@ translate lang params string =
 translations : Dict String String
 translations =
     Dict.fromList
-        [ ( "A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2})."
-          , "Un [portage simpliste]({0}) de [Wordle]({1}) en [Elm]({2})."
-          )
-        , ( "Enter a 5 letters {0} word"
+        [ ( "Enter a 5 letters {0} word"
           , "Entrez un mot {0} de 5 lettres"
           )
         , ( "Game data couldn't be loaded: {0}"
@@ -665,11 +661,14 @@ translations =
         , ( "Guess a 5 letters {0} word in {1} attempts or less!"
           , "Devinez un mot {0} en {1} essais ou moins\u{00A0}!"
           )
+        , ( "Inspired by [Wordle]({0}) - [Source code]({1})"
+          , "Inspiré de [Wordle]({0}) - [Code source]({1})"
+          )
         , ( "Loading game…"
           , "Chargement du jeu…"
           )
-        , ( "Lookup the definition of {0} on Wikktionary"
-          , "Accédez à la définition de {0} sur Wiktionary"
+        , ( "Definition of {0} on Wiktionary"
+          , "Définition de {0} sur Wiktionary"
           )
         , ( "Lookup the definition of this word (new window)"
           , "Accéder à la définition de ce mot (nouvelle fenêtre"
