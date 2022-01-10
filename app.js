@@ -6124,7 +6124,7 @@ var $author$project$Main$handleCorrectDuplicates = F2(
 								attempt)));
 					var nbCharsInWord = _v1.a;
 					var nbCorrectInAttempt = _v1.b;
-					return (_Utils_cmp(nbCorrectInAttempt, nbCharsInWord) > 0) ? $author$project$Main$Handled(c) : letter;
+					return (_Utils_cmp(nbCorrectInAttempt, nbCharsInWord) > -1) ? $author$project$Main$Handled(c) : letter;
 				} else {
 					return letter;
 				}
