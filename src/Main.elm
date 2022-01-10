@@ -476,10 +476,10 @@ definitionLink lang word =
         , href
             (case lang of
                 French ->
-                    "https://www.cnrtl.fr/definition/" ++ word
+                    "https://fr.wiktionary.org/wiki/" ++ word
 
                 English ->
-                    "https://www.oxfordlearnersdictionaries.com/definition/english/" ++ word
+                    "https://en.wiktionary.org/wiki/" ++ word
             )
         , title "Lookup the definition of this word (new window)"
         , target "_blank"
@@ -495,7 +495,7 @@ view model =
             [ text "Guess a 5 letters "
             , strong [] [ text (langToString model.lang) ]
             , text " word in "
-            , strong [] [ text <| String.fromInt maxAttempts ]
+            , strong [] [ text (String.fromInt maxAttempts) ]
             , text " attempts or less!"
             ]
         , case model.state of
