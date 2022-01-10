@@ -27,25 +27,11 @@
   </style>
 </head>
 <body>
-  <div class="game container">
-    <div class="row mt-4 mb-3">
-      <div class="col-sm-3">
-        <h1>Wordlem</h1>
-      </div>
-      <div class="col-sm-9 text-end d-flex justify-content-end align-items-center">
-        <small class="text-start text-sm-end">
-          A <a href="https://github.com/n1k0/wordlem">simplistic port</a>
-          of the <a href="https://www.powerlanguage.co.uk/wordle/">Wordle game</a>
-          in <a href="https://elm-lang.org/">Elm</a>.
-       </small>
-      </div>
-    </div>
-    <main></main>
-  </div>
+  <div id="app"></div>
   <script src="app.js"></script>
   <script>
     Elm.Main.init({
-      node: document.querySelector("main"),
+      node: document.getElementById("app"),
       flags: { lang: navigator.language || "en" }
     });
   </script>

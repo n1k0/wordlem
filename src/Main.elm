@@ -1,11 +1,14 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
 import Browser
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Markdown
 import Random
 import String.Extra as SE
+import String.Interpolate exposing (interpolate)
 import Words
 
 
@@ -104,7 +107,7 @@ langToString lang =
             "English"
 
         French ->
-            "French"
+            "français"
 
 
 getWords : Lang -> List WordToFind
@@ -153,13 +156,19 @@ validateAttempt lang word input =
             )
     in
     if List.any (Char.isAlpha >> not) inputChars then
-        Err <| "The word must contains only alphabetic characters: " ++ input
+        "The word must contains only alphabetic characters: {0}"
+            |> translate lang [ input ]
+            |> Err
 
     else if List.length inputChars /= 5 then
-        Err "The word must be 5 letters long"
+        "The word must be 5 letters long"
+            |> translate lang []
+            |> Err
 
     else if not (List.member (normalize input) (getWords lang)) then
-        Err <| "Sorry, " ++ input ++ " must be a known word from our " ++ langToString lang ++ " dictionary"
+        "Sorry, {0} must be a known word from our {1} dictionary"
+            |> translate lang [ input, langToString lang ]
+            |> Err
 
     else
         wordChars
@@ -290,7 +299,12 @@ update msg model =
             )
 
         ( NewWord Nothing, Idle ) ->
-            ( { model | state = Errored "Unable to pick a word." }
+            ( { model
+                | state =
+                    "Unable to pick a word."
+                        |> translate model.lang []
+                        |> Errored
+              }
             , Cmd.none
             )
 
@@ -315,7 +329,12 @@ update msg model =
             update NewGame { model | lang = lang }
 
         _ ->
-            ( { model | state = Errored "General game state error. This is bad." }
+            ( { model
+                | state =
+                    "General game state error. This is bad."
+                        |> translate model.lang []
+                        |> Errored
+              }
             , Cmd.none
             )
 
@@ -452,7 +471,9 @@ selectLang lang =
                 , class "nav-link"
                 , classList [ ( "active", lang == English ) ]
                 , onClick (SwitchLang English)
-                , title "Switch to English dictionary"
+                , "Switch to {0} dictionary"
+                    |> translate lang [ langToString English ]
+                    |> title
                 ]
                 [ text "English" ]
             ]
@@ -462,9 +483,11 @@ selectLang lang =
                 , class "nav-link"
                 , classList [ ( "active", lang == French ) ]
                 , onClick (SwitchLang French)
-                , title "Switch to French dictionary"
+                , "Switch to {0} dictionary"
+                    |> translate lang [ langToString French ]
+                    |> title
                 ]
-                [ text "French" ]
+                [ text "Français" ]
             ]
         ]
 
@@ -481,32 +504,60 @@ definitionLink lang word =
                 English ->
                     "https://en.wiktionary.org/wiki/" ++ word
             )
-        , title "Lookup the definition of this word (new window)"
         , target "_blank"
         ]
-        [ text (String.toUpper word) ]
+        [ "Lookup the definition of {0} on Wikktionary"
+            |> translate lang [ word ]
+            |> text
+        ]
+
+
+layout : Lang -> List (Html msg) -> Html msg
+layout lang content =
+    div [ class "game container" ]
+        [ div [ class "row mt-4 mb-3" ]
+            [ div [ class "col-sm-3" ]
+                [ h1 [] [ text "Wordlem" ] ]
+            , div [ class "col-sm-9 text-end d-flex justify-content-end align-items-center" ]
+                [ small [ class "text-start text-sm-end" ]
+                    [ "A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2})."
+                        |> translate lang
+                            [ "https://github.com/n1k0/wordlem"
+                            , "https://www.powerlanguage.co.uk/wordle/"
+                            , "https://elm-lang.org/"
+                            ]
+                        |> Markdown.toHtml []
+                    ]
+                ]
+            ]
+        , main_ [] content
+        ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
+    layout model.lang
         [ selectLang model.lang
         , p []
-            [ text "Guess a 5 letters "
-            , strong [] [ text (langToString model.lang) ]
-            , text " word in "
-            , strong [] [ text (String.fromInt maxAttempts) ]
-            , text " attempts or less!"
+            [ "Guess a 5 letters {0} word in {1} attempts or less!"
+                |> translate model.lang
+                    [ langToString model.lang
+                    , String.fromInt maxAttempts
+                    ]
+                |> text
             ]
         , case model.state of
             Idle ->
-                text "Loading game…"
+                "Loading game…"
+                    |> translate model.lang []
+                    |> text
 
             Errored gameError ->
                 div []
                     [ div [ class "alert alert-info" ]
-                        [ text "Game data couldn't be loaded:"
-                        , text gameError
+                        [ "Game data couldn't be loaded: {0}"
+                            |> translate model.lang [ gameError ]
+                            |> text
                         ]
                     , newGameButton
                     ]
@@ -515,30 +566,29 @@ view model =
                 div []
                     [ viewAttempts attempts
                     , h3 []
-                        [ text "You successfully guessed "
-                        , definitionLink model.lang word
-                        , if List.length attempts == 1 then
-                            strong [] [ text " on your first try, congrats!" ]
+                        [ if List.length attempts == 1 then
+                            "You successfully guessed {0} on your first try, congrats!"
+                                |> translate model.lang [ word ]
+                                |> text
 
                           else
-                            span []
-                                [ text " in "
-                                , strong [] [ text (String.fromInt (List.length attempts)) ]
-                                , text " attempts!"
-                                ]
+                            "You successfully guessed {0} in {1} attempts, congrats!"
+                                |> translate model.lang [ word, String.fromInt (List.length attempts) ]
+                                |> text
                         ]
+                    , p [] [ definitionLink model.lang word ]
                     , newGameButton
                     ]
 
             Lost word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [ class "mb-3" ] [ text "This one was hard!" ]
-                    , p []
-                        [ text "The word to guess was "
-                        , definitionLink model.lang word
-                        , text "."
+                    , h3 [ class "mb-3" ]
+                        [ "This one was hard!"
+                            |> translate model.lang []
+                            |> text
                         ]
+                    , p [] [ definitionLink model.lang word ]
                     , viewKeyboard attempts
                     , newGameButton
                     ]
@@ -562,11 +612,79 @@ view model =
                             , value input
                             ]
                             []
-                        , button [ class "btn btn-primary" ] [ text "Envoyer" ]
+                        , button [ class "btn btn-primary" ]
+                            [ "Submit" |> translate model.lang [] |> text ]
                         ]
                     , div [ class "form-text" ]
-                        [ text <| "Enter a 5 letters " ++ langToString model.lang ++ " word" ]
+                        [ "Enter a 5 letters {0} word"
+                            |> translate model.lang [ langToString model.lang ]
+                            |> text
+                        ]
                     ]
+        ]
+
+
+translate : Lang -> List String -> String -> String
+translate lang params string =
+    case lang of
+        English ->
+            interpolate string params
+
+        French ->
+            translations
+                |> Dict.get string
+                |> Maybe.withDefault string
+                |> (\s -> interpolate s params)
+
+
+translations : Dict String String
+translations =
+    Dict.fromList
+        [ ( "A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2})."
+          , "Un [portage simpliste]({0}) de [Wordle]({1}) en [Elm]({2})."
+          )
+        , ( "Enter a 5 letters {0} word"
+          , "Entrez un mot {0} de 5 lettres"
+          )
+        , ( "Game data couldn't be loaded: {0}"
+          , "Les données du jeu n'ont pas été chargé\u{00A0}: {0}"
+          )
+        , ( "General game state error. This is bad."
+          , "Erreur générale. C'est pas bon signe."
+          )
+        , ( "Guess a 5 letters {0} word in {1} attempts or less!"
+          , "Devinez un mot {0} en {1} essais ou moins\u{00A0}!"
+          )
+        , ( "Loading game…"
+          , "Chargement du jeu…"
+          )
+        , ( "Lookup the definition of {0} on Wikktionary"
+          , "Accédez à la définition de {0} sur Wiktionary"
+          )
+        , ( "Lookup the definition of this word (new window)"
+          , "Accéder à la définition de ce mot (nouvelle fenêtre"
+          )
+        , ( "Sorry, {0} must be a known word from our {1} dictionary"
+          , "Désolé, {0} doit être un mot connu de notre dictionnaire {1}"
+          )
+        , ( "Submit"
+          , "Envoyer"
+          )
+        , ( "Switch to {0} dictionary"
+          , "Passer au dictionnaire {0}"
+          )
+        , ( "The word must be 5 letters long"
+          , "Le mot doit contenir 5 lettres"
+          )
+        , ( "The word must contains only alphabetic characters: {0}"
+          , "Le mot ne doit contenir que des lettres alphabétiques\u{00A0}: {0}"
+          )
+        , ( "This one was hard!"
+          , "C'était pas facile\u{00A0}!"
+          )
+        , ( "Unable to pick a word."
+          , "Impossible de sélectionner un mot à trouver."
+          )
         ]
 
 
