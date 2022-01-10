@@ -6043,13 +6043,13 @@ var $elm$core$Dict$fromList = function (assocs) {
 var $author$project$Main$translations = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
-			_Utils_Tuple2('A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2}).', 'Un [portage simpliste]({0}) de [Wordle]({1}) en [Elm]({2}).'),
 			_Utils_Tuple2('Enter a 5 letters {0} word', 'Entrez un mot {0} de 5 lettres'),
 			_Utils_Tuple2('Game data couldn\'t be loaded: {0}', 'Les données du jeu n\'ont pas été chargé\u00A0: {0}'),
 			_Utils_Tuple2('General game state error. This is bad.', 'Erreur générale. C\'est pas bon signe.'),
 			_Utils_Tuple2('Guess a 5 letters {0} word in {1} attempts or less!', 'Devinez un mot {0} en {1} essais ou moins\u00A0!'),
+			_Utils_Tuple2('Inspired by [Wordle]({0}) - [Source code]({1})', 'Inspiré de [Wordle]({0}) - [Code source]({1})'),
 			_Utils_Tuple2('Loading game…', 'Chargement du jeu…'),
-			_Utils_Tuple2('Lookup the definition of {0} on Wikktionary', 'Accédez à la définition de {0} sur Wiktionary'),
+			_Utils_Tuple2('Definition of {0} on Wiktionary', 'Définition de {0} sur Wiktionary'),
 			_Utils_Tuple2('Lookup the definition of this word (new window)', 'Accéder à la définition de ce mot (nouvelle fenêtre'),
 			_Utils_Tuple2('Play again', 'Nouvelle partie'),
 			_Utils_Tuple2('Sorry, {0} must be a known word from our {1} dictionary', 'Désolé, {0} doit être un mot connu de notre dictionnaire {1}'),
@@ -6513,7 +6513,7 @@ var $author$project$Main$definitionLink = F2(
 									[
 										$elm$core$String$toUpper(word)
 									]),
-								'Lookup the definition of {0} on Wikktionary'))
+								'Definition of {0} on Wiktionary'))
 						]))
 				]));
 	});
@@ -6521,189 +6521,9 @@ var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$form = _VirtualDom_node('form');
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$main_ = _VirtualDom_node('main');
-var $elm$html$Html$small = _VirtualDom_node('small');
-var $elm_explorations$markdown$Markdown$defaultOptions = {
-	ah: $elm$core$Maybe$Nothing,
-	a1: $elm$core$Maybe$Just(
-		{aR: false, bt: false}),
-	bp: true,
-	bq: false
-};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (!maybe.$) {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
-var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
-var $author$project$Main$layout = F2(
-	function (lang, content) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('game container')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('row mt-4 mb-3')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('col-sm-3')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$h1,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$elm$html$Html$text('Wordlem')
-										]))
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('col-sm-9 text-end d-flex justify-content-end align-items-center')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$small,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('text-start text-sm-end')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm_explorations$markdown$Markdown$toHtml,
-											_List_Nil,
-											A3(
-												$author$project$Main$translate,
-												lang,
-												_List_fromArray(
-													['https://github.com/n1k0/wordlem', 'https://www.powerlanguage.co.uk/wordle/', 'https://elm-lang.org/']),
-												'A [simplistic port]({0}) of the [Wordle game]({1}) in [Elm]({2}).'))
-										]))
-								]))
-						])),
-					A2($elm$html$Html$main_, _List_Nil, content)
-				]));
-	});
-var $elm$html$Html$Attributes$maxlength = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'maxlength',
-		$elm$core$String$fromInt(n));
-};
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 0, a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$newGameButton = function (lang) {
-	return A2(
-		$elm$html$Html$p,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('mt-3')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('btn btn-lg btn-primary w-100'),
-						$elm$html$Html$Events$onClick($author$project$Main$NewGame)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						A3($author$project$Main$translate, lang, _List_Nil, 'Play again'))
-					]))
-			]));
-};
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 1, a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm$html$Html$Events$alwaysPreventDefault = function (msg) {
-	return _Utils_Tuple2(msg, true);
-};
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 2, a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $elm$html$Html$Events$onSubmit = function (msg) {
-	return A2(
-		$elm$html$Html$Events$preventDefaultOn,
-		'submit',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysPreventDefault,
-			$elm$json$Json$Decode$succeed(msg)));
-};
 var $author$project$Main$SwitchLang = function (a) {
 	return {$: 3, a: a};
 };
@@ -6722,6 +6542,23 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
 var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 0, a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Main$selectLang = function (lang) {
@@ -6729,7 +6566,7 @@ var $author$project$Main$selectLang = function (lang) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('nav nav-pills nav-fill mb-3')
+				$elm$html$Html$Attributes$class('nav nav-pills nav-fill')
 			]),
 		_List_fromArray(
 			[
@@ -6806,6 +6643,161 @@ var $author$project$Main$selectLang = function (lang) {
 							]))
 					]))
 			]));
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	ah: $elm$core$Maybe$Nothing,
+	a1: $elm$core$Maybe$Just(
+		{aR: false, bt: false}),
+	bp: true,
+	bq: false
+};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (!maybe.$) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
+var $author$project$Main$layout = F2(
+	function (lang, content) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('game container')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('d-flex justify-content-between align-items-center my-3')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$h1,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('p-0')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Wordlem')
+								])),
+							$author$project$Main$selectLang(lang)
+						])),
+					A2($elm$html$Html$main_, _List_Nil, content),
+					A2(
+					$elm$html$Html$footer,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('border-top mt-3 pt-2')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm_explorations$markdown$Markdown$toHtml,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('text-center text-muted'),
+									A2($elm$html$Html$Attributes$style, 'font-size', '.8em')
+								]),
+							A3(
+								$author$project$Main$translate,
+								lang,
+								_List_fromArray(
+									['https://www.powerlanguage.co.uk/wordle/', 'https://github.com/n1k0/wordlem']),
+								'Inspired by [Wordle]({0}) - [Source code]({1})'))
+						]))
+				]));
+	});
+var $elm$html$Html$Attributes$maxlength = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'maxlength',
+		$elm$core$String$fromInt(n));
+};
+var $author$project$Main$newGameButton = function (lang) {
+	return A2(
+		$elm$html$Html$p,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('mt-3')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn btn-lg btn-primary w-100'),
+						$elm$html$Html$Events$onClick($author$project$Main$NewGame)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A3($author$project$Main$translate, lang, _List_Nil, 'Play again'))
+					]))
+			]));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 1, a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Events$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 2, a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $elm$html$Html$Events$onSubmit = function (msg) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'submit',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysPreventDefault,
+			$elm$json$Json$Decode$succeed(msg)));
 };
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
@@ -7017,7 +7009,6 @@ var $author$project$Main$view = function (model) {
 		model.a,
 		_List_fromArray(
 			[
-				$author$project$Main$selectLang(model.a),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
@@ -7162,7 +7153,7 @@ var $author$project$Main$view = function (model) {
 									$elm$html$Html$form,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('input-group'),
+											$elm$html$Html$Attributes$class('input-group mb-0'),
 											$elm$html$Html$Events$onSubmit($author$project$Main$Submit)
 										]),
 									_List_fromArray(
