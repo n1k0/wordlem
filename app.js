@@ -6491,7 +6491,6 @@ var $author$project$Main$Submit = {$: 3};
 var $author$project$Main$UpdateTry = function (a) {
 	return {$: 5, a: a};
 };
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6500,6 +6499,13 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$autocomplete = function (bool) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'autocomplete',
+		bool ? 'on' : 'off');
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$Attributes$href = function (url) {
@@ -7203,7 +7209,8 @@ var $author$project$Main$view = function (model) {
 													$elm$html$Html$Attributes$class('form-control'),
 													$elm$html$Html$Attributes$maxlength(5),
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateTry),
-													$elm$html$Html$Attributes$value(input)
+													$elm$html$Html$Attributes$value(input),
+													$elm$html$Html$Attributes$autocomplete(false)
 												]),
 											_List_Nil),
 											A2(
