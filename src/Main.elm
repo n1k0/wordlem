@@ -515,7 +515,7 @@ view model =
                 div []
                     [ viewAttempts attempts
                     , h3 []
-                        [ text "You have guessed "
+                        [ text "You successfully guessed "
                         , definitionLink model.lang word
                         , if List.length attempts == 1 then
                             strong [] [ text " on your first try, congrats!" ]
