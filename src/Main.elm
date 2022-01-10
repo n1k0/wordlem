@@ -637,6 +637,7 @@ view model =
                             , maxlength 5
                             , onInput UpdateTry
                             , value input
+                            , autocomplete False
                             ]
                             []
                         , button [ class "btn btn-primary" ]
