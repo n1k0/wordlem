@@ -164,7 +164,7 @@ validateAttempt lang word input =
     else
         wordChars
             |> List.map2 (mapChars wordChars) inputChars
-            |> handleCorrectDuplicates
+            |> handleCorrectDuplicates wordChars
             |> handleMisplacedDuplicates wordChars
             |> Ok
 
@@ -184,14 +184,23 @@ mapChars wordChars inputChar wordChar =
 {-| Find correctly placed letters; for each, if there's only one occurence in the word,
 then check for misplaced same letter in the attempt and mark them as Handled.
 -}
-handleCorrectDuplicates : Attempt -> Attempt
-handleCorrectDuplicates attempt =
+handleCorrectDuplicates : List Char -> Attempt -> Attempt
+handleCorrectDuplicates wordChars attempt =
     attempt
         |> List.map
             (\letter ->
                 case letter of
                     Misplaced c ->
-                        if List.length (List.filter (isCorrectChar c) attempt) == 1 then
+                        let
+                            ( nbCharsInWord, nbCorrectInAttempt ) =
+                                ( -- count number of this char in target word
+                                  List.length (List.filter ((==) c) wordChars)
+                                  -- number of already correct char for
+                                , List.length (List.filter (isCorrectChar c) attempt)
+                                )
+                        in
+                        if nbCorrectInAttempt > nbCharsInWord then
+                            -- there's enough correct letters for this char already
                             Handled c
 
                         else
