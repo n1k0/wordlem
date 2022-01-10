@@ -5428,7 +5428,7 @@ var $elm$core$Task$perform = F2(
 var $elm$browser$Browser$element = _Browser_element;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $author$project$Main$NewWord = function (a) {
-	return {$: 1, a: a};
+	return {$: 2, a: a};
 };
 var $elm$random$Random$Generate = $elm$core$Basics$identity;
 var $elm$random$Random$Seed = F2(
@@ -5673,7 +5673,7 @@ var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$Errored = function (a) {
 	return {$: 1, a: a};
 };
-var $author$project$Main$NewGame = {$: 0};
+var $author$project$Main$NewGame = {$: 1};
 var $author$project$Main$Ongoing = F4(
 	function (a, b, c, d) {
 		return {$: 2, a: a, b: b, c: c, d: d};
@@ -5745,6 +5745,36 @@ var $author$project$Main$checkGame = F2(
 			$elm$core$List$length(attempts),
 			$author$project$Main$maxAttempts) > -1) ? A2($author$project$Main$Lost, word, attempts) : A4($author$project$Main$Ongoing, word, attempts, '', $elm$core$Maybe$Nothing));
 	});
+var $author$project$Main$NoOp = {$: 0};
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			A2(
+				$elm$core$Task$onError,
+				A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+					$elm$core$Result$Err),
+				A2(
+					$elm$core$Task$andThen,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Ok),
+					task)));
+	});
+var $elm$browser$Browser$Dom$focus = _Browser_call('focus');
+var $elm$core$Process$sleep = _Process_sleep;
+var $author$project$Main$focusInput = A2(
+	$elm$core$Task$attempt,
+	$elm$core$Basics$always($author$project$Main$NoOp),
+	A2(
+		$elm$core$Task$andThen,
+		function (_v0) {
+			return $elm$browser$Browser$Dom$focus('wordlem-input');
+		},
+		$elm$core$Process$sleep(1)));
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Basics$compare = _Utils_compare;
@@ -6335,10 +6365,10 @@ var $author$project$Main$update = F2(
 		update:
 		while (true) {
 			var _v0 = _Utils_Tuple2(msg, model.s);
-			_v0$6:
+			_v0$7:
 			while (true) {
 				switch (_v0.a.$) {
-					case 0:
+					case 1:
 						var _v1 = _v0.a;
 						var newModel = $author$project$Main$initialModel(model.a);
 						return _Utils_Tuple2(
@@ -6347,7 +6377,7 @@ var $author$project$Main$update = F2(
 								$elm$random$Random$generate,
 								$author$project$Main$NewWord,
 								$author$project$Main$randomWord(newModel.R)));
-					case 1:
+					case 2:
 						if (!_v0.a.a.$) {
 							if (!_v0.b.$) {
 								var newWord = _v0.a.a.a;
@@ -6358,9 +6388,9 @@ var $author$project$Main$update = F2(
 										{
 											s: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 										}),
-									$elm$core$Platform$Cmd$none);
+									$author$project$Main$focusInput);
 							} else {
-								break _v0$6;
+								break _v0$7;
 							}
 						} else {
 							if (!_v0.b.$) {
@@ -6375,10 +6405,10 @@ var $author$project$Main$update = F2(
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v0$6;
+								break _v0$7;
 							}
 						}
-					case 4:
+					case 5:
 						if (_v0.b.$ === 2) {
 							var newInput = _v0.a.a;
 							var _v5 = _v0.b;
@@ -6393,9 +6423,9 @@ var $author$project$Main$update = F2(
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
-							break _v0$6;
+							break _v0$7;
 						}
-					case 2:
+					case 3:
 						if (_v0.b.$ === 2) {
 							var _v6 = _v0.a;
 							var _v7 = _v0.b;
@@ -6414,7 +6444,7 @@ var $author$project$Main$update = F2(
 												word,
 												A2($elm$core$List$cons, attempt, attempts))
 										}),
-									$elm$core$Platform$Cmd$none);
+									$author$project$Main$focusInput);
 							} else {
 								var error = _v8.a;
 								return _Utils_Tuple2(
@@ -6428,11 +6458,14 @@ var $author$project$Main$update = F2(
 												input,
 												$elm$core$Maybe$Just(error))
 										}),
-									$elm$core$Platform$Cmd$none);
+									$author$project$Main$focusInput);
 							}
 						} else {
-							break _v0$6;
+							break _v0$7;
 						}
+					case 0:
+						var _v9 = _v0.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					default:
 						var lang = _v0.a.a;
 						var $temp$msg = $author$project$Main$NewGame,
@@ -6454,9 +6487,9 @@ var $author$project$Main$update = F2(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Main$Submit = {$: 2};
+var $author$project$Main$Submit = {$: 3};
 var $author$project$Main$UpdateTry = function (a) {
-	return {$: 4, a: a};
+	return {$: 5, a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$string = _Json_wrap;
@@ -6522,12 +6555,13 @@ var $author$project$Main$definitionLink = F2(
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$form = _VirtualDom_node('form');
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$SwitchLang = function (a) {
-	return {$: 3, a: a};
+	return {$: 4, a: a};
 };
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
@@ -7165,6 +7199,7 @@ var $author$project$Main$view = function (model) {
 											_List_fromArray(
 												[
 													$elm$html$Html$Attributes$type_('text'),
+													$elm$html$Html$Attributes$id('wordlem-input'),
 													$elm$html$Html$Attributes$class('form-control'),
 													$elm$html$Html$Attributes$maxlength(5),
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateTry),
