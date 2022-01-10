@@ -395,11 +395,14 @@ isUnusedChar char letter =
             False
 
 
-newGameButton : Html Msg
-newGameButton =
+newGameButton : Lang -> Html Msg
+newGameButton lang =
     p [ class "mt-3" ]
         [ button [ class "btn btn-lg btn-primary w-100", onClick NewGame ]
-            [ text "Play again" ]
+            [ "Play again"
+                |> translate lang []
+                |> text
+            ]
         ]
 
 
@@ -494,21 +497,23 @@ selectLang lang =
 
 definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
-    a
-        [ class "fw-bold"
-        , href
-            (case lang of
-                French ->
-                    "https://fr.wiktionary.org/wiki/" ++ word
+    p [ class "text-center" ]
+        [ a
+            [ class "btn btn-primary w-100"
+            , target "_blank"
+            , href
+                (case lang of
+                    French ->
+                        "https://fr.wiktionary.org/wiki/" ++ word
 
-                English ->
-                    "https://en.wiktionary.org/wiki/" ++ word
-            )
-        , target "_blank"
-        ]
-        [ "Lookup the definition of {0} on Wikktionary"
-            |> translate lang [ word ]
-            |> text
+                    English ->
+                        "https://en.wiktionary.org/wiki/" ++ word
+                )
+            ]
+            [ "Lookup the definition of {0} on Wikktionary"
+                |> translate lang [ String.toUpper word ]
+                |> text
+            ]
         ]
 
 
@@ -559,7 +564,7 @@ view model =
                             |> translate model.lang [ gameError ]
                             |> text
                         ]
-                    , newGameButton
+                    , newGameButton model.lang
                     ]
 
             Won word attempts ->
@@ -576,8 +581,8 @@ view model =
                                 |> translate model.lang [ word, String.fromInt (List.length attempts) ]
                                 |> text
                         ]
-                    , p [] [ definitionLink model.lang word ]
-                    , newGameButton
+                    , definitionLink model.lang word
+                    , newGameButton model.lang
                     ]
 
             Lost word attempts ->
@@ -588,9 +593,14 @@ view model =
                             |> translate model.lang []
                             |> text
                         ]
-                    , p [] [ definitionLink model.lang word ]
+                    , word
+                        |> String.toList
+                        |> List.map Correct
+                        |> List.singleton
+                        |> viewAttempts
+                    , definitionLink model.lang word
                     , viewKeyboard attempts
-                    , newGameButton
+                    , newGameButton model.lang
                     ]
 
             Ongoing _ attempts input maybeError ->
@@ -663,6 +673,9 @@ translations =
           )
         , ( "Lookup the definition of this word (new window)"
           , "Accéder à la définition de ce mot (nouvelle fenêtre"
+          )
+        , ( "Play again"
+          , "Nouvelle partie"
           )
         , ( "Sorry, {0} must be a known word from our {1} dictionary"
           , "Désolé, {0} doit être un mot connu de notre dictionnaire {1}"
