@@ -6491,6 +6491,14 @@ var $author$project$Main$Submit = {$: 3};
 var $author$project$Main$UpdateTry = function (a) {
 	return {$: 5, a: a};
 };
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6845,6 +6853,15 @@ var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
 		[value]);
 };
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$core$String$fromList = _String_fromList;
@@ -7210,7 +7227,11 @@ var $author$project$Main$view = function (model) {
 													$elm$html$Html$Attributes$maxlength(5),
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateTry),
 													$elm$html$Html$Attributes$value(input),
-													$elm$html$Html$Attributes$autocomplete(false)
+													$elm$html$Html$Attributes$autocomplete(false),
+													$elm$html$Html$Attributes$spellcheck(false),
+													A2($elm$html$Html$Attributes$attribute, 'inputmode', 'text'),
+													A2($elm$html$Html$Attributes$attribute, 'autocapitalize', 'on'),
+													A2($elm$html$Html$Attributes$attribute, 'enterkeyhint', 'send')
 												]),
 											_List_Nil),
 											A2(
