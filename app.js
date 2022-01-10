@@ -6058,7 +6058,9 @@ var $author$project$Main$translations = $elm$core$Dict$fromList(
 			_Utils_Tuple2('The word must be 5 letters long', 'Le mot doit contenir 5 lettres'),
 			_Utils_Tuple2('The word must contains only alphabetic characters: {0}', 'Le mot ne doit contenir que des lettres alphabétiques\u00A0: {0}'),
 			_Utils_Tuple2('This one was hard!', 'C\'était pas facile\u00A0!'),
-			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.')
+			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.'),
+			_Utils_Tuple2('You successfully guessed {0} on your first try, congrats!', 'Vous avez deviné {0} du premier coup, félicitations\u00A0!'),
+			_Utils_Tuple2('You successfully guessed {0} in {1} attempts, congrats!', 'Vous avez deviné {0} en {1} coups, bravo\u00A0!')
 		]));
 var $author$project$Main$translate = F3(
 	function (lang, params, string) {
@@ -7082,7 +7084,7 @@ var $author$project$Main$view = function (model) {
 												model.a,
 												_List_fromArray(
 													[
-														word,
+														$elm$core$String$toUpper(word),
 														$elm$core$String$fromInt(
 														$elm$core$List$length(attempts))
 													]),
