@@ -208,7 +208,7 @@ handleCorrectDuplicates wordChars attempt =
                                 , List.length (List.filter (isCorrectChar c) attempt)
                                 )
                         in
-                        if nbCorrectInAttempt > nbCharsInWord then
+                        if nbCorrectInAttempt >= nbCharsInWord then
                             -- there's enough correct letters for this char already
                             Handled c
 
