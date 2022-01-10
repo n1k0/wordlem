@@ -5676,23 +5676,33 @@ var $author$project$Main$isCorrectChar = F2(
 			return false;
 		}
 	});
-var $author$project$Main$handleCorrectDuplicates = function (attempt) {
-	return A2(
-		$elm$core$List$map,
-		function (letter) {
-			if (letter.$ === 2) {
-				var c = letter.a;
-				return ($elm$core$List$length(
-					A2(
-						$elm$core$List$filter,
-						$author$project$Main$isCorrectChar(c),
-						attempt)) === 1) ? $author$project$Main$Handled(c) : letter;
-			} else {
-				return letter;
-			}
-		},
-		attempt);
-};
+var $author$project$Main$handleCorrectDuplicates = F2(
+	function (wordChars, attempt) {
+		return A2(
+			$elm$core$List$map,
+			function (letter) {
+				if (letter.$ === 2) {
+					var c = letter.a;
+					var _v1 = _Utils_Tuple2(
+						$elm$core$List$length(
+							A2(
+								$elm$core$List$filter,
+								$elm$core$Basics$eq(c),
+								wordChars)),
+						$elm$core$List$length(
+							A2(
+								$elm$core$List$filter,
+								$author$project$Main$isCorrectChar(c),
+								attempt)));
+					var nbCharsInWord = _v1.a;
+					var nbCorrectInAttempt = _v1.b;
+					return (_Utils_cmp(nbCorrectInAttempt, nbCharsInWord) > 0) ? $author$project$Main$Handled(c) : letter;
+				} else {
+					return letter;
+				}
+			},
+			attempt);
+	});
 var $author$project$Main$isMisplacedChar = F2(
 	function (_char, letter) {
 		if (letter.$ === 2) {
@@ -5890,7 +5900,9 @@ var $author$project$Main$validateAttempt = F3(
 			A2(
 				$author$project$Main$handleMisplacedDuplicates,
 				wordChars,
-				$author$project$Main$handleCorrectDuplicates(
+				A2(
+					$author$project$Main$handleCorrectDuplicates,
+					wordChars,
 					A3(
 						$elm$core$List$map2,
 						$author$project$Main$mapChars(wordChars),
