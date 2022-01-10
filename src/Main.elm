@@ -1,14 +1,17 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
 import Browser
+import Browser.Dom as Dom
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Markdown
+import Process
 import Random
 import String.Extra as SE
 import String.Interpolate exposing (interpolate)
+import Task
 import Words
 
 
@@ -60,7 +63,8 @@ type alias WordToFind =
 
 
 type Msg
-    = NewGame
+    = NoOp
+    | NewGame
     | NewWord (Maybe WordToFind)
     | Submit
     | SwitchLang Lang
@@ -281,6 +285,13 @@ checkGame word attempts =
         Ongoing word attempts "" Nothing
 
 
+focusInput : Cmd Msg
+focusInput =
+    Process.sleep 1
+        |> Task.andThen (\_ -> Dom.focus "wordlem-input")
+        |> Task.attempt (always NoOp)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
@@ -295,7 +306,7 @@ update msg model =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
-            , Cmd.none
+            , focusInput
             )
 
         ( NewWord Nothing, Idle ) ->
@@ -317,13 +328,16 @@ update msg model =
             case validateAttempt model.lang word input of
                 Ok attempt ->
                     ( { model | state = checkGame word (attempt :: attempts) }
-                    , Cmd.none
+                    , focusInput
                     )
 
                 Err error ->
                     ( { model | state = Ongoing word attempts input (Just error) }
-                    , Cmd.none
+                    , focusInput
                     )
+
+        ( NoOp, _ ) ->
+            ( model, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
             update NewGame { model | lang = lang }
@@ -618,6 +632,7 @@ view model =
                     , Html.form [ class "input-group mb-0", onSubmit Submit ]
                         [ Html.input
                             [ type_ "text"
+                            , id "wordlem-input"
                             , class "form-control"
                             , maxlength 5
                             , onInput UpdateTry
