@@ -6067,9 +6067,9 @@ var $author$project$Main$definitionLink = F2(
 					$elm$html$Html$Attributes$href(
 					function () {
 						if (lang === 1) {
-							return 'https://www.cnrtl.fr/definition/' + word;
+							return 'https://fr.wiktionary.org/wiki/' + word;
 						} else {
-							return 'https://www.oxfordlearnersdictionaries.com/definition/english/' + word;
+							return 'https://en.wiktionary.org/wiki/' + word;
 						}
 					}()),
 					$elm$html$Html$Attributes$title('Lookup the definition of this word (new window)'),
@@ -6545,7 +6545,7 @@ var $author$project$Main$view = function (model) {
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('You have guessed '),
+											$elm$html$Html$text('You successfully guessed '),
 											A2($author$project$Main$definitionLink, model.h, word),
 											($elm$core$List$length(attempts) === 1) ? A2(
 											$elm$html$Html$strong,
