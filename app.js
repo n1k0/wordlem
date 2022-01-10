@@ -6051,6 +6051,7 @@ var $author$project$Main$translations = $elm$core$Dict$fromList(
 			_Utils_Tuple2('Loading game…', 'Chargement du jeu…'),
 			_Utils_Tuple2('Lookup the definition of {0} on Wikktionary', 'Accédez à la définition de {0} sur Wiktionary'),
 			_Utils_Tuple2('Lookup the definition of this word (new window)', 'Accéder à la définition de ce mot (nouvelle fenêtre'),
+			_Utils_Tuple2('Play again', 'Nouvelle partie'),
 			_Utils_Tuple2('Sorry, {0} must be a known word from our {1} dictionary', 'Désolé, {0} doit être un mot connu de notre dictionnaire {1}'),
 			_Utils_Tuple2('Submit', 'Envoyer'),
 			_Utils_Tuple2('Switch to {0} dictionary', 'Passer au dictionnaire {0}'),
@@ -6472,35 +6473,48 @@ var $elm$html$Html$Attributes$href = function (url) {
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
+var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$Main$definitionLink = F2(
 	function (lang, word) {
 		return A2(
-			$elm$html$Html$a,
+			$elm$html$Html$p,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('fw-bold'),
-					$elm$html$Html$Attributes$href(
-					function () {
-						if (lang === 1) {
-							return 'https://fr.wiktionary.org/wiki/' + word;
-						} else {
-							return 'https://en.wiktionary.org/wiki/' + word;
-						}
-					}()),
-					$elm$html$Html$Attributes$target('_blank')
+					$elm$html$Html$Attributes$class('text-center')
 				]),
 			_List_fromArray(
 				[
-					$elm$html$Html$text(
-					A3(
-						$author$project$Main$translate,
-						lang,
-						_List_fromArray(
-							[word]),
-						'Lookup the definition of {0} on Wikktionary'))
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('btn btn-primary w-100'),
+							$elm$html$Html$Attributes$target('_blank'),
+							$elm$html$Html$Attributes$href(
+							function () {
+								if (lang === 1) {
+									return 'https://fr.wiktionary.org/wiki/' + word;
+								} else {
+									return 'https://en.wiktionary.org/wiki/' + word;
+								}
+							}())
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							A3(
+								$author$project$Main$translate,
+								lang,
+								_List_fromArray(
+									[
+										$elm$core$String$toUpper(word)
+									]),
+								'Lookup the definition of {0} on Wikktionary'))
+						]))
 				]));
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
@@ -6614,27 +6628,29 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $author$project$Main$newGameButton = A2(
-	$elm$html$Html$p,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('mt-3')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('btn btn-lg btn-primary w-100'),
-					$elm$html$Html$Events$onClick($author$project$Main$NewGame)
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Play again')
-				]))
-		]));
+var $author$project$Main$newGameButton = function (lang) {
+	return A2(
+		$elm$html$Html$p,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('mt-3')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn btn-lg btn-primary w-100'),
+						$elm$html$Html$Events$onClick($author$project$Main$NewGame)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A3($author$project$Main$translate, lang, _List_Nil, 'Play again'))
+					]))
+			]));
+};
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -6791,13 +6807,13 @@ var $author$project$Main$selectLang = function (lang) {
 					]))
 			]));
 };
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $elm$html$Html$table = _VirtualDom_node('table');
-var $elm$core$String$fromList = _String_fromList;
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
 		[value]);
 };
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$table = _VirtualDom_node('table');
+var $elm$core$String$fromList = _String_fromList;
 var $elm$core$Char$toUpper = _Char_toUpper;
 var $author$project$Main$charToText = A2(
 	$elm$core$Basics$composeR,
@@ -7047,7 +7063,7 @@ var $author$project$Main$view = function (model) {
 													[gameError]),
 												'Game data couldn\'t be loaded: {0}'))
 										])),
-									$author$project$Main$newGameButton
+									$author$project$Main$newGameButton(model.a)
 								]));
 					case 4:
 						var word = _v0.a;
@@ -7081,14 +7097,8 @@ var $author$project$Main$view = function (model) {
 													]),
 												'You successfully guessed {0} in {1} attempts, congrats!'))
 										])),
-									A2(
-									$elm$html$Html$p,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2($author$project$Main$definitionLink, model.a, word)
-										])),
-									$author$project$Main$newGameButton
+									A2($author$project$Main$definitionLink, model.a, word),
+									$author$project$Main$newGameButton(model.a)
 								]));
 					case 3:
 						var word = _v0.a;
@@ -7110,15 +7120,15 @@ var $author$project$Main$view = function (model) {
 											$elm$html$Html$text(
 											A3($author$project$Main$translate, model.a, _List_Nil, 'This one was hard!'))
 										])),
-									A2(
-									$elm$html$Html$p,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2($author$project$Main$definitionLink, model.a, word)
-										])),
+									$author$project$Main$viewAttempts(
+									$elm$core$List$singleton(
+										A2(
+											$elm$core$List$map,
+											$author$project$Main$Correct,
+											$elm$core$String$toList(word)))),
+									A2($author$project$Main$definitionLink, model.a, word),
 									$author$project$Main$viewKeyboard(attempts),
-									$author$project$Main$newGameButton
+									$author$project$Main$newGameButton(model.a)
 								]));
 					default:
 						var attempts = _v0.b;
