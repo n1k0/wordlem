@@ -577,7 +577,10 @@ view model =
 
                           else
                             "You successfully guessed {0} in {1} attempts, congrats!"
-                                |> translate model.lang [ word, String.fromInt (List.length attempts) ]
+                                |> translate model.lang
+                                    [ String.toUpper word
+                                    , String.fromInt (List.length attempts)
+                                    ]
                                 |> text
                         ]
                     , definitionLink model.lang word
@@ -696,6 +699,12 @@ translations =
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
+          )
+        , ( "You successfully guessed {0} on your first try, congrats!"
+          , "Vous avez deviné {0} du premier coup, félicitations\u{00A0}!"
+          )
+        , ( "You successfully guessed {0} in {1} attempts, congrats!"
+          , "Vous avez deviné {0} en {1} coups, bravo\u{00A0}!"
           )
         ]
 
