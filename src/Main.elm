@@ -316,6 +316,9 @@ update msg model =
             , Cmd.none
             )
 
+        ( KeyPressed _, _ ) ->
+            ( model, Cmd.none )
+
         ( NewGame, _ ) ->
             let
                 newModel =
@@ -524,6 +527,7 @@ viewAttempts : List Attempt -> Html Msg
 viewAttempts =
     List.reverse
         >> List.map viewAttempt
+        -- FIXME: get rid of table, use flex
         >> table [ class "table" ]
 
 
