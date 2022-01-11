@@ -629,6 +629,21 @@ layout lang content =
         ]
 
 
+alert : String -> Html Msg
+alert message =
+    div
+        [ class "alert alert-info"
+
+        -- , style "position" "absolute"
+        -- , style "top" "10%"
+        -- , style "left" "50%"
+        -- , style "transform" "translate(-50%, 0)"
+        -- , style "pointer-events" "none"
+        -- , style "width" "fit-content"
+        ]
+        [ text message ]
+
+
 view : Model -> Html Msg
 view model =
     layout model.lang
@@ -650,11 +665,9 @@ view model =
 
             Errored gameError ->
                 div []
-                    [ div [ class "alert alert-info" ]
-                        [ "Game data couldn't be loaded: {0}"
-                            |> translate model.lang [ gameError ]
-                            |> text
-                        ]
+                    [ "Game data couldn't be loaded: {0}"
+                        |> translate model.lang [ gameError ]
+                        |> alert
                     , newGameButton model.lang
                     ]
 
@@ -697,15 +710,10 @@ view model =
                     , newGameButton model.lang
                     ]
 
-            Ongoing _ attempts input maybeError ->
+            Ongoing _ attempts input error ->
                 div []
                     [ viewAttempts attempts
-                    , case maybeError of
-                        Just error ->
-                            div [ class "alert alert-info" ] [ text error ]
-
-                        Nothing ->
-                            text ""
+                    , error |> Maybe.map alert |> Maybe.withDefault (text "")
                     , Html.form [ class "input-group mb-0", onSubmit Submit ]
                         [ Html.input
                             [ type_ "text"
