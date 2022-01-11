@@ -46,10 +46,6 @@ type Letter
     | Handled Char
 
 
-type alias KeyBoard =
-    List (List KeyState)
-
-
 type alias KeyState =
     ( Char, Maybe Letter )
 
@@ -71,7 +67,8 @@ type alias WordToFind =
 
 
 type Msg
-    = KeyPressed Char
+    = BackSpace
+    | KeyPressed Char
     | NoOp
     | NewGame
     | NewWord (Maybe WordToFind)
@@ -304,6 +301,19 @@ focusInput =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
+        ( BackSpace, Ongoing word attempts input error ) ->
+            let
+                newInput =
+                    String.toList input
+                        |> List.reverse
+                        |> List.drop 1
+                        |> List.reverse
+                        |> String.fromList
+            in
+            ( { model | state = Ongoing word attempts newInput error }
+            , Cmd.none
+            )
+
         ( KeyPressed char, Ongoing word attempts input error ) ->
             let
                 newInput =
@@ -449,10 +459,10 @@ dispositions lang =
     List.map String.toList
         (case lang of
             French ->
-                [ "azertyuiop", "qsdfghjklm", "wxcvbn" ]
+                [ "azertyuiop", "qsdfghjklm", "wxcvbn⌫⏎" ]
 
             English ->
-                [ "qwertyuiop", "asdfghjkl", "zxcvbnm" ]
+                [ "qwertyuiop", "asdfghjkl", "zxcvbnm⌫⏎" ]
         )
 
 
@@ -473,52 +483,52 @@ keyState attempts char =
     )
 
 
-keyboard : Lang -> List Attempt -> KeyBoard
-keyboard lang attempts =
-    dispositions lang
-        |> List.map (List.map (keyState attempts))
-
-
 viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
-    div [ class "mb-3" ]
-        [ keyboard lang attempts
-            |> List.map
-                (List.map viewKeyState
-                    >> div
-                        [ class "d-flex justify-content-evenly"
-                        , style "gap" "1px"
-                        , style "margin" "1px 0"
-                        ]
-                )
-            |> div [ class "" ]
-        ]
+    dispositions lang
+        |> List.map (List.map (keyState attempts))
+        |> List.map
+            (List.map viewKeyState
+                >> div
+                    [ class "d-flex justify-content-evenly"
+                    , style "gap" "1px"
+                    , style "margin" "1px 0"
+                    ]
+            )
+        |> div [ class "mb-3" ]
 
 
 viewKeyState : KeyState -> Html Msg
 viewKeyState ( char, letter ) =
     let
         baseClasses =
-            "btn py-1 px-2"
+            "btn p-2"
 
-        classes =
+        ( classes, msg ) =
             case letter of
                 Just (Correct _) ->
-                    "btn-success"
+                    ( "btn-success", KeyPressed char )
 
                 Just (Misplaced _) ->
-                    "btn-warning"
+                    ( "btn-warning", KeyPressed char )
 
                 Just (Unused _) ->
-                    "bg-dark text-light"
+                    ( "bg-dark text-light", KeyPressed char )
 
                 _ ->
-                    "btn-secondary"
+                    if char == '⌫' then
+                        ( "btn-info", BackSpace )
+
+                    else if char == '⏎' then
+                        ( "btn-info", Submit )
+
+                    else
+                        ( "btn-secondary", KeyPressed char )
     in
     button
         [ class (String.join " " [ baseClasses, classes ])
         , style "flex" "1"
-        , onClick (KeyPressed char)
+        , onClick msg
         ]
         [ charToText char ]
 
@@ -696,7 +706,10 @@ view model =
                             , attribute "enterkeyhint" "send"
                             ]
                             []
-                        , button [ class "btn btn-primary" ]
+                        , button
+                            [ class "btn btn-primary"
+                            , disabled (String.length input /= 5)
+                            ]
                             [ "Submit" |> translate model.lang [] |> text ]
                         ]
                     , div [ class "form-text" ]
