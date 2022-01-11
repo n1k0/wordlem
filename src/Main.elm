@@ -46,6 +46,14 @@ type Letter
     | Handled Char
 
 
+type alias KeyBoard =
+    List (List KeyState)
+
+
+type alias KeyState =
+    ( Char, Maybe Letter )
+
+
 type alias Attempt =
     List Letter
 
@@ -420,56 +428,82 @@ newGameButton lang =
         ]
 
 
-keyboard : List Attempt -> List ( Char, Maybe Letter )
-keyboard attempts =
-    String.toList "abcdefghijklmnopqrstuvwxyz"
-        |> List.map
-            (\c ->
-                let
-                    ( hasCorrect, hasMisplaced, hasUnused ) =
-                        ( attempts |> List.any (List.any (isCorrectChar c))
-                        , attempts |> List.any (List.any (isMisplacedChar c))
-                        , attempts |> List.any (List.any (isUnusedChar c))
-                        )
-                in
-                ( c
-                , if hasCorrect then
-                    Just (Correct c)
+dispositions : Lang -> List (List Char)
+dispositions lang =
+    List.map String.toList
+        (case lang of
+            French ->
+                [ "azertyuiop", "qsdfghjklm", "wxcvbn" ]
 
-                  else if hasMisplaced then
-                    Just (Misplaced c)
-
-                  else if hasUnused then
-                    Just (Unused c)
-
-                  else
-                    Nothing
-                )
-            )
+            English ->
+                [ "qwertyuiop", "asdfghjkl", "zxcvbnm" ]
+        )
 
 
-viewKeyboard : List Attempt -> Html Msg
-viewKeyboard attempts =
+keyState : List Attempt -> Char -> KeyState
+keyState attempts char =
+    ( char
+    , if List.any (List.any (isCorrectChar char)) attempts then
+        Just (Correct char)
+
+      else if List.any (List.any (isMisplacedChar char)) attempts then
+        Just (Misplaced char)
+
+      else if List.any (List.any (isUnusedChar char)) attempts then
+        Just (Unused char)
+
+      else
+        Nothing
+    )
+
+
+keyboard : Lang -> List Attempt -> KeyBoard
+keyboard lang attempts =
+    dispositions lang
+        |> List.map (List.map (keyState attempts))
+
+
+viewKeyboard : Lang -> List Attempt -> Html Msg
+viewKeyboard lang attempts =
     div [ class "mb-3" ]
-        [ keyboard attempts
+        [ keyboard lang attempts
             |> List.map
-                (\( char, letter ) ->
-                    case letter of
-                        Just (Correct _) ->
-                            div [ class "text-success" ] [ charToText char ]
-
-                        Just (Misplaced _) ->
-                            div [ class "text-warning" ] [ charToText char ]
-
-                        Just (Unused _) ->
-                            div [ class "text-decoration-line-through text-secondary" ]
-                                [ charToText char ]
-
-                        _ ->
-                            div [] [ charToText char ]
+                (List.map viewKeyState
+                    >> div
+                        [ class "d-flex justify-content-evenly"
+                        , style "gap" "1px"
+                        , style "margin" "1px 0"
+                        ]
                 )
-            |> div [ class "d-flex w-100 justify-content-between fw-bold" ]
+            |> div [ class "" ]
         ]
+
+
+viewKeyState : KeyState -> Html Msg
+viewKeyState ( char, letter ) =
+    let
+        baseClasses =
+            "btn py-1 px-2"
+
+        classes =
+            case letter of
+                Just (Correct _) ->
+                    "btn-success"
+
+                Just (Misplaced _) ->
+                    "btn-warning"
+
+                Just (Unused _) ->
+                    "bg-dark text-light"
+
+                _ ->
+                    "btn-secondary"
+    in
+    button
+        [ class (String.join " " [ baseClasses, classes ])
+        , style "flex" "1"
+        ]
+        [ charToText char ]
 
 
 viewAttempts : List Attempt -> Html Msg
@@ -483,7 +517,7 @@ definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
     p [ class "text-center" ]
         [ a
-            [ class "btn btn-primary w-100"
+            [ class "btn btn-info w-100"
             , target "_blank"
             , href
                 (case lang of
@@ -615,14 +649,14 @@ view model =
                         |> List.singleton
                         |> viewAttempts
                     , definitionLink model.lang word
-                    , viewKeyboard attempts
+                    , viewKeyboard model.lang attempts
                     , newGameButton model.lang
                     ]
 
             Ongoing _ attempts input maybeError ->
                 div []
                     [ viewAttempts attempts
-                    , viewKeyboard attempts
+                    , viewKeyboard model.lang attempts
                     , case maybeError of
                         Just error ->
                             div [ class "alert alert-info" ] [ text error ]
