@@ -684,7 +684,6 @@ view model =
             Ongoing _ attempts input maybeError ->
                 div []
                     [ viewAttempts attempts
-                    , viewKeyboard model.lang attempts
                     , case maybeError of
                         Just error ->
                             div [ class "alert alert-info" ] [ text error ]
@@ -712,11 +711,12 @@ view model =
                             ]
                             [ "Submit" |> translate model.lang [] |> text ]
                         ]
-                    , div [ class "form-text" ]
+                    , div [ class "form-text mb-3" ]
                         [ "Enter a 5 letters {0} word"
                             |> translate model.lang [ langToString model.lang ]
                             |> text
                         ]
+                    , viewKeyboard model.lang attempts
                     ]
         ]
 
