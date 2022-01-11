@@ -340,6 +340,7 @@ update msg model =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
+              -- FIXME: only if not using virtual keyborad
             , focusInput
             )
 
@@ -362,11 +363,13 @@ update msg model =
             case validateAttempt model.lang word input of
                 Ok attempt ->
                     ( { model | state = checkGame word (attempt :: attempts) }
+                      -- FIXME: only if not using virtual keyborad
                     , focusInput
                     )
 
                 Err error ->
                     ( { model | state = Ongoing word attempts input (Just error) }
+                      -- FIXME: only if not using virtual keyborad
                     , focusInput
                     )
 
@@ -393,24 +396,36 @@ charToText =
 
 
 viewAttempt : Attempt -> Html Msg
-viewAttempt attempt =
-    attempt
-        |> List.map
-            (\letter ->
-                case letter of
-                    Misplaced char ->
-                        td [ class "letter misplaced bg-warning" ] [ charToText char ]
+viewAttempt =
+    let
+        spot char classes =
+            div
+                [ class classes
+                , class "py-1 fs-2 text-center"
+                , style "flex" "1"
+                ]
+                [ charToText char ]
+    in
+    List.map
+        (\letter ->
+            case letter of
+                Misplaced char ->
+                    spot char "bg-warning"
 
-                    Correct char ->
-                        td [ class "letter correct bg-success" ] [ charToText char ]
+                Correct char ->
+                    spot char "bg-success"
 
-                    Unused char ->
-                        td [ class "letter unused bg-secondary" ] [ charToText char ]
+                Unused char ->
+                    spot char "bg-secondary"
 
-                    Handled char ->
-                        td [ class "letter handled bg-secondary" ] [ charToText char ]
-            )
-        |> tr []
+                Handled char ->
+                    spot char "bg-secondary"
+        )
+        >> div
+            [ class "d-flex justify-content-evenly"
+            , style "margin" "1px 0"
+            , style "gap" "1px"
+            ]
 
 
 isCorrectChar : Char -> Letter -> Bool
@@ -495,14 +510,14 @@ viewKeyboard lang attempts =
                     , style "margin" "1px 0"
                     ]
             )
-        |> div [ class "mb-3" ]
+        |> div [ class "mb-2" ]
 
 
 viewKeyState : KeyState -> Html Msg
 viewKeyState ( char, letter ) =
     let
         baseClasses =
-            "btn p-2"
+            "btn px-1 py-2"
 
         ( classes, msg ) =
             case letter of
@@ -537,8 +552,7 @@ viewAttempts : List Attempt -> Html Msg
 viewAttempts =
     List.reverse
         >> List.map viewAttempt
-        -- FIXME: get rid of table, use flex
-        >> table [ class "table" ]
+        >> div [ class "mb-3" ]
 
 
 definitionLink : Lang -> WordToFind -> Html Msg
@@ -601,7 +615,7 @@ layout lang content =
             , selectLang lang
             ]
         , main_ [] content
-        , footer [ class "border-top mt-3 pt-2" ]
+        , footer []
             [ "Inspired by [Wordle]({0}) - [Source code]({1})"
                 |> translate lang
                     [ "https://www.powerlanguage.co.uk/wordle/"
@@ -618,7 +632,9 @@ layout lang content =
 view : Model -> Html Msg
 view model =
     layout model.lang
-        [ p []
+        [ -- FIXME: move to a documentation/help section
+          -- Maybe not of we offer toggling kbd/input
+          p []
             [ "Guess a 5 letters {0} word in {1} attempts or less!"
                 |> translate model.lang
                     [ langToString model.lang
