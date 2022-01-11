@@ -71,7 +71,8 @@ type alias WordToFind =
 
 
 type Msg
-    = NoOp
+    = KeyPressed Char
+    | NoOp
     | NewGame
     | NewWord (Maybe WordToFind)
     | Submit
@@ -303,6 +304,18 @@ focusInput =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
+        ( KeyPressed char, Ongoing word attempts input error ) ->
+            let
+                newInput =
+                    String.toList input
+                        ++ [ char ]
+                        |> List.take 5
+                        |> String.fromList
+            in
+            ( { model | state = Ongoing word attempts newInput error }
+            , Cmd.none
+            )
+
         ( NewGame, _ ) ->
             let
                 newModel =
@@ -502,6 +515,7 @@ viewKeyState ( char, letter ) =
     button
         [ class (String.join " " [ baseClasses, classes ])
         , style "flex" "1"
+        , onClick (KeyPressed char)
         ]
         [ charToText char ]
 
