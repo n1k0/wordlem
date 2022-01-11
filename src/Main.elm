@@ -716,7 +716,7 @@ translations =
           , "Erreur générale. C'est pas bon signe."
           )
         , ( "Guess a 5 letters {0} word in {1} attempts or less!"
-          , "Devinez un mot {0} en {1} essais ou moins\u{00A0}!"
+          , "Devinez un mot {0} de 5 lettres en {1} essais ou moins\u{00A0}!"
           )
         , ( "Inspired by [Wordle]({0}) - [Source code]({1})"
           , "Inspiré de [Wordle]({0}) - [Code source]({1})"
