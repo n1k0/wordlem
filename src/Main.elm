@@ -6,6 +6,7 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import List.Extra as LE
 import Markdown
 import Process
 import Random
@@ -136,16 +137,7 @@ randomWord words =
         |> Random.andThen
             (\int ->
                 words
-                    |> List.indexedMap
-                        (\index word ->
-                            if index == int then
-                                Just word
-
-                            else
-                                Nothing
-                        )
-                    |> List.filterMap identity
-                    |> List.head
+                    |> LE.getAt int
                     |> Random.constant
             )
 
