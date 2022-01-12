@@ -1,18 +1,17 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
 import Browser
-import Browser.Dom as Dom
+import Browser.Events as BE
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Decode
 import List.Extra as LE
 import Markdown
-import Process
 import Random
 import String.Extra as SE
 import String.Interpolate exposing (interpolate)
-import Task
 import Words
 
 
@@ -70,12 +69,10 @@ type alias WordToFind =
 type Msg
     = BackSpace
     | KeyPressed Char
-    | NoOp
     | NewGame
     | NewWord (Maybe WordToFind)
     | Submit
     | SwitchLang Lang
-    | UpdateTry UserInput
 
 
 maxAttempts : Int
@@ -283,17 +280,10 @@ checkGame word attempts =
         Ongoing word attempts "" Nothing
 
 
-focusInput : Cmd Msg
-focusInput =
-    Process.sleep 1
-        |> Task.andThen (\_ -> Dom.focus "wordlem-input")
-        |> Task.attempt (always NoOp)
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
-        ( BackSpace, Ongoing word attempts input error ) ->
+        ( BackSpace, Ongoing word attempts input _ ) ->
             let
                 newInput =
                     String.toList input
@@ -302,11 +292,11 @@ update msg model =
                         |> List.reverse
                         |> String.fromList
             in
-            ( { model | state = Ongoing word attempts newInput error }
+            ( { model | state = Ongoing word attempts newInput Nothing }
             , Cmd.none
             )
 
-        ( KeyPressed char, Ongoing word attempts input error ) ->
+        ( KeyPressed char, Ongoing word attempts input _ ) ->
             let
                 newInput =
                     String.toList input
@@ -314,7 +304,7 @@ update msg model =
                         |> List.take 5
                         |> String.fromList
             in
-            ( { model | state = Ongoing word attempts newInput error }
+            ( { model | state = Ongoing word attempts newInput Nothing }
             , Cmd.none
             )
 
@@ -332,8 +322,7 @@ update msg model =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
-              -- FIXME: only if not using virtual keyborad
-            , focusInput
+            , Cmd.none
             )
 
         ( NewWord Nothing, Idle ) ->
@@ -346,26 +335,19 @@ update msg model =
             , Cmd.none
             )
 
-        ( UpdateTry newInput, Ongoing word attempts _ maybeError ) ->
-            ( { model | state = Ongoing word attempts newInput maybeError }
-            , Cmd.none
-            )
-
         ( Submit, Ongoing word attempts input _ ) ->
             case validateAttempt model.lang word input of
                 Ok attempt ->
                     ( { model | state = checkGame word (attempt :: attempts) }
-                      -- FIXME: only if not using virtual keyborad
-                    , focusInput
+                    , Cmd.none
                     )
 
                 Err error ->
                     ( { model | state = Ongoing word attempts input (Just error) }
-                      -- FIXME: only if not using virtual keyborad
-                    , focusInput
+                    , Cmd.none
                     )
 
-        ( NoOp, _ ) ->
+        ( Submit, _ ) ->
             ( model, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
@@ -389,35 +371,22 @@ charToText =
 
 viewAttempt : Attempt -> Html Msg
 viewAttempt =
-    let
-        spot char classes =
-            div
-                [ class classes
-                , class "py-1 fs-2 text-center"
-                , style "flex" "1"
-                ]
-                [ charToText char ]
-    in
     List.map
         (\letter ->
             case letter of
                 Misplaced char ->
-                    spot char "bg-warning"
+                    letterSpot "bg-warning" char
 
                 Correct char ->
-                    spot char "bg-success"
+                    letterSpot "bg-success" char
 
                 Unused char ->
-                    spot char "bg-secondary"
+                    letterSpot "bg-secondary" char
 
                 Handled char ->
-                    spot char "bg-secondary"
+                    letterSpot "bg-secondary" char
         )
-        >> div
-            [ class "d-flex justify-content-evenly"
-            , style "margin" "1px 0"
-            , style "gap" "1px"
-            ]
+        >> attemptRow
 
 
 isCorrectChar : Char -> Letter -> Bool
@@ -502,7 +471,8 @@ viewKeyboard lang attempts =
                     , style "margin" "1px 0"
                     ]
             )
-        |> div [ class "mb-2" ]
+        -- FIXME: no margin eventually with flex column
+        |> div [ class "mt-3 mb-2" ]
 
 
 viewKeyState : KeyState -> Html Msg
@@ -544,7 +514,40 @@ viewAttempts : List Attempt -> Html Msg
 viewAttempts =
     List.reverse
         >> List.map viewAttempt
-        >> div [ class "mb-3" ]
+        >> div []
+
+
+attemptRow : List (Html Msg) -> Html Msg
+attemptRow =
+    div
+        [ class "d-flex justify-content-evenly"
+        , style "margin" "1px 0"
+        , style "gap" "1px"
+        ]
+
+
+letterSpot : String -> Char -> Html Msg
+letterSpot classes char =
+    div
+        [ class classes
+        , class "py-1 fs-2 text-center"
+        , style "flex" "1"
+        ]
+        [ charToText char ]
+
+
+viewInput : UserInput -> Html Msg
+viewInput input =
+    let
+        chars =
+            String.toList input
+
+        spots =
+            chars ++ LE.initialize (5 - List.length chars) (always '\u{00A0}')
+    in
+    spots
+        |> List.map (letterSpot "bg-secondary")
+        |> attemptRow
 
 
 definitionLink : Lang -> WordToFind -> Html Msg
@@ -666,7 +669,7 @@ view model =
             Won word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 []
+                    , h3 [ class "my-3" ]
                         [ if List.length attempts == 1 then
                             "You successfully guessed {0} on your first try, congrats!"
                                 |> translate model.lang [ word ]
@@ -687,7 +690,7 @@ view model =
             Lost word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [ class "mb-3" ]
+                    , h3 [ class "my-3" ]
                         [ "This one was hard!"
                             |> translate model.lang []
                             |> text
@@ -698,40 +701,15 @@ view model =
                         |> List.singleton
                         |> viewAttempts
                     , definitionLink model.lang word
-                    , viewKeyboard model.lang attempts
                     , newGameButton model.lang
+                    , viewKeyboard model.lang attempts
                     ]
 
             Ongoing _ attempts input error ->
                 div []
                     [ viewAttempts attempts
+                    , viewInput input
                     , error |> Maybe.map alert |> Maybe.withDefault (text "")
-                    , Html.form [ class "input-group mb-0", onSubmit Submit ]
-                        [ Html.input
-                            [ type_ "text"
-                            , id "wordlem-input"
-                            , class "form-control"
-                            , maxlength 5
-                            , onInput UpdateTry
-                            , value input
-                            , autocomplete False
-                            , spellcheck False
-                            , attribute "inputmode" "text"
-                            , attribute "autocapitalize" "on"
-                            , attribute "enterkeyhint" "send"
-                            ]
-                            []
-                        , button
-                            [ class "btn btn-primary"
-                            , disabled (String.length input /= 5)
-                            ]
-                            [ "Submit" |> translate model.lang [] |> text ]
-                        ]
-                    , div [ class "form-text mb-3" ]
-                        [ "Enter a 5 letters {0} word"
-                            |> translate model.lang [ langToString model.lang ]
-                            |> text
-                        ]
                     , viewKeyboard model.lang attempts
                     ]
         ]
@@ -816,5 +794,49 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions { state } =
+    case state of
+        Ongoing _ _ _ _ ->
+            BE.onKeyDown decodeKey
+
+        _ ->
+            Sub.none
+
+
+
+-- Key event
+
+
+decodeKey : Decode.Decoder Msg
+decodeKey =
+    Decode.field "key" Decode.string
+        |> Decode.andThen
+            (\keyCode ->
+                case keyCode of
+                    "Backspace" ->
+                        Decode.succeed BackSpace
+
+                    "Enter" ->
+                        Decode.succeed Submit
+
+                    string ->
+                        if String.length string /= 1 then
+                            Decode.fail "no char"
+
+                        else
+                            case List.head (String.toList string) of
+                                Just char ->
+                                    if Char.toCode char < 65 || Char.toCode char > 122 then
+                                        Decode.fail "no char"
+
+                                    else
+                                        Decode.succeed (KeyPressed (Char.toLower char))
+
+                                Nothing ->
+                                    Decode.fail "no char"
+            )
