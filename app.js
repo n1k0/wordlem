@@ -7244,10 +7244,10 @@ var $author$project$Main$dispositions = function (lang) {
 		function () {
 			if (lang === 1) {
 				return _List_fromArray(
-					['azertyuiop', 'qsdfghjklm', 'wxcvbn⌫⏎']);
+					['azertyuiop', 'qsdfghjklm', '⏎wxcvbn⌫']);
 			} else {
 				return _List_fromArray(
-					['qwertyuiop', 'asdfghjkl', 'zxcvbnm⌫⏎']);
+					['qwertyuiop', 'asdfghjkl', '⏎zxcvbnm⌫']);
 			}
 		}());
 };
@@ -7317,7 +7317,7 @@ var $author$project$Main$viewKeyState = function (_v0) {
 				break _v2$3;
 			}
 		}
-		return (_char === '⌫') ? _Utils_Tuple2('btn-info', $author$project$Main$BackSpace) : ((_char === '⏎') ? _Utils_Tuple2('btn-info', $author$project$Main$Submit) : _Utils_Tuple2(
+		return (_char === '⌫') ? _Utils_Tuple2('btn-info px-3', $author$project$Main$BackSpace) : ((_char === '⏎') ? _Utils_Tuple2('btn-info px-3', $author$project$Main$Submit) : _Utils_Tuple2(
 			'btn-secondary',
 			$author$project$Main$KeyPressed(_char)));
 	}();
