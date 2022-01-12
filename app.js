@@ -6908,7 +6908,7 @@ var $author$project$Main$definitionLink = F2(
 			$elm$html$Html$a,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('btn btn-lg btn-info'),
+					$elm$html$Html$Attributes$class('btn btn-lg btn-info rounded-0'),
 					$elm$html$Html$Attributes$target('_blank'),
 					$elm$html$Html$Attributes$href(
 					function () {
@@ -6955,7 +6955,7 @@ var $author$project$Main$newGameButton = function (lang) {
 		$elm$html$Html$button,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('btn btn-lg btn-primary'),
+				$elm$html$Html$Attributes$class('btn btn-lg btn-primary rounded-0'),
 				$elm$html$Html$Events$onClick($author$project$Main$NewGame)
 			]),
 		_List_fromArray(
@@ -6964,13 +6964,16 @@ var $author$project$Main$newGameButton = function (lang) {
 				A3($author$project$Main$translate, lang, _List_Nil, 'Play again'))
 			]));
 };
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$endGameButtons = F2(
 	function (lang, word) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('btn-group w-100')
+					$elm$html$Html$Attributes$class('bg-kark btn-group w-100'),
+					A2($elm$html$Html$Attributes$style, 'z-index', '1000')
 				]),
 			_List_fromArray(
 				[
@@ -6978,8 +6981,6 @@ var $author$project$Main$endGameButtons = F2(
 					$author$project$Main$newGameButton(lang)
 				]));
 	});
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$gameLayout = $elm$html$Html$div(
 	_List_fromArray(
 		[
@@ -7146,7 +7147,8 @@ var $author$project$Main$attemptRow = $elm$html$Html$div(
 		[
 			$elm$html$Html$Attributes$class('d-flex justify-content-evenly'),
 			A2($elm$html$Html$Attributes$style, 'margin', '1px 0'),
-			A2($elm$html$Html$Attributes$style, 'gap', '1px')
+			A2($elm$html$Html$Attributes$style, 'gap', '1px'),
+			A2($elm$html$Html$Attributes$style, 'z-index', '1000')
 		]));
 var $elm$core$Char$toUpper = _Char_toUpper;
 var $author$project$Main$charToText = A2(
@@ -7280,6 +7282,13 @@ var $author$project$Main$keyState = F2(
 				attempts) ? $elm$core$Maybe$Just(
 				$author$project$Main$Unused(_char)) : $elm$core$Maybe$Nothing)));
 	});
+var $author$project$Main$keyboardRow = $elm$html$Html$div(
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('d-flex justify-content-evenly'),
+			A2($elm$html$Html$Attributes$style, 'gap', '1px'),
+			A2($elm$html$Html$Attributes$style, 'margin', '1px 0')
+		]));
 var $author$project$Main$viewKeyState = function (_v0) {
 	var _char = _v0.a;
 	var letter = _v0.b;
@@ -7325,6 +7334,8 @@ var $author$project$Main$viewKeyState = function (_v0) {
 					_List_fromArray(
 						[baseClasses, classes]))),
 				A2($elm$html$Html$Attributes$style, 'flex', '1'),
+				A2($elm$html$Html$Attributes$style, 'height', '10vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '50px'),
 				$elm$html$Html$Events$onClick(msg)
 			]),
 		_List_fromArray(
@@ -7339,36 +7350,21 @@ var $author$project$Main$viewKeyboard = F2(
 			_List_fromArray(
 				[
 					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-					A2($elm$html$Html$Attributes$style, 'bottom', '0px'),
+					A2($elm$html$Html$Attributes$style, 'bottom', '5px'),
 					A2($elm$html$Html$Attributes$style, 'left', '0'),
 					A2($elm$html$Html$Attributes$style, 'right', '0')
 				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('mb-2')
-						]),
-					A2(
-						$elm$core$List$map,
+			A2(
+				$elm$core$List$map,
+				A2(
+					$elm$core$Basics$composeR,
+					$elm$core$List$map(
 						A2(
 							$elm$core$Basics$composeR,
-							$elm$core$List$map($author$project$Main$viewKeyState),
-							$elm$html$Html$div(
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('d-flex justify-content-evenly'),
-										A2($elm$html$Html$Attributes$style, 'gap', '1px'),
-										A2($elm$html$Html$Attributes$style, 'margin', '1px 0')
-									]))),
-						A2(
-							$elm$core$List$map,
-							$elm$core$List$map(
-								$author$project$Main$keyState(attempts)),
-							$author$project$Main$dispositions(lang))))
-				]));
+							$author$project$Main$keyState(attempts),
+							$author$project$Main$viewKeyState)),
+					$author$project$Main$keyboardRow),
+				$author$project$Main$dispositions(lang)));
 	});
 var $author$project$Main$view = function (model) {
 	return A2(
