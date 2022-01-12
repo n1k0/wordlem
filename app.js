@@ -6892,7 +6892,7 @@ var $author$project$Main$alert = function (message) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('alert alert-info')
+				$elm$html$Html$Attributes$class('alert alert-warning')
 			]),
 		_List_fromArray(
 			[
@@ -7067,7 +7067,8 @@ var $author$project$Main$layout = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('game container')
+					$elm$html$Html$Attributes$class('game container'),
+					A2($elm$html$Html$Attributes$style, 'max-width', '600px')
 				]),
 			_List_fromArray(
 				[
@@ -7131,7 +7132,7 @@ var $author$project$Main$letterSpot = F2(
 			_List_fromArray(
 				[
 					$elm$html$Html$Attributes$class(classes),
-					$elm$html$Html$Attributes$class('fs-2 text-center'),
+					$elm$html$Html$Attributes$class('d-flex justify-content-center align-items-center fs-2'),
 					A2($elm$html$Html$Attributes$style, 'padding', '3px 0'),
 					A2($elm$html$Html$Attributes$style, 'flex', '1')
 				]),
@@ -7167,6 +7168,38 @@ var $author$project$Main$viewAttempts = A2(
 		$elm$core$Basics$composeR,
 		$elm$core$List$map($author$project$Main$viewAttempt),
 		$elm$html$Html$div(_List_Nil)));
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2($elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var $elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
 var $elm_community$list_extra$List$Extra$initialize = F2(
 	function (n, f) {
 		var step = F2(
@@ -7203,6 +7236,38 @@ var $author$project$Main$viewInput = function (input) {
 			$author$project$Main$letterSpot('bg-secondary'),
 			spots));
 };
+var $author$project$Main$viewBoard = F2(
+	function (input, attempts) {
+		var remaining = ($author$project$Main$maxAttempts - $elm$core$List$length(attempts)) - 2;
+		var attemptRows = A2(
+			$elm$core$List$map,
+			A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt, $elm$core$Maybe$Just),
+			$elm$core$List$reverse(attempts));
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$filterMap,
+				$elm$core$Basics$identity,
+				$elm$core$List$concat(
+					_List_fromArray(
+						[
+							attemptRows,
+							_List_fromArray(
+							[
+								A2($elm$core$Maybe$map, $author$project$Main$viewInput, input)
+							]),
+							A2(
+							$elm$core$List$map,
+							function (_v0) {
+								return $elm$core$Maybe$Just(
+									$author$project$Main$viewInput(
+										$elm$core$String$fromList(
+											A2($elm$core$List$repeat, 5, '\u00A0'))));
+							},
+							A2($elm$core$List$range, 0, remaining))
+						]))));
+	});
 var $author$project$Main$dispositions = function (lang) {
 	return A2(
 		$elm$core$List$map,
@@ -7366,7 +7431,7 @@ var $author$project$Main$view = function (model) {
 						return $author$project$Main$gameLayout(
 							_List_fromArray(
 								[
-									$author$project$Main$viewAttempts(attempts),
+									A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, attempts),
 									A2($author$project$Main$endGameButtons, model.b, word),
 									A2($author$project$Main$viewKeyboard, model.b, attempts)
 								]));
@@ -7376,7 +7441,7 @@ var $author$project$Main$view = function (model) {
 						return $author$project$Main$gameLayout(
 							_List_fromArray(
 								[
-									$author$project$Main$viewAttempts(attempts),
+									A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, attempts),
 									$author$project$Main$viewAttempts(
 									$elm$core$List$singleton(
 										A2(
@@ -7393,8 +7458,10 @@ var $author$project$Main$view = function (model) {
 						return $author$project$Main$gameLayout(
 							_List_fromArray(
 								[
-									$author$project$Main$viewAttempts(attempts),
-									$author$project$Main$viewInput(input),
+									A2(
+									$author$project$Main$viewBoard,
+									$elm$core$Maybe$Just(input),
+									attempts),
 									A2(
 									$elm$core$Maybe$withDefault,
 									$elm$html$Html$text(''),
