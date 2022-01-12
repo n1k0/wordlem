@@ -567,6 +567,33 @@ viewAttempts =
         >> div []
 
 
+viewBoard : Maybe UserInput -> List Attempt -> Html Msg
+viewBoard input attempts =
+    let
+        remaining =
+            maxAttempts - List.length attempts - 2
+
+        attemptRows =
+            attempts
+                |> List.reverse
+                |> List.map (viewAttempt >> Just)
+    in
+    [ attemptRows
+    , [ input |> Maybe.map viewInput ]
+    , List.range 0 remaining
+        |> List.map
+            (\_ ->
+                List.repeat 5 '\u{00A0}'
+                    |> String.fromList
+                    |> viewInput
+                    |> Just
+            )
+    ]
+        |> List.concat
+        |> List.filterMap identity
+        |> div []
+
+
 attemptRow : List (Html Msg) -> Html Msg
 attemptRow =
     div
@@ -581,7 +608,7 @@ letterSpot : String -> Char -> Html Msg
 letterSpot classes char =
     div
         [ class classes
-        , class "fs-2 text-center"
+        , class "d-flex justify-content-center align-items-center fs-2"
         , style "padding" "3px 0"
         , style "flex" "1"
         ]
@@ -658,7 +685,7 @@ selectLang lang =
 
 layout : Lang -> List (Html Msg) -> Html Msg
 layout lang content =
-    div [ class "game container" ]
+    div [ class "game container", style "max-width" "600px" ]
         [ div [ class "d-flex justify-content-between align-items-center my-2" ]
             [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
             , selectLang lang
@@ -670,7 +697,7 @@ layout lang content =
 alert : String -> Html Msg
 alert message =
     div
-        [ class "alert alert-info"
+        [ class "alert alert-warning"
 
         -- , style "position" "absolute"
         -- , style "top" "10%"
@@ -709,14 +736,14 @@ view model =
 
             Won word attempts ->
                 gameLayout
-                    [ viewAttempts attempts
+                    [ viewBoard Nothing attempts
                     , endGameButtons model.lang word
                     , viewKeyboard model.lang attempts
                     ]
 
             Lost word attempts ->
                 gameLayout
-                    [ viewAttempts attempts
+                    [ viewBoard Nothing attempts
                     , word
                         |> String.toList
                         |> List.map Correct
@@ -728,8 +755,7 @@ view model =
 
             Ongoing _ attempts input error ->
                 gameLayout
-                    [ viewAttempts attempts
-                    , viewInput input
+                    [ viewBoard (Just input) attempts
                     , error |> Maybe.map alert |> Maybe.withDefault (text "")
                     , viewKeyboard model.lang attempts
                     ]
