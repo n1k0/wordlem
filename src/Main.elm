@@ -1,6 +1,7 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
 import Browser
+import Browser.Dom as Dom
 import Browser.Events as BE
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -9,9 +10,11 @@ import Html.Events exposing (..)
 import Json.Decode as Decode
 import List.Extra as LE
 import Markdown
+import Process
 import Random
 import String.Extra as SE
 import String.Interpolate exposing (interpolate)
+import Task
 import Words
 
 
@@ -71,6 +74,7 @@ type Msg
     | KeyPressed Char
     | NewGame
     | NewWord (Maybe WordToFind)
+    | NoOp
     | Submit
     | SwitchLang Lang
 
@@ -280,6 +284,13 @@ checkGame word attempts =
         Ongoing word attempts "" Nothing
 
 
+defocus : String -> Cmd Msg
+defocus domId =
+    Process.sleep 1
+        |> Task.andThen (\_ -> Dom.blur domId)
+        |> Task.attempt (always NoOp)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.state ) of
@@ -322,7 +333,7 @@ update msg model =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
-            , Cmd.none
+            , Cmd.batch [ defocus "btn-lang-en", defocus "btn-lang-fr" ]
             )
 
         ( NewWord Nothing, Idle ) ->
@@ -334,6 +345,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        ( NoOp, _ ) ->
+            ( model, Cmd.none )
 
         ( Submit, Ongoing word attempts input _ ) ->
             case validateAttempt model.lang word input of
@@ -421,12 +435,38 @@ isUnusedChar char letter =
 
 newGameButton : Lang -> Html Msg
 newGameButton lang =
-    p [ class "mt-3" ]
-        [ button [ class "btn btn-lg btn-primary w-100", onClick NewGame ]
-            [ "Play again"
-                |> translate lang []
-                |> text
-            ]
+    button [ class "btn btn-primary", onClick NewGame ]
+        [ "Play again"
+            |> translate lang []
+            |> text
+        ]
+
+
+definitionLink : Lang -> WordToFind -> Html Msg
+definitionLink lang word =
+    a
+        [ class "btn btn-info"
+        , target "_blank"
+        , href
+            (case lang of
+                French ->
+                    "https://fr.wiktionary.org/wiki/" ++ word
+
+                English ->
+                    "https://en.wiktionary.org/wiki/" ++ word
+            )
+        ]
+        [ "Definition"
+            |> translate lang [ String.toUpper word ]
+            |> text
+        ]
+
+
+endGameButtons : Lang -> WordToFind -> Html Msg
+endGameButtons lang word =
+    div [ class "btn-group w-100" ]
+        [ definitionLink lang word
+        , newGameButton lang
         ]
 
 
@@ -459,20 +499,44 @@ keyState attempts char =
     )
 
 
+viewHelp : Lang -> Html Msg
+viewHelp lang =
+    div []
+        [ p []
+            [ "Guess a 5 letters {0} word in {1} attempts or less!"
+                |> translate lang
+                    [ langToString lang
+                    , String.fromInt maxAttempts
+                    ]
+                |> text
+            ]
+        , "Inspired by [Wordle]({0}) - [Source code]({1})"
+            |> translate lang
+                [ "https://www.powerlanguage.co.uk/wordle/"
+                , "https://github.com/n1k0/wordlem"
+                ]
+            |> Markdown.toHtml
+                [ class "text-center text-muted"
+                , style "font-size" ".8em"
+                ]
+        ]
+
+
 viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
-    dispositions lang
-        |> List.map (List.map (keyState attempts))
-        |> List.map
-            (List.map viewKeyState
-                >> div
-                    [ class "d-flex justify-content-evenly"
-                    , style "gap" "1px"
-                    , style "margin" "1px 0"
-                    ]
-            )
-        -- FIXME: no margin eventually with flex column
-        |> div [ class "mt-3 mb-2" ]
+    footer [ class "fixed-bottom" ]
+        [ dispositions lang
+            |> List.map (List.map (keyState attempts))
+            |> List.map
+                (List.map viewKeyState
+                    >> div
+                        [ class "d-flex justify-content-evenly"
+                        , style "gap" "1px"
+                        , style "margin" "1px 0"
+                        ]
+                )
+            |> div [ class "mb-2" ]
+        ]
 
 
 viewKeyState : KeyState -> Html Msg
@@ -550,34 +614,13 @@ viewInput input =
         |> attemptRow
 
 
-definitionLink : Lang -> WordToFind -> Html Msg
-definitionLink lang word =
-    p [ class "text-center" ]
-        [ a
-            [ class "btn btn-info w-100"
-            , target "_blank"
-            , href
-                (case lang of
-                    French ->
-                        "https://fr.wiktionary.org/wiki/" ++ word
-
-                    English ->
-                        "https://en.wiktionary.org/wiki/" ++ word
-                )
-            ]
-            [ "Definition of {0} on Wiktionary"
-                |> translate lang [ String.toUpper word ]
-                |> text
-            ]
-        ]
-
-
 selectLang : Lang -> Html Msg
 selectLang lang =
     div [ class "nav nav-pills nav-fill" ]
         [ li [ class "nav-item" ]
             [ button
                 [ type_ "button"
+                , id "btn-lang-en"
                 , class "nav-link"
                 , classList [ ( "active", lang == English ) ]
                 , onClick (SwitchLang English)
@@ -590,6 +633,7 @@ selectLang lang =
         , li [ class "nav-item" ]
             [ button
                 [ type_ "button"
+                , id "btn-lang-fr"
                 , class "nav-link"
                 , classList [ ( "active", lang == French ) ]
                 , onClick (SwitchLang French)
@@ -606,21 +650,10 @@ layout : Lang -> List (Html Msg) -> Html Msg
 layout lang content =
     div [ class "game container" ]
         [ div [ class "d-flex justify-content-between align-items-center my-3" ]
-            [ h1 [ class "p-0" ] [ text "Wordlem" ]
+            [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
             , selectLang lang
             ]
         , main_ [] content
-        , footer []
-            [ "Inspired by [Wordle]({0}) - [Source code]({1})"
-                |> translate lang
-                    [ "https://www.powerlanguage.co.uk/wordle/"
-                    , "https://github.com/n1k0/wordlem"
-                    ]
-                |> Markdown.toHtml
-                    [ class "text-center text-muted"
-                    , style "font-size" ".8em"
-                    ]
-            ]
         ]
 
 
@@ -642,17 +675,7 @@ alert message =
 view : Model -> Html Msg
 view model =
     layout model.lang
-        [ -- FIXME: move to a documentation/help section
-          -- Maybe not of we offer toggling kbd/input
-          p []
-            [ "Guess a 5 letters {0} word in {1} attempts or less!"
-                |> translate model.lang
-                    [ langToString model.lang
-                    , String.fromInt maxAttempts
-                    ]
-                |> text
-            ]
-        , case model.state of
+        [ case model.state of
             Idle ->
                 "Loading game…"
                     |> translate model.lang []
@@ -669,39 +692,18 @@ view model =
             Won word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [ class "my-3" ]
-                        [ if List.length attempts == 1 then
-                            "You successfully guessed {0} on your first try, congrats!"
-                                |> translate model.lang [ word ]
-                                |> text
-
-                          else
-                            "You successfully guessed {0} in {1} attempts, congrats!"
-                                |> translate model.lang
-                                    [ String.toUpper word
-                                    , String.fromInt (List.length attempts)
-                                    ]
-                                |> text
-                        ]
-                    , definitionLink model.lang word
-                    , newGameButton model.lang
+                    , endGameButtons model.lang word
                     ]
 
             Lost word attempts ->
                 div []
                     [ viewAttempts attempts
-                    , h3 [ class "my-3" ]
-                        [ "This one was hard!"
-                            |> translate model.lang []
-                            |> text
-                        ]
                     , word
                         |> String.toList
                         |> List.map Correct
                         |> List.singleton
                         |> viewAttempts
-                    , definitionLink model.lang word
-                    , newGameButton model.lang
+                    , endGameButtons model.lang word
                     , viewKeyboard model.lang attempts
                     ]
 
@@ -749,14 +751,11 @@ translations =
         , ( "Loading game…"
           , "Chargement du jeu…"
           )
-        , ( "Definition of {0} on Wiktionary"
-          , "Définition de {0} sur Wiktionary"
-          )
-        , ( "Lookup the definition of this word (new window)"
-          , "Accéder à la définition de ce mot (nouvelle fenêtre"
+        , ( "Definition"
+          , "Définition"
           )
         , ( "Play again"
-          , "Nouvelle partie"
+          , "Rejouer"
           )
         , ( "Sorry, {0} must be a known word from our {1} dictionary"
           , "Désolé, {0} doit être un mot connu de notre dictionnaire {1}"
@@ -773,17 +772,8 @@ translations =
         , ( "The word must contains only alphabetic characters: {0}"
           , "Le mot ne doit contenir que des lettres alphabétiques\u{00A0}: {0}"
           )
-        , ( "This one was hard!"
-          , "C'était pas facile\u{00A0}!"
-          )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
-          )
-        , ( "You successfully guessed {0} on your first try, congrats!"
-          , "Vous avez deviné {0} du premier coup, félicitations\u{00A0}!"
-          )
-        , ( "You successfully guessed {0} in {1} attempts, congrats!"
-          , "Vous avez deviné {0} en {1} coups, bravo\u{00A0}!"
           )
         ]
 
