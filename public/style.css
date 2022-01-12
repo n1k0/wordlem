@@ -1,0 +1,82 @@
+.Game {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.BoardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.Board {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  grid-gap: 5px;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 80%;
+  max-width: 350px;
+  max-height: 454px;
+}
+
+.BoardRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 5px;
+}
+
+.BoardTile {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.7rem;
+  line-height: 1.7rem;
+  user-select: none;
+}
+
+.BoardTile::before {
+  content: '';
+  display: inline-block;
+  padding-bottom: 100%;
+}
+
+.Keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 10px 10px 10px;
+  user-select: none;
+}
+
+.KeyboardRow {
+  display : flex;
+  justify-content: space-evenly;
+  gap: 4px;
+}
+
+.KeyboardKey {
+  flex: 1;
+  height: 7vh;
+  padding: 0.5rem 0.25rem;
+}
+
+.KeyboardKey:active,
+.KeyboardKey:focus {
+  box-shadow: none;
+}
+
+.Flash {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  width: fit-content;
+}

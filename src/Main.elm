@@ -80,6 +80,11 @@ type Msg
     | SwitchLang Lang
 
 
+numberOfLetters : Int
+numberOfLetters =
+    5
+
+
 maxAttempts : Int
 maxAttempts =
     6
@@ -159,14 +164,11 @@ validateAttempt lang word input =
             , String.toList (normalize input)
             )
     in
-    if List.any (Char.isAlpha >> not) inputChars then
-        "Invalid word" |> translate lang [] |> Err
-
-    else if List.length inputChars /= 5 then
+    if List.length inputChars /= numberOfLetters then
         "Not enough letters" |> translate lang [] |> Err
 
     else if not (List.member (normalize input) (getWords lang)) then
-        "Unknown word: {0}" |> translate lang [ input ] |> Err
+        "Not in dictionary: {0}" |> translate lang [ String.toUpper input ] |> Err
 
     else
         wordChars
@@ -203,7 +205,7 @@ handleCorrectDuplicates wordChars attempt =
                                 ( -- count number of this char in target word
                                   List.length (List.filter ((==) c) wordChars)
                                   -- number of already correct char for
-                                , List.length (List.filter (isCorrectChar c) attempt)
+                                , List.length (List.filter (letterIs Correct c) attempt)
                                 )
                         in
                         if nbCorrectInAttempt >= nbCharsInWord then
@@ -232,7 +234,7 @@ handleMisplacedDuplicates wordChars =
                             -- count number of this char in target word
                             ( List.length (List.filter ((==) c) wordChars)
                               -- number of already misplaced char for in accumulator
-                            , List.length (List.filter (isMisplacedChar c) acc)
+                            , List.length (List.filter (letterIs Misplaced c) acc)
                             )
                     in
                     if nbCharInAcc >= nbCharInWord then
@@ -302,12 +304,15 @@ update msg model =
             , Cmd.none
             )
 
+        ( BackSpace, _ ) ->
+            ( model, Cmd.none )
+
         ( KeyPressed char, Ongoing word attempts input _ ) ->
             let
                 newInput =
                     String.toList input
                         ++ [ char ]
-                        |> List.take 5
+                        |> List.take numberOfLetters
                         |> String.fromList
             in
             ( { model | state = Ongoing word attempts newInput Nothing }
@@ -392,42 +397,17 @@ viewAttempt =
                     letterSpot "bg-success" char
 
                 Unused char ->
-                    letterSpot "bg-secondary" char
+                    letterSpot "bg-dark text-light" char
 
                 Handled char ->
                     letterSpot "bg-secondary" char
         )
-        >> attemptRow
+        >> div [ class "BoardRow" ]
 
 
-isCorrectChar : Char -> Letter -> Bool
-isCorrectChar char letter =
-    case letter of
-        Correct c ->
-            c == char
-
-        _ ->
-            False
-
-
-isMisplacedChar : Char -> Letter -> Bool
-isMisplacedChar char letter =
-    case letter of
-        Misplaced c ->
-            c == char
-
-        _ ->
-            False
-
-
-isUnusedChar : Char -> Letter -> Bool
-isUnusedChar char letter =
-    case letter of
-        Unused c ->
-            c == char
-
-        _ ->
-            False
+letterIs : (Char -> Letter) -> Char -> Letter -> Bool
+letterIs build char =
+    (==) (build char)
 
 
 newGameButton : Lang -> Html Msg
@@ -464,7 +444,7 @@ definitionLink lang word =
 
 endGameButtons : Lang -> WordToFind -> Html Msg
 endGameButtons lang word =
-    div [ class "bg-kark btn-group w-100", style "z-index" "1000" ]
+    div [ class "bg-kark btn-group w-100" ]
         [ definitionLink lang word
         , newGameButton lang
         ]
@@ -485,13 +465,13 @@ dispositions lang =
 keyState : List Attempt -> Char -> KeyState
 keyState attempts char =
     ( char
-    , if List.any (List.any (isCorrectChar char)) attempts then
+    , if List.any (List.any (letterIs Correct char)) attempts then
         Just (Correct char)
 
-      else if List.any (List.any (isMisplacedChar char)) attempts then
+      else if List.any (List.any (letterIs Misplaced char)) attempts then
         Just (Misplaced char)
 
-      else if List.any (List.any (isUnusedChar char)) attempts then
+      else if List.any (List.any (letterIs Unused char)) attempts then
         Just (Unused char)
 
       else
@@ -499,35 +479,21 @@ keyState attempts char =
     )
 
 
-keyboardRow : List (Html Msg) -> Html Msg
-keyboardRow =
-    div
-        [ class "d-flex justify-content-evenly"
-        , style "gap" "1px"
-        , style "margin" "1px 0"
-        ]
-
-
 viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
     dispositions lang
         |> List.map
             (List.map (keyState attempts >> viewKeyState)
-                >> keyboardRow
+                >> div [ class "KeyboardRow" ]
             )
-        |> footer
-            [ style "position" "absolute"
-            , style "bottom" "5px"
-            , style "left" "0"
-            , style "right" "0"
-            ]
+        |> footer [ class "Keyboard" ]
 
 
 viewKeyState : KeyState -> Html Msg
 viewKeyState ( char, letter ) =
     let
         baseClasses =
-            "btn px-1 py-2"
+            "KeyboardKey btn"
 
         ( classes, msg ) =
             case letter of
@@ -552,66 +518,43 @@ viewKeyState ( char, letter ) =
     in
     button
         [ class (String.join " " [ baseClasses, classes ])
-        , style "flex" "1"
-        , style "height" "10vh"
-        , style "max-height" "50px"
         , onClick msg
         ]
         [ charToText char ]
-
-
-viewAttempts : List Attempt -> Html Msg
-viewAttempts =
-    List.reverse
-        >> List.map viewAttempt
-        >> div []
 
 
 viewBoard : Maybe UserInput -> List Attempt -> Html Msg
 viewBoard input attempts =
     let
         remaining =
-            maxAttempts - List.length attempts - 2
-
-        attemptRows =
-            attempts
+            maxAttempts
+                - List.length attempts
+                - (input |> Maybe.map (always 2) |> Maybe.withDefault 1)
+    in
+    div [ class "BoardContainer" ]
+        [ [ attempts
                 |> List.reverse
                 |> List.map (viewAttempt >> Just)
-    in
-    [ attemptRows
-    , [ input |> Maybe.map viewInput ]
-    , List.range 0 remaining
-        |> List.map
-            (\_ ->
-                List.repeat 5 '\u{00A0}'
-                    |> String.fromList
-                    |> viewInput
-                    |> Just
-            )
-    ]
-        |> List.concat
-        |> List.filterMap identity
-        |> div []
-
-
-attemptRow : List (Html Msg) -> Html Msg
-attemptRow =
-    div
-        [ class "d-flex justify-content-evenly"
-        , style "margin" "1px 0"
-        , style "gap" "1px"
-        , style "z-index" "1000"
+          , [ input |> Maybe.map viewInput ]
+          , List.range 0 remaining
+                |> List.map
+                    (\_ ->
+                        List.repeat numberOfLetters '\u{00A0}'
+                            |> String.fromList
+                            |> viewInput
+                            |> Just
+                    )
+          ]
+            |> List.concat
+            |> List.filterMap identity
+            |> div [ class "Board" ]
         ]
 
 
 letterSpot : String -> Char -> Html Msg
 letterSpot classes char =
     div
-        [ class classes
-        , class "d-flex justify-content-center align-items-center fs-2"
-        , style "padding" "3px 0"
-        , style "flex" "1"
-        ]
+        [ class <| "BoardTile " ++ classes ]
         [ charToText char ]
 
 
@@ -622,11 +565,11 @@ viewInput input =
             String.toList input
 
         spots =
-            chars ++ LE.initialize (5 - List.length chars) (always '\u{00A0}')
+            chars ++ LE.initialize (numberOfLetters - List.length chars) (always '\u{00A0}')
     in
     spots
         |> List.map (letterSpot "bg-secondary")
-        |> attemptRow
+        |> div [ class "BoardRow" ]
 
 
 langBtnId : Lang -> String
@@ -648,7 +591,7 @@ selectLang lang =
                     [ button
                         [ type_ "button"
                         , id (langBtnId lang_)
-                        , class "nav-link"
+                        , class "nav-link px-2 py-1 mx-1"
                         , classList [ ( "active", lang == lang_ ) ]
                         , onClick (SwitchLang lang_)
                         ]
@@ -664,9 +607,10 @@ selectLang lang =
 -- viewHelp lang =
 --     div []
 --         [ p []
---             [ "Guess a 5 letters {0} word in {1} attempts or less!"
+--             [ "Guess a {0} letters {1} word in {2} attempts or less."
 --                 |> translate lang
---                     [ langToString lang
+--                     [ String.fromInt numberOfLetters,
+--                     , langToString lang
 --                     , String.fromInt maxAttempts
 --                     ]
 --                 |> text
@@ -685,81 +629,67 @@ selectLang lang =
 
 layout : Lang -> List (Html Msg) -> Html Msg
 layout lang content =
-    div [ class "game container", style "max-width" "600px" ]
-        [ div [ class "d-flex justify-content-between align-items-center my-2" ]
+    main_ [ class "Game" ]
+        (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
             [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
             , selectLang lang
             ]
-        , main_ [] content
-        ]
+            :: content
+        )
 
 
-alert : String -> Html Msg
-alert message =
+alert : String -> String -> Html Msg
+alert level message =
     div
-        [ class "alert alert-warning"
-
-        -- , style "position" "absolute"
-        -- , style "top" "10%"
-        -- , style "left" "50%"
-        -- , style "transform" "translate(-50%, 0)"
-        -- , style "pointer-events" "none"
-        -- , style "width" "fit-content"
-        ]
+        [ class <| "Flash alert alert-" ++ level ]
         [ text message ]
 
 
-gameLayout : List (Html Msg) -> Html Msg
-gameLayout =
-    div
-        [ style "position" "relative"
-        , style "height" "calc(100% - 60px)"
-        ]
-
-
 view : Model -> Html Msg
-view model =
-    layout model.lang
-        [ case model.state of
+view { lang, state } =
+    layout lang
+        (case state of
             Idle ->
-                "Loading game…"
-                    |> translate model.lang []
+                [ "Loading game…"
+                    |> translate lang []
                     |> text
+                ]
 
             Errored gameError ->
-                div []
-                    [ "Game data couldn't be loaded: {0}"
-                        |> translate model.lang [ gameError ]
-                        |> alert
-                    , newGameButton model.lang
-                    ]
+                [ "Game data couldn't load: {0}"
+                    |> translate lang [ gameError ]
+                    |> alert "danger"
+                , newGameButton lang
+                ]
 
             Won word attempts ->
-                gameLayout
-                    [ viewBoard Nothing attempts
-                    , endGameButtons model.lang word
-                    , viewKeyboard model.lang attempts
-                    ]
+                [ viewBoard Nothing attempts
+                , endGameButtons lang word
+                , viewKeyboard lang attempts
+                , "Well done!"
+                    |> translate lang []
+                    |> alert "success"
+                ]
 
             Lost word attempts ->
-                gameLayout
-                    [ viewBoard Nothing attempts
-                    , word
-                        |> String.toList
-                        |> List.map Correct
-                        |> List.singleton
-                        |> viewAttempts
-                    , endGameButtons model.lang word
-                    , viewKeyboard model.lang attempts
-                    ]
+                [ word
+                    |> String.toList
+                    |> List.map Correct
+                    |> (\a -> a :: attempts)
+                    |> viewBoard Nothing
+                , endGameButtons lang word
+                , viewKeyboard lang attempts
+                , "Ok that was hard."
+                    |> translate lang []
+                    |> alert "success"
+                ]
 
             Ongoing _ attempts input error ->
-                gameLayout
-                    [ viewBoard (Just input) attempts
-                    , error |> Maybe.map alert |> Maybe.withDefault (text "")
-                    , viewKeyboard model.lang attempts
-                    ]
-        ]
+                [ viewBoard (Just input) attempts
+                , error |> Maybe.map (alert "warning") |> Maybe.withDefault (text "")
+                , viewKeyboard lang attempts
+                ]
+        )
 
 
 translate : Lang -> List String -> String -> String
@@ -778,17 +708,17 @@ translate lang params string =
 translations : Dict String String
 translations =
     Dict.fromList
-        [ ( "Enter a 5 letters {0} word"
-          , "Entrez un mot {0} de 5 lettres"
+        [ ( "Definition"
+          , "Définition"
           )
-        , ( "Game data couldn't be loaded: {0}"
+        , ( "Game data couldn't load: {0}"
           , "Les données du jeu n'ont pas été chargé\u{00A0}: {0}"
           )
         , ( "General game state error. This is bad."
           , "Erreur générale. C'est pas bon signe."
           )
-        , ( "Guess a 5 letters {0} word in {1} attempts or less!"
-          , "Devinez un mot {0} de 5 lettres en {1} essais ou moins\u{00A0}!"
+        , ( "Guess a {0} letters {1} word in {2} attempts or less."
+          , "Devinez un mot {0} de {1} lettres en {2} essais ou moins\u{00A0}."
           )
         , ( "Inspired by [Wordle]({0}) - [Source code]({1})"
           , "Inspiré de [Wordle]({0}) - [Code source]({1})"
@@ -796,23 +726,23 @@ translations =
         , ( "Loading game…"
           , "Chargement du jeu…"
           )
-        , ( "Definition"
-          , "Définition"
+        , ( "Ok that was hard."
+          , "Pas facile, hein\u{00A0}?"
           )
         , ( "Play again"
           , "Rejouer"
           )
-        , ( "Unknown word: {0}"
-          , "Mot inconnu\u{00A0}: {0}"
+        , ( "Not in dictionary: {0}"
+          , "Absent du dictionnaire\u{00A0}: {0}"
           )
         , ( "Not enough letters"
           , "Mot trop court"
           )
-        , ( "Invalid word"
-          , "Mot invalide"
-          )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
+          )
+        , ( "Well done!"
+          , "Bien joué\u{00A0}!"
           )
         ]
 
