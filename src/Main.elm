@@ -479,10 +479,10 @@ dispositions lang =
     List.map String.toList
         (case lang of
             French ->
-                [ "azertyuiop", "qsdfghjklm", "wxcvbn⌫⏎" ]
+                [ "azertyuiop", "qsdfghjklm", "⏎wxcvbn⌫" ]
 
             English ->
-                [ "qwertyuiop", "asdfghjkl", "zxcvbnm⌫⏎" ]
+                [ "qwertyuiop", "asdfghjkl", "⏎zxcvbnm⌫" ]
         )
 
 
@@ -546,10 +546,10 @@ viewKeyState ( char, letter ) =
 
                 _ ->
                     if char == '⌫' then
-                        ( "btn-info", BackSpace )
+                        ( "btn-info px-3", BackSpace )
 
                     else if char == '⏎' then
-                        ( "btn-info", Submit )
+                        ( "btn-info px-3", Submit )
 
                     else
                         ( "btn-secondary", KeyPressed char )
