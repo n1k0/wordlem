@@ -4945,25 +4945,25 @@ var $elm$core$Array$treeFromBuilder = F2(
 	});
 var $elm$core$Array$builderToArray = F2(
 	function (reverseNodeList, builder) {
-		if (!builder.c) {
+		if (!builder.b) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.d),
+				$elm$core$Elm$JsArray$length(builder.c),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.d);
+				builder.c);
 		} else {
-			var treeLen = builder.c * $elm$core$Array$branchFactor;
+			var treeLen = builder.b * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.e) : builder.e;
-			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.c);
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.d) : builder.d;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.b);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.d) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.c) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.d);
+				builder.c);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -4976,7 +4976,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{e: nodeList, c: (len / $elm$core$Array$branchFactor) | 0, d: tail});
+					{d: nodeList, b: (len / $elm$core$Array$branchFactor) | 0, c: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -5437,8 +5437,8 @@ var $author$project$Main$getWords = function (lang) {
 };
 var $author$project$Main$initialModel = function (lang) {
 	return {
-		b: lang,
-		p: $author$project$Main$Idle,
+		q: lang,
+		o: $author$project$Main$Idle,
 		R: $author$project$Main$getWords(lang)
 	};
 };
@@ -5554,7 +5554,7 @@ var $author$project$Main$randomWord = function (words) {
 };
 var $author$project$Main$init = function (flags) {
 	var model = $author$project$Main$initialModel(
-		$author$project$Main$parseLang(flags.b));
+		$author$project$Main$parseLang(flags.q));
 	return _Utils_Tuple2(
 		model,
 		A2(
@@ -6006,7 +6006,7 @@ var $elm$browser$Browser$Events$on = F3(
 	});
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
 var $author$project$Main$subscriptions = function (_v0) {
-	var state = _v0.p;
+	var state = _v0.o;
 	if (state.$ === 2) {
 		return $elm$browser$Browser$Events$onKeyDown($author$project$Main$decodeKey);
 	} else {
@@ -6282,6 +6282,7 @@ var $author$project$Main$langBtnId = A2(
 					$elm$core$String$fromList,
 					$elm$core$Basics$append('btn-lang-'))))));
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$numberOfLetters = 5;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -6404,7 +6405,7 @@ var $elm$core$Array$fromListHelp = F3(
 				return A2(
 					$elm$core$Array$builderToArray,
 					true,
-					{e: nodeList, c: nodeListSize, d: jsArray});
+					{d: nodeList, b: nodeListSize, c: jsArray});
 			} else {
 				var $temp$list = remainingItems,
 					$temp$nodeList = A2(
@@ -6455,18 +6456,18 @@ var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
 var $author$project$Main$translations = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
-			_Utils_Tuple2('Enter a 5 letters {0} word', 'Entrez un mot {0} de 5 lettres'),
-			_Utils_Tuple2('Game data couldn\'t be loaded: {0}', 'Les données du jeu n\'ont pas été chargé\u00A0: {0}'),
+			_Utils_Tuple2('Definition', 'Définition'),
+			_Utils_Tuple2('Game data couldn\'t load: {0}', 'Les données du jeu n\'ont pas été chargé\u00A0: {0}'),
 			_Utils_Tuple2('General game state error. This is bad.', 'Erreur générale. C\'est pas bon signe.'),
-			_Utils_Tuple2('Guess a 5 letters {0} word in {1} attempts or less!', 'Devinez un mot {0} de 5 lettres en {1} essais ou moins\u00A0!'),
+			_Utils_Tuple2('Guess a {0} letters {1} word in {2} attempts or less.', 'Devinez un mot {0} de {1} lettres en {2} essais ou moins\u00A0.'),
 			_Utils_Tuple2('Inspired by [Wordle]({0}) - [Source code]({1})', 'Inspiré de [Wordle]({0}) - [Code source]({1})'),
 			_Utils_Tuple2('Loading game…', 'Chargement du jeu…'),
-			_Utils_Tuple2('Definition', 'Définition'),
+			_Utils_Tuple2('Ok that was hard.', 'Pas facile, hein\u00A0?'),
 			_Utils_Tuple2('Play again', 'Rejouer'),
-			_Utils_Tuple2('Unknown word: {0}', 'Mot inconnu\u00A0: {0}'),
+			_Utils_Tuple2('Not in dictionary: {0}', 'Absent du dictionnaire\u00A0: {0}'),
 			_Utils_Tuple2('Not enough letters', 'Mot trop court'),
-			_Utils_Tuple2('Invalid word', 'Mot invalide'),
-			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.')
+			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.'),
+			_Utils_Tuple2('Well done!', 'Bien joué\u00A0!')
 		]));
 var $author$project$Main$translate = F3(
 	function (lang, params, string) {
@@ -6482,6 +6483,9 @@ var $author$project$Main$translate = F3(
 					A2($elm$core$Dict$get, string, $author$project$Main$translations)));
 		}
 	});
+var $author$project$Main$Correct = function (a) {
+	return {$: 1, a: a};
+};
 var $author$project$Main$Handled = function (a) {
 	return {$: 3, a: a};
 };
@@ -6496,14 +6500,10 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var $author$project$Main$isCorrectChar = F2(
-	function (_char, letter) {
-		if (letter.$ === 1) {
-			var c = letter.a;
-			return _Utils_eq(c, _char);
-		} else {
-			return false;
-		}
+var $author$project$Main$letterIs = F2(
+	function (build, _char) {
+		return $elm$core$Basics$eq(
+			build(_char));
 	});
 var $author$project$Main$handleCorrectDuplicates = F2(
 	function (wordChars, attempt) {
@@ -6521,7 +6521,7 @@ var $author$project$Main$handleCorrectDuplicates = F2(
 						$elm$core$List$length(
 							A2(
 								$elm$core$List$filter,
-								$author$project$Main$isCorrectChar(c),
+								A2($author$project$Main$letterIs, $author$project$Main$Correct, c),
 								attempt)));
 					var nbCharsInWord = _v1.a;
 					var nbCorrectInAttempt = _v1.b;
@@ -6532,15 +6532,9 @@ var $author$project$Main$handleCorrectDuplicates = F2(
 			},
 			attempt);
 	});
-var $author$project$Main$isMisplacedChar = F2(
-	function (_char, letter) {
-		if (letter.$ === 2) {
-			var c = letter.a;
-			return _Utils_eq(c, _char);
-		} else {
-			return false;
-		}
-	});
+var $author$project$Main$Misplaced = function (a) {
+	return {$: 2, a: a};
+};
 var $author$project$Main$handleMisplacedDuplicates = function (wordChars) {
 	return A2(
 		$elm$core$List$foldl,
@@ -6557,7 +6551,7 @@ var $author$project$Main$handleMisplacedDuplicates = function (wordChars) {
 						$elm$core$List$length(
 							A2(
 								$elm$core$List$filter,
-								$author$project$Main$isMisplacedChar(c),
+								A2($author$project$Main$letterIs, $author$project$Main$Misplaced, c),
 								acc)));
 					var nbCharInWord = _v1.a;
 					var nbCharInAcc = _v1.b;
@@ -6578,12 +6572,6 @@ var $author$project$Main$handleMisplacedDuplicates = function (wordChars) {
 				}
 			}),
 		_List_Nil);
-};
-var $author$project$Main$Correct = function (a) {
-	return {$: 1, a: a};
-};
-var $author$project$Main$Misplaced = function (a) {
-	return {$: 2, a: a};
 };
 var $author$project$Main$Unused = function (a) {
 	return {$: 0, a: a};
@@ -6663,6 +6651,7 @@ var $elm$core$String$replace = F3(
 			after,
 			A2($elm$core$String$split, before, string));
 	});
+var $elm$core$String$toUpper = _String_toUpper;
 var $elm$core$String$trim = _String_trim;
 var $author$project$Main$validateAttempt = F3(
 	function (lang, word, input) {
@@ -6683,11 +6672,9 @@ var $author$project$Main$validateAttempt = F3(
 				normalize(input)));
 		var wordChars = _v0.a;
 		var inputChars = _v0.b;
-		return A2(
-			$elm$core$List$any,
-			A2($elm$core$Basics$composeR, $elm$core$Char$isAlpha, $elm$core$Basics$not),
-			inputChars) ? $elm$core$Result$Err(
-			A3($author$project$Main$translate, lang, _List_Nil, 'Invalid word')) : (($elm$core$List$length(inputChars) !== 5) ? $elm$core$Result$Err(
+		return (!_Utils_eq(
+			$elm$core$List$length(inputChars),
+			$author$project$Main$numberOfLetters)) ? $elm$core$Result$Err(
 			A3($author$project$Main$translate, lang, _List_Nil, 'Not enough letters')) : ((!A2(
 			$elm$core$List$member,
 			normalize(input),
@@ -6696,8 +6683,10 @@ var $author$project$Main$validateAttempt = F3(
 				$author$project$Main$translate,
 				lang,
 				_List_fromArray(
-					[input]),
-				'Unknown word: {0}')) : $elm$core$Result$Ok(
+					[
+						$elm$core$String$toUpper(input)
+					]),
+				'Not in dictionary: {0}')) : $elm$core$Result$Ok(
 			A2(
 				$author$project$Main$handleMisplacedDuplicates,
 				wordChars,
@@ -6708,14 +6697,14 @@ var $author$project$Main$validateAttempt = F3(
 						$elm$core$List$map2,
 						$author$project$Main$mapChars(wordChars),
 						inputChars,
-						wordChars))))));
+						wordChars)))));
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		update:
 		while (true) {
-			var _v0 = _Utils_Tuple2(msg, model.p);
-			_v0$10:
+			var _v0 = _Utils_Tuple2(msg, model.o);
+			_v0$11:
 			while (true) {
 				switch (_v0.a.$) {
 					case 0:
@@ -6736,23 +6725,24 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										p: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
+										o: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
-							break _v0$10;
+							var _v3 = _v0.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					case 1:
 						if (_v0.b.$ === 2) {
 							var _char = _v0.a.a;
-							var _v3 = _v0.b;
-							var word = _v3.a;
-							var attempts = _v3.b;
-							var input = _v3.c;
+							var _v4 = _v0.b;
+							var word = _v4.a;
+							var attempts = _v4.b;
+							var input = _v4.c;
 							var newInput = $elm$core$String$fromList(
 								A2(
 									$elm$core$List$take,
-									5,
+									$author$project$Main$numberOfLetters,
 									_Utils_ap(
 										$elm$core$String$toList(input),
 										_List_fromArray(
@@ -6761,15 +6751,15 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										p: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
+										o: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					case 2:
-						var _v4 = _v0.a;
-						var newModel = $author$project$Main$initialModel(model.b);
+						var _v5 = _v0.a;
+						var newModel = $author$project$Main$initialModel(model.q);
 						return _Utils_Tuple2(
 							newModel,
 							A2(
@@ -6780,12 +6770,12 @@ var $author$project$Main$update = F2(
 						if (!_v0.a.a.$) {
 							if (!_v0.b.$) {
 								var newWord = _v0.a.a.a;
-								var _v5 = _v0.b;
+								var _v6 = _v0.b;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											p: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
+											o: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 										}),
 									$elm$core$Platform$Cmd$batch(
 										A2(
@@ -6794,54 +6784,54 @@ var $author$project$Main$update = F2(
 											_List_fromArray(
 												[0, 1]))));
 							} else {
-								break _v0$10;
+								break _v0$11;
 							}
 						} else {
 							if (!_v0.b.$) {
-								var _v6 = _v0.a.a;
-								var _v7 = _v0.b;
+								var _v7 = _v0.a.a;
+								var _v8 = _v0.b;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											p: $author$project$Main$Errored(
-												A3($author$project$Main$translate, model.b, _List_Nil, 'Unable to pick a word.'))
+											o: $author$project$Main$Errored(
+												A3($author$project$Main$translate, model.q, _List_Nil, 'Unable to pick a word.'))
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v0$10;
+								break _v0$11;
 							}
 						}
 					case 4:
-						var _v8 = _v0.a;
+						var _v9 = _v0.a;
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					case 5:
 						if (_v0.b.$ === 2) {
-							var _v9 = _v0.a;
-							var _v10 = _v0.b;
-							var word = _v10.a;
-							var attempts = _v10.b;
-							var input = _v10.c;
-							var _v11 = A3($author$project$Main$validateAttempt, model.b, word, input);
-							if (!_v11.$) {
-								var attempt = _v11.a;
+							var _v10 = _v0.a;
+							var _v11 = _v0.b;
+							var word = _v11.a;
+							var attempts = _v11.b;
+							var input = _v11.c;
+							var _v12 = A3($author$project$Main$validateAttempt, model.q, word, input);
+							if (!_v12.$) {
+								var attempt = _v12.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											p: A2(
+											o: A2(
 												$author$project$Main$checkGame,
 												word,
 												A2($elm$core$List$cons, attempt, attempts))
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								var error = _v11.a;
+								var error = _v12.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											p: A4(
+											o: A4(
 												$author$project$Main$Ongoing,
 												word,
 												attempts,
@@ -6851,7 +6841,7 @@ var $author$project$Main$update = F2(
 									$elm$core$Platform$Cmd$none);
 							}
 						} else {
-							var _v12 = _v0.a;
+							var _v13 = _v0.a;
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					default:
@@ -6859,7 +6849,7 @@ var $author$project$Main$update = F2(
 						var $temp$msg = $author$project$Main$NewGame,
 							$temp$model = _Utils_update(
 							model,
-							{b: lang});
+							{q: lang});
 						msg = $temp$msg;
 						model = $temp$model;
 						continue update;
@@ -6869,8 +6859,8 @@ var $author$project$Main$update = F2(
 				_Utils_update(
 					model,
 					{
-						p: $author$project$Main$Errored(
-							A3($author$project$Main$translate, model.b, _List_Nil, 'General game state error. This is bad.'))
+						o: $author$project$Main$Errored(
+							A3($author$project$Main$translate, model.q, _List_Nil, 'General game state error. This is bad.'))
 					}),
 				$elm$core$Platform$Cmd$none);
 		}
@@ -6887,18 +6877,19 @@ var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$alert = function (message) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('alert alert-warning')
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(message)
-			]));
-};
+var $author$project$Main$alert = F2(
+	function (level, message) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('Flash alert alert-' + level)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(message)
+				]));
+	});
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
@@ -6907,7 +6898,6 @@ var $elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$Main$definitionLink = F2(
 	function (lang, word) {
 		return A2(
@@ -6970,16 +6960,13 @@ var $author$project$Main$newGameButton = function (lang) {
 				A3($author$project$Main$translate, lang, _List_Nil, 'Play again'))
 			]));
 };
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$endGameButtons = F2(
 	function (lang, word) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('bg-kark btn-group w-100'),
-					A2($elm$html$Html$Attributes$style, 'z-index', '1000')
+					$elm$html$Html$Attributes$class('bg-kark btn-group w-100')
 				]),
 			_List_fromArray(
 				[
@@ -6987,13 +6974,8 @@ var $author$project$Main$endGameButtons = F2(
 					$author$project$Main$newGameButton(lang)
 				]));
 	});
-var $author$project$Main$gameLayout = $elm$html$Html$div(
-	_List_fromArray(
-		[
-			A2($elm$html$Html$Attributes$style, 'position', 'relative'),
-			A2($elm$html$Html$Attributes$style, 'height', 'calc(100% - 60px)')
-		]));
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$header = _VirtualDom_node('header');
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$SwitchLang = function (a) {
 	return {$: 6, a: a};
@@ -7040,7 +7022,7 @@ var $author$project$Main$selectLang = function (lang) {
 									$elm$html$Html$Attributes$type_('button'),
 									$elm$html$Html$Attributes$id(
 									$author$project$Main$langBtnId(lang_)),
-									$elm$html$Html$Attributes$class('nav-link'),
+									$elm$html$Html$Attributes$class('nav-link px-2 py-1 mx-1'),
 									$elm$html$Html$Attributes$classList(
 									_List_fromArray(
 										[
@@ -7064,19 +7046,18 @@ var $author$project$Main$selectLang = function (lang) {
 var $author$project$Main$layout = F2(
 	function (lang, content) {
 		return A2(
-			$elm$html$Html$div,
+			$elm$html$Html$main_,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('game container'),
-					A2($elm$html$Html$Attributes$style, 'max-width', '600px')
+					$elm$html$Html$Attributes$class('Game')
 				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
+			A2(
+				$elm$core$List$cons,
+				A2(
+					$elm$html$Html$header,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('d-flex justify-content-between align-items-center my-2')
+							$elm$html$Html$Attributes$class('d-flex justify-content-between align-items-center p-2 pb-0')
 						]),
 					_List_fromArray(
 						[
@@ -7092,8 +7073,7 @@ var $author$project$Main$layout = F2(
 								])),
 							$author$project$Main$selectLang(lang)
 						])),
-					A2($elm$html$Html$main_, _List_Nil, content)
-				]));
+				content));
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -7105,69 +7085,6 @@ var $elm$core$Maybe$map = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $elm$core$List$singleton = function (value) {
-	return _List_fromArray(
-		[value]);
-};
-var $author$project$Main$attemptRow = $elm$html$Html$div(
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('d-flex justify-content-evenly'),
-			A2($elm$html$Html$Attributes$style, 'margin', '1px 0'),
-			A2($elm$html$Html$Attributes$style, 'gap', '1px'),
-			A2($elm$html$Html$Attributes$style, 'z-index', '1000')
-		]));
-var $elm$core$Char$toUpper = _Char_toUpper;
-var $author$project$Main$charToText = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$Char$toUpper,
-	A2(
-		$elm$core$Basics$composeR,
-		$elm$core$List$singleton,
-		A2($elm$core$Basics$composeR, $elm$core$String$fromList, $elm$html$Html$text)));
-var $author$project$Main$letterSpot = F2(
-	function (classes, _char) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class(classes),
-					$elm$html$Html$Attributes$class('d-flex justify-content-center align-items-center fs-2'),
-					A2($elm$html$Html$Attributes$style, 'padding', '3px 0'),
-					A2($elm$html$Html$Attributes$style, 'flex', '1')
-				]),
-			_List_fromArray(
-				[
-					$author$project$Main$charToText(_char)
-				]));
-	});
-var $author$project$Main$viewAttempt = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$List$map(
-		function (letter) {
-			switch (letter.$) {
-				case 2:
-					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-warning', _char);
-				case 1:
-					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-success', _char);
-				case 0:
-					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-secondary', _char);
-				default:
-					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-secondary', _char);
-			}
-		}),
-	$author$project$Main$attemptRow);
-var $author$project$Main$viewAttempts = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$List$reverse,
-	A2(
-		$elm$core$Basics$composeR,
-		$elm$core$List$map($author$project$Main$viewAttempt),
-		$elm$html$Html$div(_List_Nil)));
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -7200,6 +7117,55 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $elm$core$Char$toUpper = _Char_toUpper;
+var $author$project$Main$charToText = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$Char$toUpper,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm$core$List$singleton,
+		A2($elm$core$Basics$composeR, $elm$core$String$fromList, $elm$html$Html$text)));
+var $author$project$Main$letterSpot = F2(
+	function (classes, _char) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('BoardTile ' + classes)
+				]),
+			_List_fromArray(
+				[
+					$author$project$Main$charToText(_char)
+				]));
+	});
+var $author$project$Main$viewAttempt = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$List$map(
+		function (letter) {
+			switch (letter.$) {
+				case 2:
+					var _char = letter.a;
+					return A2($author$project$Main$letterSpot, 'bg-warning', _char);
+				case 1:
+					var _char = letter.a;
+					return A2($author$project$Main$letterSpot, 'bg-success', _char);
+				case 0:
+					var _char = letter.a;
+					return A2($author$project$Main$letterSpot, 'bg-dark text-light', _char);
+				default:
+					var _char = letter.a;
+					return A2($author$project$Main$letterSpot, 'bg-secondary', _char);
+			}
+		}),
+	$elm$html$Html$div(
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('BoardRow')
+			])));
 var $elm_community$list_extra$List$Extra$initialize = F2(
 	function (n, f) {
 		var step = F2(
@@ -7228,9 +7194,14 @@ var $author$project$Main$viewInput = function (input) {
 		chars,
 		A2(
 			$elm_community$list_extra$List$Extra$initialize,
-			5 - $elm$core$List$length(chars),
+			$author$project$Main$numberOfLetters - $elm$core$List$length(chars),
 			$elm$core$Basics$always('\u00A0')));
-	return $author$project$Main$attemptRow(
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('BoardRow')
+			]),
 		A2(
 			$elm$core$List$map,
 			$author$project$Main$letterSpot('bg-secondary'),
@@ -7238,35 +7209,52 @@ var $author$project$Main$viewInput = function (input) {
 };
 var $author$project$Main$viewBoard = F2(
 	function (input, attempts) {
-		var remaining = ($author$project$Main$maxAttempts - $elm$core$List$length(attempts)) - 2;
-		var attemptRows = A2(
-			$elm$core$List$map,
-			A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt, $elm$core$Maybe$Just),
-			$elm$core$List$reverse(attempts));
+		var remaining = ($author$project$Main$maxAttempts - $elm$core$List$length(attempts)) - A2(
+			$elm$core$Maybe$withDefault,
+			1,
+			A2(
+				$elm$core$Maybe$map,
+				$elm$core$Basics$always(2),
+				input));
 		return A2(
 			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$filterMap,
-				$elm$core$Basics$identity,
-				$elm$core$List$concat(
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('BoardContainer')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							attemptRows,
+							$elm$html$Html$Attributes$class('Board')
+						]),
+					A2(
+						$elm$core$List$filterMap,
+						$elm$core$Basics$identity,
+						$elm$core$List$concat(
 							_List_fromArray(
-							[
-								A2($elm$core$Maybe$map, $author$project$Main$viewInput, input)
-							]),
-							A2(
-							$elm$core$List$map,
-							function (_v0) {
-								return $elm$core$Maybe$Just(
-									$author$project$Main$viewInput(
-										$elm$core$String$fromList(
-											A2($elm$core$List$repeat, 5, '\u00A0'))));
-							},
-							A2($elm$core$List$range, 0, remaining))
-						]))));
+								[
+									A2(
+									$elm$core$List$map,
+									A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt, $elm$core$Maybe$Just),
+									$elm$core$List$reverse(attempts)),
+									_List_fromArray(
+									[
+										A2($elm$core$Maybe$map, $author$project$Main$viewInput, input)
+									]),
+									A2(
+									$elm$core$List$map,
+									function (_v0) {
+										return $elm$core$Maybe$Just(
+											$author$project$Main$viewInput(
+												$elm$core$String$fromList(
+													A2($elm$core$List$repeat, $author$project$Main$numberOfLetters, '\u00A0'))));
+									},
+									A2($elm$core$List$range, 0, remaining))
+								]))))
+				]));
 	});
 var $author$project$Main$dispositions = function (lang) {
 	return A2(
@@ -7283,15 +7271,6 @@ var $author$project$Main$dispositions = function (lang) {
 		}());
 };
 var $elm$html$Html$footer = _VirtualDom_node('footer');
-var $author$project$Main$isUnusedChar = F2(
-	function (_char, letter) {
-		if (!letter.$) {
-			var c = letter.a;
-			return _Utils_eq(c, _char);
-		} else {
-			return false;
-		}
-	});
 var $author$project$Main$keyState = F2(
 	function (attempts, _char) {
 		return _Utils_Tuple2(
@@ -7299,31 +7278,24 @@ var $author$project$Main$keyState = F2(
 			A2(
 				$elm$core$List$any,
 				$elm$core$List$any(
-					$author$project$Main$isCorrectChar(_char)),
+					A2($author$project$Main$letterIs, $author$project$Main$Correct, _char)),
 				attempts) ? $elm$core$Maybe$Just(
 				$author$project$Main$Correct(_char)) : (A2(
 				$elm$core$List$any,
 				$elm$core$List$any(
-					$author$project$Main$isMisplacedChar(_char)),
+					A2($author$project$Main$letterIs, $author$project$Main$Misplaced, _char)),
 				attempts) ? $elm$core$Maybe$Just(
 				$author$project$Main$Misplaced(_char)) : (A2(
 				$elm$core$List$any,
 				$elm$core$List$any(
-					$author$project$Main$isUnusedChar(_char)),
+					A2($author$project$Main$letterIs, $author$project$Main$Unused, _char)),
 				attempts) ? $elm$core$Maybe$Just(
 				$author$project$Main$Unused(_char)) : $elm$core$Maybe$Nothing)));
 	});
-var $author$project$Main$keyboardRow = $elm$html$Html$div(
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('d-flex justify-content-evenly'),
-			A2($elm$html$Html$Attributes$style, 'gap', '1px'),
-			A2($elm$html$Html$Attributes$style, 'margin', '1px 0')
-		]));
 var $author$project$Main$viewKeyState = function (_v0) {
 	var _char = _v0.a;
 	var letter = _v0.b;
-	var baseClasses = 'btn px-1 py-2';
+	var baseClasses = 'KeyboardKey btn';
 	var _v1 = function () {
 		_v2$3:
 		while (true) {
@@ -7364,9 +7336,6 @@ var $author$project$Main$viewKeyState = function (_v0) {
 					' ',
 					_List_fromArray(
 						[baseClasses, classes]))),
-				A2($elm$html$Html$Attributes$style, 'flex', '1'),
-				A2($elm$html$Html$Attributes$style, 'height', '10vh'),
-				A2($elm$html$Html$Attributes$style, 'max-height', '50px'),
 				$elm$html$Html$Events$onClick(msg)
 			]),
 		_List_fromArray(
@@ -7380,10 +7349,7 @@ var $author$project$Main$viewKeyboard = F2(
 			$elm$html$Html$footer,
 			_List_fromArray(
 				[
-					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-					A2($elm$html$Html$Attributes$style, 'bottom', '5px'),
-					A2($elm$html$Html$Attributes$style, 'left', '0'),
-					A2($elm$html$Html$Attributes$style, 'right', '0')
+					$elm$html$Html$Attributes$class('Keyboard')
 				]),
 			A2(
 				$elm$core$List$map,
@@ -7394,83 +7360,98 @@ var $author$project$Main$viewKeyboard = F2(
 							$elm$core$Basics$composeR,
 							$author$project$Main$keyState(attempts),
 							$author$project$Main$viewKeyState)),
-					$author$project$Main$keyboardRow),
+					$elm$html$Html$div(
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('KeyboardRow')
+							]))),
 				$author$project$Main$dispositions(lang)));
 	});
-var $author$project$Main$view = function (model) {
+var $author$project$Main$view = function (_v0) {
+	var lang = _v0.q;
+	var state = _v0.o;
 	return A2(
 		$author$project$Main$layout,
-		model.b,
-		_List_fromArray(
-			[
-				function () {
-				var _v0 = model.p;
-				switch (_v0.$) {
-					case 0:
-						return $elm$html$Html$text(
-							A3($author$project$Main$translate, model.b, _List_Nil, 'Loading game…'));
-					case 1:
-						var gameError = _v0.a;
-						return A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$author$project$Main$alert(
-									A3(
-										$author$project$Main$translate,
-										model.b,
-										_List_fromArray(
-											[gameError]),
-										'Game data couldn\'t be loaded: {0}')),
-									$author$project$Main$newGameButton(model.b)
-								]));
-					case 4:
-						var word = _v0.a;
-						var attempts = _v0.b;
-						return $author$project$Main$gameLayout(
-							_List_fromArray(
-								[
-									A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, attempts),
-									A2($author$project$Main$endGameButtons, model.b, word),
-									A2($author$project$Main$viewKeyboard, model.b, attempts)
-								]));
-					case 3:
-						var word = _v0.a;
-						var attempts = _v0.b;
-						return $author$project$Main$gameLayout(
-							_List_fromArray(
-								[
-									A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, attempts),
-									$author$project$Main$viewAttempts(
-									$elm$core$List$singleton(
-										A2(
-											$elm$core$List$map,
-											$author$project$Main$Correct,
-											$elm$core$String$toList(word)))),
-									A2($author$project$Main$endGameButtons, model.b, word),
-									A2($author$project$Main$viewKeyboard, model.b, attempts)
-								]));
-					default:
-						var attempts = _v0.b;
-						var input = _v0.c;
-						var error = _v0.d;
-						return $author$project$Main$gameLayout(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Main$viewBoard,
-									$elm$core$Maybe$Just(input),
-									attempts),
-									A2(
-									$elm$core$Maybe$withDefault,
-									$elm$html$Html$text(''),
-									A2($elm$core$Maybe$map, $author$project$Main$alert, error)),
-									A2($author$project$Main$viewKeyboard, model.b, attempts)
-								]));
-				}
-			}()
-			]));
+		lang,
+		function () {
+			switch (state.$) {
+				case 0:
+					return _List_fromArray(
+						[
+							$elm$html$Html$text(
+							A3($author$project$Main$translate, lang, _List_Nil, 'Loading game…'))
+						]);
+				case 1:
+					var gameError = state.a;
+					return _List_fromArray(
+						[
+							A2(
+							$author$project$Main$alert,
+							'danger',
+							A3(
+								$author$project$Main$translate,
+								lang,
+								_List_fromArray(
+									[gameError]),
+								'Game data couldn\'t load: {0}')),
+							$author$project$Main$newGameButton(lang)
+						]);
+				case 4:
+					var word = state.a;
+					var attempts = state.b;
+					return _List_fromArray(
+						[
+							A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, attempts),
+							A2($author$project$Main$endGameButtons, lang, word),
+							A2($author$project$Main$viewKeyboard, lang, attempts),
+							A2(
+							$author$project$Main$alert,
+							'success',
+							A3($author$project$Main$translate, lang, _List_Nil, 'Well done!'))
+						]);
+				case 3:
+					var word = state.a;
+					var attempts = state.b;
+					return _List_fromArray(
+						[
+							A2(
+							$author$project$Main$viewBoard,
+							$elm$core$Maybe$Nothing,
+							function (a) {
+								return A2($elm$core$List$cons, a, attempts);
+							}(
+								A2(
+									$elm$core$List$map,
+									$author$project$Main$Correct,
+									$elm$core$String$toList(word)))),
+							A2($author$project$Main$endGameButtons, lang, word),
+							A2($author$project$Main$viewKeyboard, lang, attempts),
+							A2(
+							$author$project$Main$alert,
+							'success',
+							A3($author$project$Main$translate, lang, _List_Nil, 'Ok that was hard.'))
+						]);
+				default:
+					var attempts = state.b;
+					var input = state.c;
+					var error = state.d;
+					return _List_fromArray(
+						[
+							A2(
+							$author$project$Main$viewBoard,
+							$elm$core$Maybe$Just(input),
+							attempts),
+							A2(
+							$elm$core$Maybe$withDefault,
+							$elm$html$Html$text(''),
+							A2(
+								$elm$core$Maybe$map,
+								$author$project$Main$alert('warning'),
+								error)),
+							A2($author$project$Main$viewKeyboard, lang, attempts)
+						]);
+			}
+		}());
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{a7: $author$project$Main$init, bu: $author$project$Main$subscriptions, by: $author$project$Main$update, bz: $author$project$Main$view});
@@ -7479,6 +7460,6 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 		$elm$json$Json$Decode$andThen,
 		function (lang) {
 			return $elm$json$Json$Decode$succeed(
-				{b: lang});
+				{q: lang});
 		},
 		A2($elm$json$Json$Decode$field, 'lang', $elm$json$Json$Decode$string)))(0)}});}(this));
