@@ -120,7 +120,7 @@ langToString lang =
             "English"
 
         French ->
-            "français"
+            "Français"
 
 
 getWords : Lang -> List WordToFind
@@ -160,19 +160,13 @@ validateAttempt lang word input =
             )
     in
     if List.any (Char.isAlpha >> not) inputChars then
-        "The word must contains only alphabetic characters: {0}"
-            |> translate lang [ input ]
-            |> Err
+        "Invalid word" |> translate lang [] |> Err
 
     else if List.length inputChars /= 5 then
-        "The word must be 5 letters long"
-            |> translate lang []
-            |> Err
+        "Not enough letters" |> translate lang [] |> Err
 
     else if not (List.member (normalize input) (getWords lang)) then
-        "Sorry, {0} must be a known word from our {1} dictionary"
-            |> translate lang [ input, langToString lang ]
-            |> Err
+        "Unknown word: {0}" |> translate lang [ input ] |> Err
 
     else
         wordChars
@@ -334,7 +328,9 @@ update msg model =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
-            , Cmd.batch [ defocus "btn-lang-en", defocus "btn-lang-fr" ]
+            , [ English, French ]
+                |> List.map (langBtnId >> defocus)
+                |> Cmd.batch
             )
 
         ( NewWord Nothing, Idle ) ->
@@ -606,36 +602,33 @@ viewInput input =
         |> attemptRow
 
 
+langBtnId : Lang -> String
+langBtnId =
+    langToString
+        >> String.toLower
+        >> String.toList
+        >> List.take 2
+        >> String.fromList
+        >> (++) "btn-lang-"
+
+
 selectLang : Lang -> Html Msg
 selectLang lang =
-    div [ class "nav nav-pills nav-fill" ]
-        [ li [ class "nav-item" ]
-            [ button
-                [ type_ "button"
-                , id "btn-lang-en"
-                , class "nav-link"
-                , classList [ ( "active", lang == English ) ]
-                , onClick (SwitchLang English)
-                , "Switch to {0} dictionary"
-                    |> translate lang [ langToString English ]
-                    |> title
-                ]
-                [ text "English" ]
-            ]
-        , li [ class "nav-item" ]
-            [ button
-                [ type_ "button"
-                , id "btn-lang-fr"
-                , class "nav-link"
-                , classList [ ( "active", lang == French ) ]
-                , onClick (SwitchLang French)
-                , "Switch to {0} dictionary"
-                    |> translate lang [ langToString French ]
-                    |> title
-                ]
-                [ text "Français" ]
-            ]
-        ]
+    [ English, French ]
+        |> List.map
+            (\lang_ ->
+                li [ class "nav-item" ]
+                    [ button
+                        [ type_ "button"
+                        , id (langBtnId lang_)
+                        , class "nav-link"
+                        , classList [ ( "active", lang == lang_ ) ]
+                        , onClick (SwitchLang lang_)
+                        ]
+                        [ text <| langToString lang_ ]
+                    ]
+            )
+        |> div [ class "nav nav-pills nav-fill" ]
 
 
 
@@ -783,20 +776,14 @@ translations =
         , ( "Play again"
           , "Rejouer"
           )
-        , ( "Sorry, {0} must be a known word from our {1} dictionary"
-          , "Désolé, {0} doit être un mot connu de notre dictionnaire {1}"
+        , ( "Unknown word: {0}"
+          , "Mot inconnu\u{00A0}: {0}"
           )
-        , ( "Submit"
-          , "Envoyer"
+        , ( "Not enough letters"
+          , "Mot trop court"
           )
-        , ( "Switch to {0} dictionary"
-          , "Passer au dictionnaire {0}"
-          )
-        , ( "The word must be 5 letters long"
-          , "Le mot doit contenir 5 lettres"
-          )
-        , ( "The word must contains only alphabetic characters: {0}"
-          , "Le mot ne doit contenir que des lettres alphabétiques\u{00A0}: {0}"
+        , ( "Invalid word"
+          , "Mot invalide"
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
