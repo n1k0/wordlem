@@ -436,7 +436,10 @@ isUnusedChar char letter =
 
 newGameButton : Lang -> Html Msg
 newGameButton lang =
-    button [ class "btn btn-lg btn-primary", onClick NewGame ]
+    button
+        [ class "btn btn-lg btn-primary rounded-0"
+        , onClick NewGame
+        ]
         [ "Play again"
             |> translate lang []
             |> text
@@ -446,7 +449,7 @@ newGameButton lang =
 definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
     a
-        [ class "btn btn-lg btn-info"
+        [ class "btn btn-lg btn-info rounded-0"
         , target "_blank"
         , href
             (case lang of
@@ -465,7 +468,7 @@ definitionLink lang word =
 
 endGameButtons : Lang -> WordToFind -> Html Msg
 endGameButtons lang word =
-    div [ class "btn-group w-100" ]
+    div [ class "bg-kark btn-group w-100", style "z-index" "1000" ]
         [ definitionLink lang word
         , newGameButton lang
         ]
@@ -500,51 +503,28 @@ keyState attempts char =
     )
 
 
-
--- TODO: help modal
--- viewHelp : Lang -> Html Msg
--- viewHelp lang =
---     div []
---         [ p []
---             [ "Guess a 5 letters {0} word in {1} attempts or less!"
---                 |> translate lang
---                     [ langToString lang
---                     , String.fromInt maxAttempts
---                     ]
---                 |> text
---             ]
---         , "Inspired by [Wordle]({0}) - [Source code]({1})"
---             |> translate lang
---                 [ "https://www.powerlanguage.co.uk/wordle/"
---                 , "https://github.com/n1k0/wordlem"
---                 ]
---             |> Markdown.toHtml
---                 [ class "text-center text-muted"
---                 , style "font-size" ".8em"
---                 ]
---         ]
+keyboardRow : List (Html Msg) -> Html Msg
+keyboardRow =
+    div
+        [ class "d-flex justify-content-evenly"
+        , style "gap" "1px"
+        , style "margin" "1px 0"
+        ]
 
 
 viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
-    footer
-        [ style "position" "absolute"
-        , style "bottom" "0px"
-        , style "left" "0"
-        , style "right" "0"
-        ]
-        [ dispositions lang
-            |> List.map (List.map (keyState attempts))
-            |> List.map
-                (List.map viewKeyState
-                    >> div
-                        [ class "d-flex justify-content-evenly"
-                        , style "gap" "1px"
-                        , style "margin" "1px 0"
-                        ]
-                )
-            |> div [ class "mb-2" ]
-        ]
+    dispositions lang
+        |> List.map
+            (List.map (keyState attempts >> viewKeyState)
+                >> keyboardRow
+            )
+        |> footer
+            [ style "position" "absolute"
+            , style "bottom" "5px"
+            , style "left" "0"
+            , style "right" "0"
+            ]
 
 
 viewKeyState : KeyState -> Html Msg
@@ -577,6 +557,8 @@ viewKeyState ( char, letter ) =
     button
         [ class (String.join " " [ baseClasses, classes ])
         , style "flex" "1"
+        , style "height" "10vh"
+        , style "max-height" "50px"
         , onClick msg
         ]
         [ charToText char ]
@@ -595,6 +577,7 @@ attemptRow =
         [ class "d-flex justify-content-evenly"
         , style "margin" "1px 0"
         , style "gap" "1px"
+        , style "z-index" "1000"
         ]
 
 
@@ -653,6 +636,31 @@ selectLang lang =
                 [ text "Français" ]
             ]
         ]
+
+
+
+-- TODO: help modal
+-- viewHelp : Lang -> Html Msg
+-- viewHelp lang =
+--     div []
+--         [ p []
+--             [ "Guess a 5 letters {0} word in {1} attempts or less!"
+--                 |> translate lang
+--                     [ langToString lang
+--                     , String.fromInt maxAttempts
+--                     ]
+--                 |> text
+--             ]
+--         , "Inspired by [Wordle]({0}) - [Source code]({1})"
+--             |> translate lang
+--                 [ "https://www.powerlanguage.co.uk/wordle/"
+--                 , "https://github.com/n1k0/wordlem"
+--                 ]
+--             |> Markdown.toHtml
+--                 [ class "text-center text-muted"
+--                 , style "font-size" ".8em"
+--                 ]
+--         ]
 
 
 layout : Lang -> List (Html Msg) -> Html Msg
