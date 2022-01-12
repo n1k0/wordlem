@@ -6089,6 +6089,11 @@ var $author$project$Main$checkGame = F2(
 			$elm$core$List$length(attempts),
 			$author$project$Main$maxAttempts) > -1) ? A2($author$project$Main$Lost, word, attempts) : A4($author$project$Main$Ongoing, word, attempts, '', $elm$core$Maybe$Nothing));
 	});
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $author$project$Main$NoOp = {$: 4};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
@@ -6126,7 +6131,13 @@ var $author$project$Main$defocus = function (domId) {
 			$elm$core$Process$sleep(1)));
 };
 var $elm$core$String$fromList = _String_fromList;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$langToString = function (lang) {
+	if (!lang) {
+		return 'English';
+	} else {
+		return 'Français';
+	}
+};
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -6253,6 +6264,24 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
+var $elm$core$String$toLower = _String_toLower;
+var $author$project$Main$langBtnId = A2(
+	$elm$core$Basics$composeR,
+	$author$project$Main$langToString,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm$core$String$toLower,
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$String$toList,
+			A2(
+				$elm$core$Basics$composeR,
+				$elm$core$List$take(2),
+				A2(
+					$elm$core$Basics$composeR,
+					$elm$core$String$fromList,
+					$elm$core$Basics$append('btn-lang-'))))));
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -6434,11 +6463,9 @@ var $author$project$Main$translations = $elm$core$Dict$fromList(
 			_Utils_Tuple2('Loading game…', 'Chargement du jeu…'),
 			_Utils_Tuple2('Definition', 'Définition'),
 			_Utils_Tuple2('Play again', 'Rejouer'),
-			_Utils_Tuple2('Sorry, {0} must be a known word from our {1} dictionary', 'Désolé, {0} doit être un mot connu de notre dictionnaire {1}'),
-			_Utils_Tuple2('Submit', 'Envoyer'),
-			_Utils_Tuple2('Switch to {0} dictionary', 'Passer au dictionnaire {0}'),
-			_Utils_Tuple2('The word must be 5 letters long', 'Le mot doit contenir 5 lettres'),
-			_Utils_Tuple2('The word must contains only alphabetic characters: {0}', 'Le mot ne doit contenir que des lettres alphabétiques\u00A0: {0}'),
+			_Utils_Tuple2('Unknown word: {0}', 'Mot inconnu\u00A0: {0}'),
+			_Utils_Tuple2('Not enough letters', 'Mot trop court'),
+			_Utils_Tuple2('Invalid word', 'Mot invalide'),
 			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.')
 		]));
 var $author$project$Main$translate = F3(
@@ -6454,11 +6481,6 @@ var $author$project$Main$translate = F3(
 					string,
 					A2($elm$core$Dict$get, string, $author$project$Main$translations)));
 		}
-	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
 	});
 var $author$project$Main$Handled = function (a) {
 	return {$: 3, a: a};
@@ -6557,13 +6579,6 @@ var $author$project$Main$handleMisplacedDuplicates = function (wordChars) {
 			}),
 		_List_Nil);
 };
-var $author$project$Main$langToString = function (lang) {
-	if (!lang) {
-		return 'English';
-	} else {
-		return 'français';
-	}
-};
 var $author$project$Main$Correct = function (a) {
 	return {$: 1, a: a};
 };
@@ -6648,7 +6663,6 @@ var $elm$core$String$replace = F3(
 			after,
 			A2($elm$core$String$split, before, string));
 	});
-var $elm$core$String$toLower = _String_toLower;
 var $elm$core$String$trim = _String_trim;
 var $author$project$Main$validateAttempt = F3(
 	function (lang, word, input) {
@@ -6673,13 +6687,8 @@ var $author$project$Main$validateAttempt = F3(
 			$elm$core$List$any,
 			A2($elm$core$Basics$composeR, $elm$core$Char$isAlpha, $elm$core$Basics$not),
 			inputChars) ? $elm$core$Result$Err(
-			A3(
-				$author$project$Main$translate,
-				lang,
-				_List_fromArray(
-					[input]),
-				'The word must contains only alphabetic characters: {0}')) : (($elm$core$List$length(inputChars) !== 5) ? $elm$core$Result$Err(
-			A3($author$project$Main$translate, lang, _List_Nil, 'The word must be 5 letters long')) : ((!A2(
+			A3($author$project$Main$translate, lang, _List_Nil, 'Invalid word')) : (($elm$core$List$length(inputChars) !== 5) ? $elm$core$Result$Err(
+			A3($author$project$Main$translate, lang, _List_Nil, 'Not enough letters')) : ((!A2(
 			$elm$core$List$member,
 			normalize(input),
 			$author$project$Main$getWords(lang))) ? $elm$core$Result$Err(
@@ -6687,11 +6696,8 @@ var $author$project$Main$validateAttempt = F3(
 				$author$project$Main$translate,
 				lang,
 				_List_fromArray(
-					[
-						input,
-						$author$project$Main$langToString(lang)
-					]),
-				'Sorry, {0} must be a known word from our {1} dictionary')) : $elm$core$Result$Ok(
+					[input]),
+				'Unknown word: {0}')) : $elm$core$Result$Ok(
 			A2(
 				$author$project$Main$handleMisplacedDuplicates,
 				wordChars,
@@ -6782,11 +6788,11 @@ var $author$project$Main$update = F2(
 											p: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 										}),
 									$elm$core$Platform$Cmd$batch(
-										_List_fromArray(
-											[
-												$author$project$Main$defocus('btn-lang-en'),
-												$author$project$Main$defocus('btn-lang-fr')
-											])));
+										A2(
+											$elm$core$List$map,
+											A2($elm$core$Basics$composeR, $author$project$Main$langBtnId, $author$project$Main$defocus),
+											_List_fromArray(
+												[0, 1]))));
 							} else {
 								break _v0$10;
 							}
@@ -7008,7 +7014,6 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 };
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$html$Html$li = _VirtualDom_node('li');
-var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Main$selectLang = function (lang) {
 	return A2(
@@ -7017,83 +7022,44 @@ var $author$project$Main$selectLang = function (lang) {
 			[
 				$elm$html$Html$Attributes$class('nav nav-pills nav-fill')
 			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$li,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('nav-item')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$type_('button'),
-								$elm$html$Html$Attributes$id('btn-lang-en'),
-								$elm$html$Html$Attributes$class('nav-link'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2('active', !lang)
-									])),
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$SwitchLang(0)),
-								$elm$html$Html$Attributes$title(
-								A3(
-									$author$project$Main$translate,
-									lang,
+		A2(
+			$elm$core$List$map,
+			function (lang_) {
+				return A2(
+					$elm$html$Html$li,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nav-item')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$type_('button'),
+									$elm$html$Html$Attributes$id(
+									$author$project$Main$langBtnId(lang_)),
+									$elm$html$Html$Attributes$class('nav-link'),
+									$elm$html$Html$Attributes$classList(
 									_List_fromArray(
 										[
-											$author$project$Main$langToString(0)
-										]),
-									'Switch to {0} dictionary'))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('English')
-							]))
-					])),
-				A2(
-				$elm$html$Html$li,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('nav-item')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$type_('button'),
-								$elm$html$Html$Attributes$id('btn-lang-fr'),
-								$elm$html$Html$Attributes$class('nav-link'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2('active', lang === 1)
-									])),
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$SwitchLang(1)),
-								$elm$html$Html$Attributes$title(
-								A3(
-									$author$project$Main$translate,
-									lang,
-									_List_fromArray(
-										[
-											$author$project$Main$langToString(1)
-										]),
-									'Switch to {0} dictionary'))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Français')
-							]))
-					]))
-			]));
+											_Utils_Tuple2(
+											'active',
+											_Utils_eq(lang, lang_))
+										])),
+									$elm$html$Html$Events$onClick(
+									$author$project$Main$SwitchLang(lang_))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(
+									$author$project$Main$langToString(lang_))
+								]))
+						]));
+			},
+			_List_fromArray(
+				[0, 1])));
 };
 var $author$project$Main$layout = F2(
 	function (lang, content) {
