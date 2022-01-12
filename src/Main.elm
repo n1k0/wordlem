@@ -413,7 +413,7 @@ letterIs build char =
 newGameButton : Lang -> Html Msg
 newGameButton lang =
     button
-        [ class "btn btn-lg btn-primary rounded-0"
+        [ class "btn btn-lg btn-primary"
         , onClick NewGame
         ]
         [ "Play again"
@@ -425,7 +425,7 @@ newGameButton lang =
 definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
     a
-        [ class "btn btn-lg btn-info rounded-0"
+        [ class "btn btn-lg btn-info"
         , target "_blank"
         , href
             (case lang of
@@ -444,7 +444,7 @@ definitionLink lang word =
 
 endGameButtons : Lang -> WordToFind -> Html Msg
 endGameButtons lang word =
-    div [ class "bg-kark btn-group w-100" ]
+    div [ class "EndGameButtons bg-dark btn-group" ]
         [ definitionLink lang word
         , newGameButton lang
         ]
