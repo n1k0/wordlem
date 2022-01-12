@@ -1,5 +1,7 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
+-- import Markdown
+
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
@@ -9,7 +11,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import List.Extra as LE
-import Markdown
 import Process
 import Random
 import String.Extra as SE
@@ -435,7 +436,7 @@ isUnusedChar char letter =
 
 newGameButton : Lang -> Html Msg
 newGameButton lang =
-    button [ class "btn btn-primary", onClick NewGame ]
+    button [ class "btn btn-lg btn-primary", onClick NewGame ]
         [ "Play again"
             |> translate lang []
             |> text
@@ -445,7 +446,7 @@ newGameButton lang =
 definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
     a
-        [ class "btn btn-info"
+        [ class "btn btn-lg btn-info"
         , target "_blank"
         , href
             (case lang of
@@ -499,32 +500,39 @@ keyState attempts char =
     )
 
 
-viewHelp : Lang -> Html Msg
-viewHelp lang =
-    div []
-        [ p []
-            [ "Guess a 5 letters {0} word in {1} attempts or less!"
-                |> translate lang
-                    [ langToString lang
-                    , String.fromInt maxAttempts
-                    ]
-                |> text
-            ]
-        , "Inspired by [Wordle]({0}) - [Source code]({1})"
-            |> translate lang
-                [ "https://www.powerlanguage.co.uk/wordle/"
-                , "https://github.com/n1k0/wordlem"
-                ]
-            |> Markdown.toHtml
-                [ class "text-center text-muted"
-                , style "font-size" ".8em"
-                ]
-        ]
+
+-- TODO: help modal
+-- viewHelp : Lang -> Html Msg
+-- viewHelp lang =
+--     div []
+--         [ p []
+--             [ "Guess a 5 letters {0} word in {1} attempts or less!"
+--                 |> translate lang
+--                     [ langToString lang
+--                     , String.fromInt maxAttempts
+--                     ]
+--                 |> text
+--             ]
+--         , "Inspired by [Wordle]({0}) - [Source code]({1})"
+--             |> translate lang
+--                 [ "https://www.powerlanguage.co.uk/wordle/"
+--                 , "https://github.com/n1k0/wordlem"
+--                 ]
+--             |> Markdown.toHtml
+--                 [ class "text-center text-muted"
+--                 , style "font-size" ".8em"
+--                 ]
+--         ]
 
 
 viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
-    footer [ class "fixed-bottom" ]
+    footer
+        [ style "position" "absolute"
+        , style "bottom" "0px"
+        , style "left" "0"
+        , style "right" "0"
+        ]
         [ dispositions lang
             |> List.map (List.map (keyState attempts))
             |> List.map
@@ -594,7 +602,8 @@ letterSpot : String -> Char -> Html Msg
 letterSpot classes char =
     div
         [ class classes
-        , class "py-1 fs-2 text-center"
+        , class "fs-2 text-center"
+        , style "padding" "3px 0"
         , style "flex" "1"
         ]
         [ charToText char ]
@@ -649,7 +658,7 @@ selectLang lang =
 layout : Lang -> List (Html Msg) -> Html Msg
 layout lang content =
     div [ class "game container" ]
-        [ div [ class "d-flex justify-content-between align-items-center my-3" ]
+        [ div [ class "d-flex justify-content-between align-items-center my-2" ]
             [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
             , selectLang lang
             ]
@@ -672,6 +681,14 @@ alert message =
         [ text message ]
 
 
+gameLayout : List (Html Msg) -> Html Msg
+gameLayout =
+    div
+        [ style "position" "relative"
+        , style "height" "calc(100% - 60px)"
+        ]
+
+
 view : Model -> Html Msg
 view model =
     layout model.lang
@@ -690,13 +707,14 @@ view model =
                     ]
 
             Won word attempts ->
-                div []
+                gameLayout
                     [ viewAttempts attempts
                     , endGameButtons model.lang word
+                    , viewKeyboard model.lang attempts
                     ]
 
             Lost word attempts ->
-                div []
+                gameLayout
                     [ viewAttempts attempts
                     , word
                         |> String.toList
@@ -708,7 +726,7 @@ view model =
                     ]
 
             Ongoing _ attempts input error ->
-                div []
+                gameLayout
                     [ viewAttempts attempts
                     , viewInput input
                     , error |> Maybe.map alert |> Maybe.withDefault (text "")
