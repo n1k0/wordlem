@@ -402,7 +402,18 @@ viewAttempt =
                 Handled char ->
                     letterSpot "bg-secondary" char
         )
-        >> div [ class "BoardRow" ]
+        >> boardRow
+
+
+boardRow : List (Html Msg) -> Html Msg
+boardRow =
+    div
+        [ class "BoardRow"
+        , style "grid-template-columns"
+            (interpolate "repeat({0}, 1fr)"
+                [ String.fromInt numberOfLetters ]
+            )
+        ]
 
 
 letterIs : (Char -> Letter) -> Char -> Letter -> Bool
@@ -547,7 +558,18 @@ viewBoard input attempts =
           ]
             |> List.concat
             |> List.filterMap identity
-            |> div [ class "Board" ]
+            |> boardElement
+        ]
+
+
+boardElement : List (Html Msg) -> Html Msg
+boardElement =
+    div
+        [ class "Board"
+        , style "grid-template-rows"
+            (interpolate "repeat({0}, 1fr)"
+                [ String.fromInt maxAttempts ]
+            )
         ]
 
 
@@ -569,7 +591,7 @@ viewInput input =
     in
     spots
         |> List.map (letterSpot "bg-secondary")
-        |> div [ class "BoardRow" ]
+        |> boardRow
 
 
 langBtnId : Lang -> String

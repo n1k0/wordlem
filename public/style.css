@@ -16,8 +16,8 @@
 }
 
 .Board {
+  /* Note: grid-template-columns is handled programmatically in Elm land */
   display: grid;
-  grid-template-rows: repeat(6, 1fr);
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
@@ -27,8 +27,8 @@
 }
 
 .BoardRow {
+  /* Note: grid-template-columns is handled programmatically in Elm land */
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   grid-gap: 5px;
 }
 
