@@ -36,9 +36,11 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  font-weight: 500;
   font-size: 1.5rem;
   line-height: 1.5rem;
   user-select: none;
+  padding: unset;
 }
 
 .BoardTile::before {

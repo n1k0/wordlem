@@ -153,11 +153,7 @@ validateAttempt : Lang -> WordToFind -> UserInput -> Result String Attempt
 validateAttempt lang word input =
     let
         normalize =
-            String.toLower
-                >> String.trim
-                >> SE.removeAccents
-                -- French being French…
-                >> String.replace "œ" "oe"
+            String.toLower >> SE.removeAccents
 
         ( wordChars, inputChars ) =
             ( String.toList (normalize word)
@@ -391,22 +387,22 @@ viewAttempt =
         (\letter ->
             case letter of
                 Misplaced char ->
-                    letterSpot "bg-warning" char
+                    viewTile "btn-warning" char
 
                 Correct char ->
-                    letterSpot "bg-success" char
+                    viewTile "btn-success" char
 
                 Unused char ->
-                    letterSpot "bg-dark text-light" char
+                    viewTile "btn-dark" char
 
                 Handled char ->
-                    letterSpot "bg-secondary" char
+                    viewTile "btn-secondary" char
         )
-        >> boardRow
+        >> viewBoardRow
 
 
-boardRow : List (Html Msg) -> Html Msg
-boardRow =
+viewBoardRow : List (Html Msg) -> Html Msg
+viewBoardRow =
     div
         [ class "BoardRow"
         , style "grid-template-columns"
@@ -455,7 +451,7 @@ definitionLink lang word =
 
 endGameButtons : Lang -> WordToFind -> Html Msg
 endGameButtons lang word =
-    div [ class "EndGameButtons bg-dark btn-group" ]
+    div [ class "EndGameButtons btn-group" ]
         [ definitionLink lang word
         , newGameButton lang
         ]
@@ -494,8 +490,8 @@ viewKeyboard : Lang -> List Attempt -> Html Msg
 viewKeyboard lang attempts =
     dispositions lang
         |> List.map
-            (List.map (keyState attempts >> viewKeyState)
-                >> div [ class "KeyboardRow" ]
+            (div [ class "KeyboardRow" ]
+                << List.map (keyState attempts >> viewKeyState)
             )
         |> footer [ class "Keyboard" ]
 
@@ -558,12 +554,12 @@ viewBoard input attempts =
           ]
             |> List.concat
             |> List.filterMap identity
-            |> boardElement
+            |> viewBoardElement
         ]
 
 
-boardElement : List (Html Msg) -> Html Msg
-boardElement =
+viewBoardElement : List (Html Msg) -> Html Msg
+viewBoardElement =
     div
         [ class "Board"
         , style "grid-template-rows"
@@ -573,10 +569,10 @@ boardElement =
         ]
 
 
-letterSpot : String -> Char -> Html Msg
-letterSpot classes char =
+viewTile : String -> Char -> Html Msg
+viewTile classes char =
     div
-        [ class <| "BoardTile " ++ classes ]
+        [ class <| "btn BoardTile rounded-0 " ++ classes ]
         [ charToText char ]
 
 
@@ -590,8 +586,8 @@ viewInput input =
             chars ++ LE.initialize (numberOfLetters - List.length chars) (always '\u{00A0}')
     in
     spots
-        |> List.map (letterSpot "bg-secondary")
-        |> boardRow
+        |> List.map (viewTile "btn-secondary")
+        |> viewBoardRow
 
 
 langBtnId : Lang -> String
