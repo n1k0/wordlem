@@ -6644,27 +6644,10 @@ var $elm_community$string_extra$String$Extra$removeAccents = function (string) {
 		return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
 	}
 };
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
-		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
-	});
 var $elm$core$String$toUpper = _String_toUpper;
-var $elm$core$String$trim = _String_trim;
 var $author$project$Main$validateAttempt = F3(
 	function (lang, word, input) {
-		var normalize = A2(
-			$elm$core$Basics$composeR,
-			$elm$core$String$toLower,
-			A2(
-				$elm$core$Basics$composeR,
-				$elm$core$String$trim,
-				A2(
-					$elm$core$Basics$composeR,
-					$elm_community$string_extra$String$Extra$removeAccents,
-					A2($elm$core$String$replace, 'œ', 'oe'))));
+		var normalize = A2($elm$core$Basics$composeR, $elm$core$String$toLower, $elm_community$string_extra$String$Extra$removeAccents);
 		var _v0 = _Utils_Tuple2(
 			$elm$core$String$toList(
 				normalize(word)),
@@ -6966,7 +6949,7 @@ var $author$project$Main$endGameButtons = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('EndGameButtons bg-dark btn-group')
+					$elm$html$Html$Attributes$class('EndGameButtons btn-group')
 				]),
 			_List_fromArray(
 				[
@@ -7085,23 +7068,6 @@ var $elm$core$Maybe$map = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $author$project$Main$boardElement = $elm$html$Html$div(
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('Board'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'grid-template-rows',
-			A2(
-				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
-				'repeat({0}, 1fr)',
-				_List_fromArray(
-					[
-						$elm$core$String$fromInt($author$project$Main$maxAttempts)
-					])))
-		]));
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -7134,7 +7100,9 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var $author$project$Main$boardRow = $elm$html$Html$div(
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Main$viewBoardRow = $elm$html$Html$div(
 	_List_fromArray(
 		[
 			$elm$html$Html$Attributes$class('BoardRow'),
@@ -7161,13 +7129,13 @@ var $author$project$Main$charToText = A2(
 		$elm$core$Basics$composeR,
 		$elm$core$List$singleton,
 		A2($elm$core$Basics$composeR, $elm$core$String$fromList, $elm$html$Html$text)));
-var $author$project$Main$letterSpot = F2(
+var $author$project$Main$viewTile = F2(
 	function (classes, _char) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('BoardTile ' + classes)
+					$elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
 				]),
 			_List_fromArray(
 				[
@@ -7181,19 +7149,34 @@ var $author$project$Main$viewAttempt = A2(
 			switch (letter.$) {
 				case 2:
 					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-warning', _char);
+					return A2($author$project$Main$viewTile, 'btn-warning', _char);
 				case 1:
 					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-success', _char);
+					return A2($author$project$Main$viewTile, 'btn-success', _char);
 				case 0:
 					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-dark text-light', _char);
+					return A2($author$project$Main$viewTile, 'btn-dark', _char);
 				default:
 					var _char = letter.a;
-					return A2($author$project$Main$letterSpot, 'bg-secondary', _char);
+					return A2($author$project$Main$viewTile, 'btn-secondary', _char);
 			}
 		}),
-	$author$project$Main$boardRow);
+	$author$project$Main$viewBoardRow);
+var $author$project$Main$viewBoardElement = $elm$html$Html$div(
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('Board'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'grid-template-rows',
+			A2(
+				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+				'repeat({0}, 1fr)',
+				_List_fromArray(
+					[
+						$elm$core$String$fromInt($author$project$Main$maxAttempts)
+					])))
+		]));
 var $elm_community$list_extra$List$Extra$initialize = F2(
 	function (n, f) {
 		var step = F2(
@@ -7224,10 +7207,10 @@ var $author$project$Main$viewInput = function (input) {
 			$elm_community$list_extra$List$Extra$initialize,
 			$author$project$Main$numberOfLetters - $elm$core$List$length(chars),
 			$elm$core$Basics$always('\u00A0')));
-	return $author$project$Main$boardRow(
+	return $author$project$Main$viewBoardRow(
 		A2(
 			$elm$core$List$map,
-			$author$project$Main$letterSpot('bg-secondary'),
+			$author$project$Main$viewTile('btn-secondary'),
 			spots));
 };
 var $author$project$Main$viewBoard = F2(
@@ -7247,7 +7230,7 @@ var $author$project$Main$viewBoard = F2(
 				]),
 			_List_fromArray(
 				[
-					$author$project$Main$boardElement(
+					$author$project$Main$viewBoardElement(
 					A2(
 						$elm$core$List$filterMap,
 						$elm$core$Basics$identity,
@@ -7372,17 +7355,17 @@ var $author$project$Main$viewKeyboard = F2(
 			A2(
 				$elm$core$List$map,
 				A2(
-					$elm$core$Basics$composeR,
-					$elm$core$List$map(
-						A2(
-							$elm$core$Basics$composeR,
-							$author$project$Main$keyState(attempts),
-							$author$project$Main$viewKeyState)),
+					$elm$core$Basics$composeL,
 					$elm$html$Html$div(
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$class('KeyboardRow')
-							]))),
+							])),
+					$elm$core$List$map(
+						A2(
+							$elm$core$Basics$composeR,
+							$author$project$Main$keyState(attempts),
+							$author$project$Main$viewKeyState))),
 				$author$project$Main$dispositions(lang)));
 	});
 var $author$project$Main$view = function (_v0) {
