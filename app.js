@@ -6904,7 +6904,7 @@ var $author$project$Main$definitionLink = F2(
 			$elm$html$Html$a,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('btn btn-lg btn-info rounded-0'),
+					$elm$html$Html$Attributes$class('btn btn-lg btn-info'),
 					$elm$html$Html$Attributes$target('_blank'),
 					$elm$html$Html$Attributes$href(
 					function () {
@@ -6951,7 +6951,7 @@ var $author$project$Main$newGameButton = function (lang) {
 		$elm$html$Html$button,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('btn btn-lg btn-primary rounded-0'),
+				$elm$html$Html$Attributes$class('btn btn-lg btn-primary'),
 				$elm$html$Html$Events$onClick($author$project$Main$NewGame)
 			]),
 		_List_fromArray(
@@ -6966,7 +6966,7 @@ var $author$project$Main$endGameButtons = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('bg-kark btn-group w-100')
+					$elm$html$Html$Attributes$class('EndGameButtons bg-dark btn-group')
 				]),
 			_List_fromArray(
 				[
@@ -7085,6 +7085,23 @@ var $elm$core$Maybe$map = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Main$boardElement = $elm$html$Html$div(
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('Board'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'grid-template-rows',
+			A2(
+				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+				'repeat({0}, 1fr)',
+				_List_fromArray(
+					[
+						$elm$core$String$fromInt($author$project$Main$maxAttempts)
+					])))
+		]));
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -7117,6 +7134,21 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
+var $author$project$Main$boardRow = $elm$html$Html$div(
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('BoardRow'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'grid-template-columns',
+			A2(
+				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+				'repeat({0}, 1fr)',
+				_List_fromArray(
+					[
+						$elm$core$String$fromInt($author$project$Main$numberOfLetters)
+					])))
+		]));
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
 		[value]);
@@ -7161,11 +7193,7 @@ var $author$project$Main$viewAttempt = A2(
 					return A2($author$project$Main$letterSpot, 'bg-secondary', _char);
 			}
 		}),
-	$elm$html$Html$div(
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('BoardRow')
-			])));
+	$author$project$Main$boardRow);
 var $elm_community$list_extra$List$Extra$initialize = F2(
 	function (n, f) {
 		var step = F2(
@@ -7196,12 +7224,7 @@ var $author$project$Main$viewInput = function (input) {
 			$elm_community$list_extra$List$Extra$initialize,
 			$author$project$Main$numberOfLetters - $elm$core$List$length(chars),
 			$elm$core$Basics$always('\u00A0')));
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('BoardRow')
-			]),
+	return $author$project$Main$boardRow(
 		A2(
 			$elm$core$List$map,
 			$author$project$Main$letterSpot('bg-secondary'),
@@ -7224,12 +7247,7 @@ var $author$project$Main$viewBoard = F2(
 				]),
 			_List_fromArray(
 				[
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('Board')
-						]),
+					$author$project$Main$boardElement(
 					A2(
 						$elm$core$List$filterMap,
 						$elm$core$Basics$identity,
