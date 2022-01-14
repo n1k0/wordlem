@@ -189,7 +189,9 @@ initialModel store =
     { store = store
     , words = getWords store.lang
     , state = Idle
-    , modal = Nothing
+
+    -- , modal = Nothing
+    , modal = Just StatsModal
     , time = Time.millisToPosix 0
     , menuOpened = False
     }
@@ -797,19 +799,14 @@ viewHelp { lang } =
     ]
 
 
-viewStats : Store -> List (Html Msg)
-viewStats { lang, logs } =
-    case logs of
-        [] ->
-            [ "No game data yet" |> translate lang [] |> text ]
-
-        logs_ ->
-            [ viewStatsTable lang logs_ ]
+formatFloat : Int -> Float -> String
+formatFloat decimals =
+    FormatNumber.format { frenchLocale | decimals = Exact decimals }
 
 
 formatPercent : Float -> String
 formatPercent float =
-    FormatNumber.format { frenchLocale | decimals = Exact 2 } float ++ "%"
+    formatFloat 0 float ++ "%"
 
 
 progressBar : Float -> Html Msg
@@ -824,17 +821,46 @@ progressBar percent =
         ]
 
 
-viewStatsTable : Lang -> List Log -> Html Msg
-viewStatsTable lang logs =
+viewStats : Store -> List (Html Msg)
+viewStats { lang, logs } =
+    case List.filter (.lang >> (==) lang) logs of
+        [] ->
+            [ "You haven't played in {0} yet, so I can't render any stats."
+                |> translate lang [ langToString lang ]
+                |> text
+            ]
+
+        logs_ ->
+            viewLangStats lang logs_
+
+
+viewLangStats : Lang -> List Log -> List (Html Msg)
+viewLangStats lang langLogs =
     let
+        onlyVictories =
+            List.filter .victory
+
+        totalPlayed =
+            List.length langLogs
+
         totalWins =
-            logs |> List.filter .victory |> List.length
+            List.length (onlyVictories langLogs)
+
+        percentWin =
+            toFloat totalWins / toFloat totalPlayed * 100
+
+        totalGuesses =
+            langLogs |> onlyVictories |> List.map .guesses |> List.sum
+
+        guessAvg =
+            toFloat totalGuesses / toFloat totalWins
 
         row nbGuess =
             let
                 wins =
-                    logs
-                        |> List.filter (\{ victory, guesses } -> victory && guesses == nbGuess)
+                    langLogs
+                        |> onlyVictories
+                        |> List.filter (.guesses >> (==) nbGuess)
                         |> List.length
 
                 percent =
@@ -847,14 +873,39 @@ viewStatsTable lang logs =
                 , td [ class "w-100" ] [ progressBar percent ]
                 ]
     in
-    div [ class "table-responsive" ]
-        [ h2 [ class "fs-5" ] [ "Guess distribution" |> translate lang [] |> text ]
+    [ div [ class "card-group mb-3" ]
+        [ div [ class "card py-0" ]
+            [ div [ class "card-body text-center" ]
+                [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
+                , small [] [ "games played" |> translate lang [] |> text ]
+                ]
+            ]
+        , div [ class "card py-0" ]
+            [ div [ class "card-body text-center" ]
+                [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
+                , small [] [ "win rate" |> translate lang [] |> text ]
+                ]
+            ]
+        , div [ class "card py-0" ]
+            [ div [ class "card-body text-center" ]
+                [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
+                , small [] [ "average guesses" |> translate lang [] |> text ]
+                ]
+            ]
+        ]
+    , div [ class "table-responsive" ]
+        [ h2 [ class "fs-5" ]
+            [ "Guess distribution ({0})"
+                |> translate lang [ langToString lang ]
+                |> text
+            ]
         , table [ class "table" ]
             [ List.range 1 6
                 |> List.map row
                 |> tbody []
             ]
         ]
+    ]
 
 
 layout : Model -> List (Html Msg) -> Html Msg
@@ -1153,6 +1204,9 @@ translations =
         , ( "{0} is unused"
           , "{0} n'est pas utilisée"
           )
+        , ( "average guesses"
+          , "essais en moyenne"
+          )
         , ( "Definition"
           , "Définition"
           )
@@ -1168,8 +1222,8 @@ translations =
         , ( "Guess a {0} letters {1} word in {2} guesses or less."
           , "Devinez un mot {1} de {0} lettres en {2} essais ou moins."
           )
-        , ( "Guess distribution"
-          , "Distribution des scores"
+        , ( "Guess distribution ({0})"
+          , "Distribution des scores ({0})"
           )
         , ( "Help"
           , "Aide"
@@ -1212,6 +1266,12 @@ translations =
           )
         , ( "Well done!"
           , "Bien joué\u{00A0}!"
+          )
+        , ( "win rate"
+          , "de parties gagnées"
+          )
+        , ( "You haven't played in {0} yet, so I can't render any stats."
+          , "Vous n'avez pas encore joué en {0}, je ne peux pas afficher de statistiques."
           )
         ]
 
