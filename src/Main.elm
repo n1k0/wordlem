@@ -79,6 +79,7 @@ type Letter
 
 type Modal
     = HelpModal
+    | StatsModal
 
 
 type alias KeyState =
@@ -725,8 +726,8 @@ attemptDescription lang =
         )
 
 
-viewHelp : Lang -> List (Html Msg)
-viewHelp lang =
+viewHelp : Store -> List (Html Msg)
+viewHelp { lang } =
     let
         demo =
             [ Correct 'm'
@@ -769,6 +770,11 @@ viewHelp lang =
     ]
 
 
+viewStats : Store -> List (Html Msg)
+viewStats { lang } =
+    [ text "stats" ]
+
+
 layout : Model -> List (Html Msg) -> Html Msg
 layout { store, modal } content =
     div []
@@ -776,6 +782,12 @@ layout { store, modal } content =
             (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
                 [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
                 , selectLang store.lang
+                , button
+                    [ class "btn btn-sm btn-dark fw-bold rounded-circle"
+                    , title "Stats"
+                    , onClick (OpenModal StatsModal)
+                    ]
+                    [ text "\u{00A0}🏆\u{00A0}" ]
                 , button
                     [ class "btn btn-sm btn-dark fw-bold rounded-circle"
                     , title "Help"
@@ -787,7 +799,10 @@ layout { store, modal } content =
             )
         , case modal of
             Just HelpModal ->
-                viewModal store.lang (viewHelp store.lang)
+                viewModal store "Help" (viewHelp store)
+
+            Just StatsModal ->
+                viewModal store "Stats" (viewStats store)
 
             Nothing ->
                 text ""
@@ -801,8 +816,8 @@ alert level message =
         [ text message ]
 
 
-viewModal : Lang -> List (Html Msg) -> Html Msg
-viewModal lang content =
+viewModal : Store -> String -> List (Html Msg) -> Html Msg
+viewModal { lang } title content =
     let
         modalContentAttrs =
             [ class "modal-content"
@@ -836,7 +851,7 @@ viewModal lang content =
                 [ div modalContentAttrs
                     [ div [ class "modal-header" ]
                         [ h6 [ class "modal-title" ]
-                            [ "Help" |> translate lang [] |> text ]
+                            [ title |> translate lang [] |> text ]
                         , button
                             [ type_ "button"
                             , class "btn-close"
@@ -1003,6 +1018,9 @@ translations =
           )
         , ( "Not enough letters"
           , "Mot trop court"
+          )
+        , ( "Stats"
+          , "Statistiques"
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
