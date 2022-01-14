@@ -189,9 +189,7 @@ initialModel store =
     { store = store
     , words = getWords store.lang
     , state = Idle
-
-    -- , modal = Nothing
-    , modal = Just StatsModal
+    , modal = Nothing
     , time = Time.millisToPosix 0
     , menuOpened = False
     }

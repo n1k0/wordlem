@@ -25,7 +25,7 @@
       node: document.getElementById("app"),
       flags: {
         lang: navigator.language || "en",
-        rawStore: localStorage[storeKey] || ""
+        rawStore: localStorage[storeKey] || JSON.stringify({lang: "en", logs: []})
       }
     });
     app.ports.saveStore.subscribe((rawStore) => {
