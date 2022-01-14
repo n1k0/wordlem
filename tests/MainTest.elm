@@ -13,33 +13,33 @@ asTest label =
 suite : Test
 suite =
     describe "Main"
-        [ describe "validateAttempt"
+        [ describe "validateGuess"
             [ describe "Error handling"
-                [ validateAttempt French "voila" "air"
+                [ validateGuess French "voila" "air"
                     |> Expect.err
                     |> asTest "should validate attempt length"
-                , validateAttempt French "voila" "12a45"
+                , validateGuess French "voila" "12a45"
                     |> Expect.err
                     |> asTest "should validate attempt contains letters"
-                , validateAttempt French "voila" "xxxxx"
+                , validateGuess French "voila" "xxxxx"
                     |> Expect.err
                     |> asTest "should validate attempt is an existing word"
                 ]
             , describe "Letters state handling"
-                [ validateAttempt French "epees" "evier"
+                [ validateGuess French "epees" "evier"
                     |> Expect.equal (Ok [ c 'e', u 'v', u 'i', c 'e', u 'r' ])
                     |> asTest "should validate a word"
-                , validateAttempt French "titra" "traca"
+                , validateGuess French "titra" "traca"
                     |> Expect.equal (Ok [ c 't', m 'r', h 'a', u 'c', c 'a' ])
                     |> asTest "should avoid duplicating correct letters as misplaced"
-                , validateAttempt French "ladre" "agaça"
+                , validateGuess French "ladre" "agaça"
                     -- https://twitter.com/signap/status/1480099023440826370
                     |> Expect.equal (Ok [ m 'a', u 'g', h 'a', u 'c', h 'a' ])
                     |> asTest "should avoid duplicating misplaced letters (3 dupes)"
-                , validateAttempt French "ladre" "placa"
+                , validateGuess French "ladre" "placa"
                     |> Expect.equal (Ok [ u 'p', m 'l', m 'a', u 'c', h 'a' ])
                     |> asTest "should avoid duplicating misplaced letters (2 dupes)"
-                , validateAttempt French "envie" "génie"
+                , validateGuess French "envie" "génie"
                     |> Expect.equal (Ok [ u 'g', m 'e', m 'n', c 'i', c 'e' ])
                     |> asTest "should avoid duplicating misplaced letters (2 dupes, bis)"
                 ]

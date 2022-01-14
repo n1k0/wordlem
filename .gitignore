@@ -2,3 +2,7 @@ build
 elm-stuff
 node_modules
 public/app.js
+public/icomoon/*.txt
+public/icomoon/demo-files
+public/icomoon/demo-files
+public/icomoon/demo.html

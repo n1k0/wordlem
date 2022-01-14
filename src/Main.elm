@@ -4,13 +4,15 @@ port module Main exposing
     , main
     , saveStore
     , storeChanged
-    , validateAttempt
+    , validateGuess
     )
 
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
 import Dict exposing (Dict)
+import FormatNumber
+import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -44,7 +46,7 @@ type alias Log =
     , lang : Lang
     , word : WordToFind
     , victory : Bool
-    , attempts : Int
+    , guesses : Int
     }
 
 
@@ -64,10 +66,10 @@ type alias Model =
 
 type GameState
     = Idle
-    | Errored String
-    | Ongoing WordToFind (List Attempt) UserInput (Maybe AttemptError)
-    | Lost WordToFind (List Attempt)
-    | Won WordToFind (List Attempt)
+    | Errored Error
+    | Ongoing WordToFind (List Guess) UserInput (Maybe AttemptError)
+    | Lost WordToFind (List Guess)
+    | Won WordToFind (List Guess)
 
 
 type Letter
@@ -82,11 +84,17 @@ type Modal
     | StatsModal
 
 
+type Error
+    = DecodeError String
+    | LoadError
+    | StateError
+
+
 type alias KeyState =
     ( Char, Maybe Letter )
 
 
-type alias Attempt =
+type alias Guess =
     List Letter
 
 
@@ -142,13 +150,35 @@ init flags =
         store =
             flags.rawStore
                 |> Decode.decodeString decodeStore
-                |> Result.withDefault (defaultStore lang)
 
-        model =
-            initialModel store
+        ( model, cmds ) =
+            case store of
+                Ok store_ ->
+                    ( initialModel store_, Cmd.none )
+
+                Err error ->
+                    let
+                        newStore =
+                            defaultStore lang
+
+                        newModel =
+                            initialModel newStore
+                    in
+                    ( { newModel
+                        | state =
+                            error
+                                |> Decode.errorToString
+                                |> DecodeError
+                                |> Errored
+                      }
+                    , newStore |> encodeStore |> Encode.encode 0 |> saveStore
+                    )
     in
     ( model
-    , Random.generate NewWord (randomWord model.words)
+    , Cmd.batch
+        [ Random.generate NewWord (randomWord model.words)
+        , cmds
+        ]
     )
 
 
@@ -212,8 +242,8 @@ randomWord words =
             )
 
 
-validateAttempt : Lang -> WordToFind -> UserInput -> Result String Attempt
-validateAttempt lang word input =
+validateGuess : Lang -> WordToFind -> UserInput -> Result String Guess
+validateGuess lang word input =
     let
         normalize =
             String.toLower >> SE.removeAccents
@@ -250,11 +280,11 @@ mapChars wordChars inputChar wordChar =
 
 
 {-| Find correctly placed letters; for each, if there's only one occurence in the word,
-then check for misplaced same letter in the attempt and mark them as Handled.
+then check for misplaced same letter in the guess and mark them as Handled.
 -}
-handleCorrectDuplicates : List Char -> Attempt -> Attempt
-handleCorrectDuplicates wordChars attempt =
-    attempt
+handleCorrectDuplicates : List Char -> Guess -> Guess
+handleCorrectDuplicates wordChars guess =
+    guess
         |> List.map
             (\letter ->
                 case letter of
@@ -264,7 +294,7 @@ handleCorrectDuplicates wordChars attempt =
                                 ( -- count number of this char in target word
                                   List.length (List.filter ((==) c) wordChars)
                                   -- number of already correct char for
-                                , List.length (List.filter (letterIs Correct c) attempt)
+                                , List.length (List.filter (letterIs Correct c) guess)
                                 )
                         in
                         if nbCorrectInAttempt >= nbCharsInWord then
@@ -279,10 +309,10 @@ handleCorrectDuplicates wordChars attempt =
             )
 
 
-{-| If a word contains a single A, and you provide an attempt with 3 As, you'll have 3
+{-| If a word contains a single A, and you provide an guess with 3 As, you'll have 3
 misplaced As while we only want one, ideally the first one, with others marked as Handled.
 -}
-handleMisplacedDuplicates : List Char -> Attempt -> Attempt
+handleMisplacedDuplicates : List Char -> Guess -> Guess
 handleMisplacedDuplicates wordChars =
     List.foldl
         (\letter acc ->
@@ -309,9 +339,9 @@ handleMisplacedDuplicates wordChars =
         []
 
 
-hasWon : List Attempt -> Bool
-hasWon attempts =
-    case attempts of
+hasWon : List Guess -> Bool
+hasWon guesses =
+    case guesses of
         [] ->
             False
 
@@ -328,16 +358,16 @@ hasWon attempts =
                 last
 
 
-checkGame : WordToFind -> List Attempt -> GameState
-checkGame word attempts =
-    if hasWon attempts then
-        Won word attempts
+checkGame : WordToFind -> List Guess -> GameState
+checkGame word guesses =
+    if hasWon guesses then
+        Won word guesses
 
-    else if List.length attempts >= maxAttempts then
-        Lost word attempts
+    else if List.length guesses >= maxAttempts then
+        Lost word guesses
 
     else
-        Ongoing word attempts "" Nothing
+        Ongoing word guesses "" Nothing
 
 
 defocus : String -> Cmd Msg
@@ -350,7 +380,7 @@ defocus domId =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
-        ( BackSpace, Ongoing word attempts input _ ) ->
+        ( BackSpace, Ongoing word guesses input _ ) ->
             let
                 newInput =
                     String.toList input
@@ -359,7 +389,7 @@ update msg ({ store } as model) =
                         |> List.reverse
                         |> String.fromList
             in
-            ( { model | state = Ongoing word attempts newInput Nothing }
+            ( { model | state = Ongoing word guesses newInput Nothing }
             , Cmd.none
             )
 
@@ -369,7 +399,7 @@ update msg ({ store } as model) =
         ( CloseModal, _ ) ->
             ( { model | modal = Nothing }, Cmd.none )
 
-        ( KeyPressed char, Ongoing word attempts input _ ) ->
+        ( KeyPressed char, Ongoing word guesses input _ ) ->
             let
                 newInput =
                     String.toList input
@@ -377,7 +407,7 @@ update msg ({ store } as model) =
                         |> List.take numberOfLetters
                         |> String.fromList
             in
-            ( { model | state = Ongoing word attempts newInput Nothing }
+            ( { model | state = Ongoing word guesses newInput Nothing }
             , Cmd.none
             )
 
@@ -404,12 +434,12 @@ update msg ({ store } as model) =
             )
 
         ( NewWord Nothing, Idle ) ->
-            ( { model
-                | state =
-                    "Unable to pick a word."
-                        |> translate store.lang []
-                        |> Errored
-              }
+            ( { model | state = Errored LoadError }
+            , Cmd.none
+            )
+
+        ( NewWord _, Errored _ ) ->
+            ( model
             , Cmd.none
             )
 
@@ -427,16 +457,16 @@ update msg ({ store } as model) =
                 Err _ ->
                     ( model, Cmd.none )
 
-        ( Submit, Ongoing word attempts input _ ) ->
-            case validateAttempt store.lang word input of
-                Ok attempt ->
+        ( Submit, Ongoing word guesses input _ ) ->
+            case validateGuess store.lang word input of
+                Ok guess ->
                     logResult
-                        ( { model | state = checkGame word (attempt :: attempts) }
+                        ( { model | state = checkGame word (guess :: guesses) }
                         , Cmd.none
                         )
 
                 Err error ->
-                    ( { model | state = Ongoing word attempts input (Just error) }
+                    ( { model | state = Ongoing word guesses input (Just error) }
                     , Cmd.none
                     )
 
@@ -447,12 +477,7 @@ update msg ({ store } as model) =
             update NewGame { model | store = { store | lang = lang } }
 
         _ ->
-            ( { model
-                | state =
-                    "General game state error. This is bad."
-                        |> translate store.lang []
-                        |> Errored
-              }
+            ( { model | state = Errored StateError }
             , Cmd.none
             )
 
@@ -462,7 +487,7 @@ charToText =
     Char.toUpper >> List.singleton >> String.fromList
 
 
-viewAttempt : Attempt -> Html Msg
+viewAttempt : Guess -> Html Msg
 viewAttempt =
     List.map
         (\letter ->
@@ -550,16 +575,16 @@ dispositions lang =
         )
 
 
-keyState : List Attempt -> Char -> KeyState
-keyState attempts char =
+keyState : List Guess -> Char -> KeyState
+keyState guesses char =
     ( char
-    , if List.any (List.any (letterIs Correct char)) attempts then
+    , if List.any (List.any (letterIs Correct char)) guesses then
         Just (Correct char)
 
-      else if List.any (List.any (letterIs Misplaced char)) attempts then
+      else if List.any (List.any (letterIs Misplaced char)) guesses then
         Just (Misplaced char)
 
-      else if List.any (List.any (letterIs Unused char)) attempts then
+      else if List.any (List.any (letterIs Unused char)) guesses then
         Just (Unused char)
 
       else
@@ -567,12 +592,12 @@ keyState attempts char =
     )
 
 
-viewKeyboard : Lang -> List Attempt -> Html Msg
-viewKeyboard lang attempts =
+viewKeyboard : Lang -> List Guess -> Html Msg
+viewKeyboard lang guesses =
     dispositions lang
         |> List.map
             (div [ class "KeyboardRow" ]
-                << List.map (keyState attempts >> viewKeyState)
+                << List.map (keyState guesses >> viewKeyState)
             )
         |> footer [ class "Keyboard" ]
 
@@ -611,16 +636,16 @@ viewKeyState ( char, letter ) =
         [ text (charToText char) ]
 
 
-viewBoard : Maybe UserInput -> List Attempt -> Html Msg
-viewBoard input attempts =
+viewBoard : Maybe UserInput -> List Guess -> Html Msg
+viewBoard input guesses =
     let
         remaining =
             maxAttempts
-                - List.length attempts
+                - List.length guesses
                 - (input |> Maybe.map (always 2) |> Maybe.withDefault 1)
     in
     div [ class "BoardContainer" ]
-        [ [ attempts
+        [ [ guesses
                 |> List.reverse
                 |> List.map (viewAttempt >> Just)
           , [ input |> Maybe.map viewInput ]
@@ -703,8 +728,8 @@ selectLang lang =
         |> div [ class "nav nav-pills nav-fill" ]
 
 
-attemptDescription : Lang -> Attempt -> List String
-attemptDescription lang =
+guessDescription : Lang -> Guess -> List String
+guessDescription lang =
     List.map
         (\letter ->
             let
@@ -738,7 +763,7 @@ viewHelp { lang } =
             ]
     in
     [ p []
-        [ "Guess a {0} letters {1} word in {2} attempts or less."
+        [ "Guess a {0} letters {1} word in {2} guesses or less."
             |> translate lang
                 [ String.fromInt numberOfLetters
                 , langToString lang
@@ -753,7 +778,7 @@ viewHelp { lang } =
         ]
     , div [ class "mb-3" ] [ viewAttempt demo ]
     , p [] [ "In this example:" |> translate lang [] |> text ]
-    , attemptDescription lang demo
+    , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
         |> ul []
     , p []
@@ -771,32 +796,70 @@ viewHelp { lang } =
 
 
 viewStats : Store -> List (Html Msg)
-viewStats { lang } =
-    [ text "stats" ]
+viewStats { lang, logs } =
+    case logs of
+        [] ->
+            [ "No game data yet" |> translate lang [] |> text ]
+
+        logs_ ->
+            [ viewStatsTable lang logs_ ]
+
+
+formatPercent : Float -> String
+formatPercent float =
+    FormatNumber.format { frenchLocale | decimals = Exact 2 } float ++ "%"
+
+
+progressBar : Float -> Html Msg
+progressBar percent =
+    div
+        [ class "progress" ]
+        [ div
+            [ class "progress-bar bg-success"
+            , style "width" <| String.fromFloat percent ++ "%"
+            ]
+            []
+        ]
+
+
+viewStatsTable : Lang -> List Log -> Html Msg
+viewStatsTable lang logs =
+    let
+        totalWins =
+            logs |> List.filter .victory |> List.length
+
+        row nbGuess =
+            let
+                wins =
+                    logs
+                        |> List.filter (\{ victory, guesses } -> victory && guesses == nbGuess)
+                        |> List.length
+
+                percent =
+                    toFloat wins / toFloat totalWins * 100
+            in
+            tr []
+                [ th [ class "text-end" ] [ text (String.fromInt nbGuess) ]
+                , td [ class "text-end" ] [ wins |> String.fromInt |> text ]
+                , td [ class "text-end" ] [ text (formatPercent percent) ]
+                , td [ class "w-100" ] [ progressBar percent ]
+                ]
+    in
+    div [ class "table-responsive" ]
+        [ h2 [ class "fs-5" ] [ "Guess distribution" |> translate lang [] |> text ]
+        , table [ class "table" ]
+            [ List.range 1 6
+                |> List.map row
+                |> tbody []
+            ]
+        ]
 
 
 layout : Model -> List (Html Msg) -> Html Msg
 layout { store, modal } content =
     div []
         [ main_ [ class "Game" ]
-            (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
-                [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
-                , selectLang store.lang
-                , button
-                    [ class "btn btn-sm btn-dark fw-bold rounded-circle"
-                    , title "Stats"
-                    , onClick (OpenModal StatsModal)
-                    ]
-                    [ text "\u{00A0}🏆\u{00A0}" ]
-                , button
-                    [ class "btn btn-sm btn-dark fw-bold rounded-circle"
-                    , title "Help"
-                    , onClick (OpenModal HelpModal)
-                    ]
-                    [ text "\u{00A0}?\u{00A0}" ]
-                ]
-                :: content
-            )
+            (viewHeader store :: content)
         , case modal of
             Just HelpModal ->
                 viewModal store "Help" (viewHelp store)
@@ -806,6 +869,31 @@ layout { store, modal } content =
 
             Nothing ->
                 text ""
+        ]
+
+
+icon : String -> Html Msg
+icon name =
+    i [ class <| "icon icon-" ++ name ] []
+
+
+viewHeader : Store -> Html Msg
+viewHeader { lang } =
+    header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
+        [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
+        , selectLang lang
+        , button
+            [ class "btn btn-sm btn-dark fw-bold rounded-circle"
+            , title "Stats"
+            , onClick (OpenModal StatsModal)
+            ]
+            [ icon "stats" ]
+        , button
+            [ class "btn btn-sm btn-dark fw-bold rounded-circle"
+            , title "Help"
+            , onClick (OpenModal HelpModal)
+            ]
+            [ icon "help" ]
         ]
 
 
@@ -870,6 +958,32 @@ viewModal { lang } title content =
         ]
 
 
+viewError : Lang -> Error -> Html Msg
+viewError lang error =
+    div [ class "alert alert-danger m-3" ]
+        [ case error of
+            DecodeError details ->
+                div []
+                    [ p []
+                        [ "Unable to restore previously saved data."
+                            |> translate lang []
+                            |> text
+                        ]
+                    , pre [ class "pb-3" ] [ text details ]
+                    ]
+
+            LoadError ->
+                "Unable to pick a word."
+                    |> translate lang []
+                    |> text
+
+            StateError ->
+                "General game state error. This is bad."
+                    |> translate lang []
+                    |> text
+        ]
+
+
 view : Model -> Html Msg
 view ({ store, state } as model) =
     layout model
@@ -880,39 +994,38 @@ view ({ store, state } as model) =
                     |> text
                 ]
 
-            Errored gameError ->
-                [ "Game data couldn't load: {0}"
-                    |> translate store.lang [ gameError ]
-                    |> alert "danger"
-                , newGameButton store.lang
+            Errored error ->
+                [ viewError store.lang error
+                , p [ class "text-center" ]
+                    [ newGameButton store.lang ]
                 ]
 
-            Won word attempts ->
-                [ viewBoard Nothing attempts
+            Won word guesses ->
+                [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang attempts
+                , viewKeyboard store.lang guesses
                 , "Well done!"
                     |> translate store.lang []
                     |> alert "success"
                 ]
 
-            Lost word attempts ->
+            Lost word guesses ->
                 [ word
                     |> String.toList
                     |> List.map Correct
-                    |> (\a -> a :: attempts)
+                    |> (\a -> a :: guesses)
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang attempts
+                , viewKeyboard store.lang guesses
                 , "Ok that was hard."
                     |> translate store.lang []
                     |> alert "success"
                 ]
 
-            Ongoing _ attempts input error ->
-                [ viewBoard (Just input) attempts
+            Ongoing _ guesses input error ->
+                [ viewBoard (Just input) guesses
                 , error |> Maybe.map (alert "warning") |> Maybe.withDefault (text "")
-                , viewKeyboard store.lang attempts
+                , viewKeyboard store.lang guesses
                 ]
         )
 
@@ -926,11 +1039,11 @@ logResult ( { store, state, time } as model, cmds ) =
     let
         logData =
             case state of
-                Won word attempts ->
-                    Just ( True, word, List.length attempts )
+                Won word guesses ->
+                    Just ( True, word, List.length guesses )
 
-                Lost word attempts ->
-                    Just ( False, word, List.length attempts )
+                Lost word guesses ->
+                    Just ( False, word, List.length guesses )
 
                 _ ->
                     Nothing
@@ -986,14 +1099,20 @@ translations =
         , ( "Definition"
           , "Définition"
           )
+        , ( "Erreur: {0}"
+          , "Erreur\u{00A0}: {0}"
+          )
         , ( "Game data couldn't load: {0}"
           , "Les données du jeu n'ont pas été chargé\u{00A0}: {0}"
           )
         , ( "General game state error. This is bad."
           , "Erreur générale. C'est pas bon signe."
           )
-        , ( "Guess a {0} letters {1} word in {2} attempts or less."
+        , ( "Guess a {0} letters {1} word in {2} guesses or less."
           , "Devinez un mot {1} de {0} lettres en {2} essais ou moins."
+          )
+        , ( "Guess distribution"
+          , "Distribution des scores"
           )
         , ( "Help"
           , "Aide"
@@ -1006,6 +1125,9 @@ translations =
           )
         , ( "Loading game…"
           , "Chargement du jeu…"
+          )
+        , ( "No game data yet"
+          , "Pas de données de parties jouées"
           )
         , ( "Ok that was hard."
           , "Pas facile, hein\u{00A0}?"
@@ -1024,6 +1146,9 @@ translations =
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
+          )
+        , ( "Unable to restore previously saved data."
+          , "Impossible de restaurer les données précedemment sauvegardées."
           )
         , ( "Use your dekstop computer keyboard to enter words, or the virtual one at the bottom."
           , "Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l'écran."
@@ -1053,7 +1178,7 @@ encodeLog log =
         , ( "lang", log.lang |> langToString |> Encode.string )
         , ( "word", log.word |> Encode.string )
         , ( "victory", log.victory |> Encode.bool )
-        , ( "attempts", log.attempts |> Encode.int )
+        , ( "guesses", log.guesses |> Encode.int )
         ]
 
 
@@ -1065,7 +1190,7 @@ decodeStore : Decoder Store
 decodeStore =
     Decode.map2 Store
         (Decode.field "lang" (Decode.map langFromString Decode.string))
-        (Decode.field "log" (Decode.list decodeLog))
+        (Decode.field "logs" (Decode.list decodeLog))
 
 
 decodeLog : Decoder Log
@@ -1075,7 +1200,7 @@ decodeLog =
         (Decode.field "lang" (Decode.map langFromString Decode.string))
         (Decode.field "word" Decode.string)
         (Decode.field "victory" Decode.bool)
-        (Decode.field "attemps" Decode.int)
+        (Decode.field "guesses" Decode.int)
 
 
 decodeKey : Decoder Msg
@@ -1112,17 +1237,7 @@ decodeKey =
 
 
 
--- Ports
-
-
-port saveStore : String -> Cmd msg
-
-
-port storeChanged : (String -> msg) -> Sub msg
-
-
-
--- Main stuff
+-- Main & subs
 
 
 main : Program Flags Model Msg
@@ -1147,3 +1262,13 @@ subscriptions { state } =
             _ ->
                 Sub.none
         ]
+
+
+
+-- Ports
+
+
+port saveStore : String -> Cmd msg
+
+
+port storeChanged : (String -> msg) -> Sub msg
