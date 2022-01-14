@@ -61,6 +61,7 @@ type alias Model =
     , state : GameState
     , modal : Maybe Modal
     , time : Posix
+    , menuOpened : Bool
     }
 
 
@@ -122,6 +123,7 @@ type Msg
     | StoreChanged String
     | Submit
     | SwitchLang Lang
+    | ToggleMenu
 
 
 numberOfLetters : Int
@@ -189,6 +191,7 @@ initialModel store =
     , state = Idle
     , modal = Nothing
     , time = Time.millisToPosix 0
+    , menuOpened = False
     }
 
 
@@ -389,15 +392,22 @@ update msg ({ store } as model) =
                         |> List.reverse
                         |> String.fromList
             in
-            ( { model | state = Ongoing word guesses newInput Nothing }
+            ( { model
+                | state = Ongoing word guesses newInput Nothing
+                , menuOpened = False
+              }
             , Cmd.none
             )
 
         ( BackSpace, _ ) ->
-            ( model, Cmd.none )
+            ( { model | menuOpened = False }
+            , Cmd.none
+            )
 
         ( CloseModal, _ ) ->
-            ( { model | modal = Nothing }, Cmd.none )
+            ( { model | modal = Nothing, menuOpened = False }
+            , Cmd.none
+            )
 
         ( KeyPressed char, Ongoing word guesses input _ ) ->
             let
@@ -407,7 +417,10 @@ update msg ({ store } as model) =
                         |> List.take numberOfLetters
                         |> String.fromList
             in
-            ( { model | state = Ongoing word guesses newInput Nothing }
+            ( { model
+                | state = Ongoing word guesses newInput Nothing
+                , menuOpened = False
+              }
             , Cmd.none
             )
 
@@ -427,19 +440,25 @@ update msg ({ store } as model) =
             ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Idle ) ->
-            ( { model | state = Ongoing newWord [] "" Nothing }
-            , [ English, French ]
-                |> List.map (langBtnId >> defocus)
+            ( { model
+                | state = Ongoing newWord [] "" Nothing
+                , menuOpened = False
+              }
+            , [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help" ]
+                |> List.map defocus
                 |> Cmd.batch
             )
 
         ( NewWord Nothing, Idle ) ->
-            ( { model | state = Errored LoadError }
+            ( { model
+                | state = Errored LoadError
+                , menuOpened = False
+              }
             , Cmd.none
             )
 
         ( NewWord _, Errored _ ) ->
-            ( model
+            ( { model | menuOpened = False }
             , Cmd.none
             )
 
@@ -447,7 +466,7 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( OpenModal modal, _ ) ->
-            ( { model | modal = Just modal }, Cmd.none )
+            ( { model | modal = Just modal, menuOpened = False }, Cmd.none )
 
         ( StoreChanged rawStore, _ ) ->
             case Decode.decodeString decodeStore rawStore of
@@ -461,23 +480,38 @@ update msg ({ store } as model) =
             case validateGuess store.lang word input of
                 Ok guess ->
                     logResult
-                        ( { model | state = checkGame word (guess :: guesses) }
+                        ( { model
+                            | state = checkGame word (guess :: guesses)
+                            , menuOpened = False
+                          }
                         , Cmd.none
                         )
 
                 Err error ->
-                    ( { model | state = Ongoing word guesses input (Just error) }
+                    ( { model
+                        | state = Ongoing word guesses input (Just error)
+                        , menuOpened = False
+                      }
                     , Cmd.none
                     )
 
         ( Submit, _ ) ->
-            ( model, Cmd.none )
+            ( { model | menuOpened = False }, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
-            update NewGame { model | store = { store | lang = lang } }
+            update NewGame
+                { model
+                    | store = { store | lang = lang }
+                    , menuOpened = False
+                }
+
+        ( ToggleMenu, _ ) ->
+            ( { model | menuOpened = not model.menuOpened }
+            , Cmd.none
+            )
 
         _ ->
-            ( { model | state = Errored StateError }
+            ( { model | state = Errored StateError, menuOpened = False }
             , Cmd.none
             )
 
@@ -696,38 +730,6 @@ viewInput input =
         |> viewBoardRow
 
 
-langBtnId : Lang -> String
-langBtnId =
-    langToString
-        >> String.toLower
-        >> String.slice 0 2
-        >> (++) "btn-lang-"
-
-
-selectLang : Lang -> Html Msg
-selectLang lang =
-    [ English, French ]
-        |> List.map
-            (\lang_ ->
-                li [ class "nav-item" ]
-                    [ button
-                        [ type_ "button"
-                        , id (langBtnId lang_)
-                        , class "nav-link px-2 py-1 mx-1"
-                        , classList [ ( "active", lang == lang_ ) ]
-                        , title (langToString lang_)
-                        , onClick (SwitchLang lang_)
-                        ]
-                        [ span [ class "d-none d-sm-block" ]
-                            [ lang_ |> langToString |> text ]
-                        , span [ class "d-block d-sm-none" ]
-                            [ lang_ |> langToString |> String.slice 0 2 |> text ]
-                        ]
-                    ]
-            )
-        |> div [ class "nav nav-pills nav-fill" ]
-
-
 guessDescription : Lang -> Guess -> List String
 guessDescription lang =
     List.map
@@ -856,10 +858,10 @@ viewStatsTable lang logs =
 
 
 layout : Model -> List (Html Msg) -> Html Msg
-layout { store, modal } content =
+layout ({ store, modal } as model) content =
     div []
         [ main_ [ class "Game" ]
-            (viewHeader store :: content)
+            (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
                 viewModal store "Help" (viewHelp store)
@@ -874,26 +876,81 @@ layout { store, modal } content =
 
 icon : String -> Html Msg
 icon name =
-    i [ class <| "icon icon-" ++ name ] []
+    i [ class <| "me-1 icon icon-" ++ name ] []
 
 
-viewHeader : Store -> Html Msg
-viewHeader { lang } =
-    header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
-        [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
-        , selectLang lang
-        , button
-            [ class "btn btn-sm btn-dark fw-bold rounded-circle"
-            , title "Stats"
-            , onClick (OpenModal StatsModal)
+viewHeader : Model -> Html Msg
+viewHeader { store, menuOpened } =
+    nav [ class "navbar fixed-top navbar-expand-lg navbar-dark bg-dark" ]
+        [ div [ class "Header container" ]
+            [ span [ class "navbar-brand" ] [ text "Wordlem" ]
+            , button
+                [ type_ "button"
+                , class "navbar-toggler"
+                , classList [ ( "collapsed", not menuOpened ) ]
+                , onClick ToggleMenu
+                , attribute "aria-label" "Navigation"
+                , attribute "aria-controls" "menuBar"
+                , attribute "aria-expanded"
+                    (if menuOpened then
+                        "true"
+
+                     else
+                        "false"
+                    )
+                ]
+                [ span [ class "navbar-toggler-icon" ] [] ]
+            , div
+                [ id "menuBar"
+                , class "navbar-collapse collapse"
+                , classList [ ( "show", menuOpened ) ]
+                ]
+                [ ul [ class "navbar-nav me-auto mb-2 mb-lg-0" ]
+                    [ li [ class "nav-item" ]
+                        [ button
+                            [ type_ "button"
+                            , id "btn-lang-fr"
+                            , class "btn btn-link nav-link"
+                            , classList [ ( "active", store.lang == French ) ]
+                            , onClick (SwitchLang French)
+                            ]
+                            [ text "Jouer en Français" ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ button
+                            [ type_ "button"
+                            , id "btn-lang-en"
+                            , class "btn btn-link nav-link"
+                            , classList [ ( "active", store.lang == English ) ]
+                            , onClick (SwitchLang English)
+                            ]
+                            [ text "Play in English" ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ button
+                            [ type_ "button"
+                            , id "btn-stats"
+                            , class "btn btn-link nav-link"
+                            , onClick (OpenModal StatsModal)
+                            ]
+                            [ icon "stats"
+                            , "Stats" |> translate store.lang [] |> text
+                            ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ button
+                            [ type_ "button"
+                            , id "btn-help"
+                            , class "btn btn-link nav-link"
+                            , onClick (OpenModal HelpModal)
+                            ]
+                            [ icon "help"
+                            , "Help" |> translate store.lang [] |> text
+                            ]
+                        ]
+                    ]
+                ]
             ]
-            [ icon "stats" ]
-        , button
-            [ class "btn btn-sm btn-dark fw-bold rounded-circle"
-            , title "Help"
-            , onClick (OpenModal HelpModal)
-            ]
-            [ icon "help" ]
         ]
 
 
@@ -1219,20 +1276,19 @@ decodeKey =
                         Decode.succeed CloseModal
 
                     string ->
-                        if String.length string /= 1 then
-                            Decode.fail "no char"
+                        case String.toList string of
+                            [] ->
+                                Decode.fail ("Discarded key " ++ string)
 
-                        else
-                            case List.head (String.toList string) of
-                                Just char ->
-                                    if Char.toCode char < 65 || Char.toCode char > 122 then
-                                        Decode.fail "no char"
+                            [ char ] ->
+                                if Char.toCode char < 65 || Char.toCode char > 122 then
+                                    Decode.fail ("Unsupported char: " ++ String.fromList [ char ])
 
-                                    else
-                                        Decode.succeed (KeyPressed (Char.toLower char))
+                                else
+                                    Decode.succeed (KeyPressed (Char.toLower char))
 
-                                Nothing ->
-                                    Decode.fail "no char"
+                            _ ->
+                                Decode.fail ("Discarded key " ++ string)
             )
 
 
