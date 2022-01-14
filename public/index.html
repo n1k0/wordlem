@@ -19,10 +19,22 @@
   <div id="app"></div>
   <script src="app.js"></script>
   <script>
-    Elm.Main.init({
+    const storeKey = "wordlem";
+    const app = Elm.Main.init({
       node: document.getElementById("app"),
-      flags: { lang: navigator.language || "en" }
+      flags: {
+        lang: navigator.language || "en",
+        rawStore: localStorage[storeKey] || ""
+      }
     });
+    app.ports.saveStore.subscribe((rawStore) => {
+      localStorage[storeKey] = rawStore;
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.storageArea === localStorage && event.key === storeKey) {
+        app.ports.storeChanged.send(event.newValue);
+      }
+    }, false);
   </script>
 </body>
 </html>

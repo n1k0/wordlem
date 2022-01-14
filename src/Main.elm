@@ -1,4 +1,11 @@
-module Main exposing (Lang(..), Letter(..), main, validateAttempt)
+port module Main exposing
+    ( Lang(..)
+    , Letter(..)
+    , main
+    , saveStore
+    , storeChanged
+    , validateAttempt
+    )
 
 import Browser
 import Browser.Dom as Dom
@@ -7,7 +14,8 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import List.Extra as LE
 import Markdown
 import Process
@@ -15,11 +23,29 @@ import Random
 import String.Extra as SE
 import String.Interpolate exposing (interpolate)
 import Task
+import Time exposing (Posix)
 import Words
 
 
 type alias Flags =
-    { lang : String }
+    { lang : String
+    , rawStore : String
+    }
+
+
+type alias Store =
+    { lang : Lang
+    , logs : List Log
+    }
+
+
+type alias Log =
+    { time : Posix
+    , lang : Lang
+    , word : WordToFind
+    , victory : Bool
+    , attempts : Int
+    }
 
 
 type Lang
@@ -28,10 +54,11 @@ type Lang
 
 
 type alias Model =
-    { lang : Lang
+    { store : Store
     , words : List WordToFind
     , state : GameState
     , modal : Maybe Modal
+    , time : Posix
     }
 
 
@@ -79,9 +106,11 @@ type Msg
     | CloseModal
     | KeyPressed Char
     | NewGame
+    | NewTime Posix
     | NewWord (Maybe WordToFind)
     | NoOp
     | OpenModal Modal
+    | StoreChanged String
     | Submit
     | SwitchLang Lang
 
@@ -96,23 +125,39 @@ maxAttempts =
     6
 
 
+defaultStore : Lang -> Store
+defaultStore lang =
+    { lang = lang
+    , logs = []
+    }
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
+        lang =
+            parseLang flags.lang
+
+        store =
+            flags.rawStore
+                |> Decode.decodeString decodeStore
+                |> Result.withDefault (defaultStore lang)
+
         model =
-            initialModel (parseLang flags.lang)
+            initialModel store
     in
     ( model
     , Random.generate NewWord (randomWord model.words)
     )
 
 
-initialModel : Lang -> Model
-initialModel lang =
-    { lang = lang
-    , words = getWords lang
+initialModel : Store -> Model
+initialModel store =
+    { store = store
+    , words = getWords store.lang
     , state = Idle
     , modal = Nothing
+    , time = Time.millisToPosix 0
     }
 
 
@@ -133,6 +178,16 @@ langToString lang =
 
         French ->
             "Français"
+
+
+langFromString : String -> Lang
+langFromString string =
+    case string of
+        "Français" ->
+            French
+
+        _ ->
+            English
 
 
 getWords : Lang -> List WordToFind
@@ -292,7 +347,7 @@ defocus domId =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ store } as model) =
     case ( msg, model.state ) of
         ( BackSpace, Ongoing word attempts input _ ) ->
             let
@@ -331,11 +386,14 @@ update msg model =
         ( NewGame, _ ) ->
             let
                 newModel =
-                    initialModel model.lang
+                    initialModel store
             in
             ( newModel
             , Random.generate NewWord (randomWord newModel.words)
             )
+
+        ( NewTime time, _ ) ->
+            ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
@@ -348,7 +406,7 @@ update msg model =
             ( { model
                 | state =
                     "Unable to pick a word."
-                        |> translate model.lang []
+                        |> translate store.lang []
                         |> Errored
               }
             , Cmd.none
@@ -360,12 +418,21 @@ update msg model =
         ( OpenModal modal, _ ) ->
             ( { model | modal = Just modal }, Cmd.none )
 
+        ( StoreChanged rawStore, _ ) ->
+            case Decode.decodeString decodeStore rawStore of
+                Ok newStore ->
+                    ( { model | store = newStore }, Cmd.none )
+
+                Err _ ->
+                    ( model, Cmd.none )
+
         ( Submit, Ongoing word attempts input _ ) ->
-            case validateAttempt model.lang word input of
+            case validateAttempt store.lang word input of
                 Ok attempt ->
-                    ( { model | state = checkGame word (attempt :: attempts) }
-                    , Cmd.none
-                    )
+                    logResult
+                        ( { model | state = checkGame word (attempt :: attempts) }
+                        , Cmd.none
+                        )
 
                 Err error ->
                     ( { model | state = Ongoing word attempts input (Just error) }
@@ -376,13 +443,13 @@ update msg model =
             ( model, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
-            update NewGame { model | lang = lang }
+            update NewGame { model | store = { store | lang = lang } }
 
         _ ->
             ( { model
                 | state =
                     "General game state error. This is bad."
-                        |> translate model.lang []
+                        |> translate store.lang []
                         |> Errored
               }
             , Cmd.none
@@ -607,9 +674,7 @@ langBtnId : Lang -> String
 langBtnId =
     langToString
         >> String.toLower
-        >> String.toList
-        >> List.take 2
-        >> String.fromList
+        >> String.slice 0 2
         >> (++) "btn-lang-"
 
 
@@ -705,12 +770,12 @@ viewHelp lang =
 
 
 layout : Model -> List (Html Msg) -> Html Msg
-layout { lang, modal } content =
+layout { store, modal } content =
     div []
         [ main_ [ class "Game" ]
             (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
                 [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
-                , selectLang lang
+                , selectLang store.lang
                 , button
                     [ class "btn btn-sm btn-dark fw-bold rounded-circle"
                     , title "Help"
@@ -722,7 +787,7 @@ layout { lang, modal } content =
             )
         , case modal of
             Just HelpModal ->
-                viewModal lang (viewHelp lang)
+                viewModal store.lang (viewHelp store.lang)
 
             Nothing ->
                 text ""
@@ -791,28 +856,28 @@ viewModal lang content =
 
 
 view : Model -> Html Msg
-view ({ lang, state } as model) =
+view ({ store, state } as model) =
     layout model
         (case state of
             Idle ->
                 [ "Loading game…"
-                    |> translate lang []
+                    |> translate store.lang []
                     |> text
                 ]
 
             Errored gameError ->
                 [ "Game data couldn't load: {0}"
-                    |> translate lang [ gameError ]
+                    |> translate store.lang [ gameError ]
                     |> alert "danger"
-                , newGameButton lang
+                , newGameButton store.lang
                 ]
 
             Won word attempts ->
                 [ viewBoard Nothing attempts
-                , endGameButtons lang word
-                , viewKeyboard lang attempts
+                , endGameButtons store.lang word
+                , viewKeyboard store.lang attempts
                 , "Well done!"
-                    |> translate lang []
+                    |> translate store.lang []
                     |> alert "success"
                 ]
 
@@ -822,19 +887,60 @@ view ({ lang, state } as model) =
                     |> List.map Correct
                     |> (\a -> a :: attempts)
                     |> viewBoard Nothing
-                , endGameButtons lang word
-                , viewKeyboard lang attempts
+                , endGameButtons store.lang word
+                , viewKeyboard store.lang attempts
                 , "Ok that was hard."
-                    |> translate lang []
+                    |> translate store.lang []
                     |> alert "success"
                 ]
 
             Ongoing _ attempts input error ->
                 [ viewBoard (Just input) attempts
                 , error |> Maybe.map (alert "warning") |> Maybe.withDefault (text "")
-                , viewKeyboard lang attempts
+                , viewKeyboard store.lang attempts
                 ]
         )
+
+
+
+-- Logging
+
+
+logResult : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+logResult ( { store, state, time } as model, cmds ) =
+    let
+        logData =
+            case state of
+                Won word attempts ->
+                    Just ( True, word, List.length attempts )
+
+                Lost word attempts ->
+                    Just ( False, word, List.length attempts )
+
+                _ ->
+                    Nothing
+    in
+    case logData of
+        Just ( victory, word, nbAttempts ) ->
+            let
+                newStore =
+                    store |> logEntry (Log time store.lang word victory nbAttempts)
+            in
+            ( { model | store = newStore }
+            , newStore |> encodeStore |> Encode.encode 0 |> saveStore
+            )
+
+        Nothing ->
+            ( model, cmds )
+
+
+logEntry : Log -> Store -> Store
+logEntry log ({ logs } as store) =
+    { store | logs = log :: logs }
+
+
+
+-- I18n
 
 
 translate : Lang -> List String -> String -> String
@@ -910,31 +1016,51 @@ translations =
         ]
 
 
-main : Program Flags Model Msg
-main =
-    Browser.element
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+
+-- Encoders
 
 
-subscriptions : Model -> Sub Msg
-subscriptions { state } =
-    case state of
-        Ongoing _ _ _ _ ->
-            BE.onKeyDown decodeKey
-
-        _ ->
-            Sub.none
+encodeStore : Store -> Encode.Value
+encodeStore store =
+    Encode.object
+        [ ( "lang", Encode.string (langToString store.lang) )
+        , ( "logs", Encode.list encodeLog store.logs )
+        ]
 
 
+encodeLog : Log -> Encode.Value
+encodeLog log =
+    Encode.object
+        [ ( "time", log.time |> Time.posixToMillis |> Encode.int )
+        , ( "lang", log.lang |> langToString |> Encode.string )
+        , ( "word", log.word |> Encode.string )
+        , ( "victory", log.victory |> Encode.bool )
+        , ( "attempts", log.attempts |> Encode.int )
+        ]
 
--- Key event
 
 
-decodeKey : Decode.Decoder Msg
+-- Decoders
+
+
+decodeStore : Decoder Store
+decodeStore =
+    Decode.map2 Store
+        (Decode.field "lang" (Decode.map langFromString Decode.string))
+        (Decode.field "log" (Decode.list decodeLog))
+
+
+decodeLog : Decoder Log
+decodeLog =
+    Decode.map5 Log
+        (Decode.field "time" (Decode.map Time.millisToPosix Decode.int))
+        (Decode.field "lang" (Decode.map langFromString Decode.string))
+        (Decode.field "word" Decode.string)
+        (Decode.field "victory" Decode.bool)
+        (Decode.field "attemps" Decode.int)
+
+
+decodeKey : Decoder Msg
 decodeKey =
     Decode.field "key" Decode.string
         |> Decode.andThen
@@ -965,3 +1091,41 @@ decodeKey =
                                 Nothing ->
                                     Decode.fail "no char"
             )
+
+
+
+-- Ports
+
+
+port saveStore : String -> Cmd msg
+
+
+port storeChanged : (String -> msg) -> Sub msg
+
+
+
+-- Main stuff
+
+
+main : Program Flags Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions { state } =
+    Sub.batch
+        [ Time.every 1000 NewTime
+        , storeChanged StoreChanged
+        , case state of
+            Ongoing _ _ _ _ ->
+                BE.onKeyDown decodeKey
+
+            _ ->
+                Sub.none
+        ]
