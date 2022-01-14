@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region._.H === region.ak.H)
+	if (region.Z.G === region.ai.G)
 	{
-		return 'on line ' + region._.H;
+		return 'on line ' + region.Z.G;
 	}
-	return 'on lines ' + region._.H + ' through ' + region.ak.H;
+	return 'on lines ' + region.Z.G + ' through ' + region.ai.G;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a7,
-		impl.by,
-		impl.bu,
+		impl.a8,
+		impl.bz,
+		impl.bv,
 		function() { return function() {} }
 	);
 });
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		w: func(record.w),
-		aa: record.aa,
-		Y: record.Y
+		ar: func(record.ar),
+		aH: record.aH,
+		ay: record.ay
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.w;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.aa;
+		var message = !tag ? value : tag < 3 ? value.a : value.ar;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.aH;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.Y) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.ay) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a7,
-		impl.by,
-		impl.bu,
+		impl.a8,
+		impl.bz,
+		impl.bv,
 		function(sendToApp, initialModel) {
-			var view = impl.bz;
+			var view = impl.bA;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.a7,
-		impl.by,
-		impl.bu,
+		impl.a8,
+		impl.bz,
+		impl.bv,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.Z && impl.Z(sendToApp)
-			var view = impl.bz;
+			var divertHrefToApp = impl.Y && impl.Y(sendToApp)
+			var view = impl.bA;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3977,12 +3977,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.aS);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.aT);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.bx) && (_VirtualDom_doc.title = title = doc.bx);
+				(title !== doc.by) && (_VirtualDom_doc.title = title = doc.by);
 			});
 		}
 	);
@@ -4038,12 +4038,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.bl;
-	var onUrlRequest = impl.bm;
+	var onUrlChange = impl.bm;
+	var onUrlRequest = impl.bn;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		Z: function(sendToApp)
+		Y: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4060,8 +4060,8 @@ function _Browser_application(impl)
 					sendToApp(onUrlRequest(
 						(next
 							&& curr.aB === next.aB
-							&& curr.ap === next.ap
-							&& curr.ay.a === next.ay.a
+							&& curr.an === next.an
+							&& curr.ax.a === next.ax.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		a7: function(flags)
+		a8: function(flags)
 		{
-			return A3(impl.a7, flags, _Browser_getUrl(), key);
+			return A3(impl.a8, flags, _Browser_getUrl(), key);
 		},
+		bA: impl.bA,
 		bz: impl.bz,
-		by: impl.by,
-		bu: impl.bu
+		bv: impl.bv
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { a4: 'hidden', aV: 'visibilitychange' }
+		? { a5: 'hidden', aW: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { a4: 'mozHidden', aV: 'mozvisibilitychange' }
+		? { a5: 'mozHidden', aW: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { a4: 'msHidden', aV: 'msvisibilitychange' }
+		? { a5: 'msHidden', aW: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { a4: 'webkitHidden', aV: 'webkitvisibilitychange' }
-		: { a4: 'hidden', aV: 'visibilitychange' };
+		? { a5: 'webkitHidden', aW: 'webkitvisibilitychange' }
+		: { a5: 'hidden', aW: 'visibilitychange' };
 }
 
 
@@ -4233,11 +4233,11 @@ function _Browser_getViewport()
 {
 	return {
 		aG: _Browser_getScene(),
-		aL: {
-			aN: _Browser_window.pageXOffset,
-			aO: _Browser_window.pageYOffset,
-			aM: _Browser_doc.documentElement.clientWidth,
-			ao: _Browser_doc.documentElement.clientHeight
+		aM: {
+			aO: _Browser_window.pageXOffset,
+			aP: _Browser_window.pageYOffset,
+			aN: _Browser_doc.documentElement.clientWidth,
+			am: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		aM: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		ao: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		aN: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		am: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4272,14 +4272,14 @@ function _Browser_getViewportOf(id)
 	{
 		return {
 			aG: {
-				aM: node.scrollWidth,
-				ao: node.scrollHeight
+				aN: node.scrollWidth,
+				am: node.scrollHeight
 			},
-			aL: {
-				aN: node.scrollLeft,
-				aO: node.scrollTop,
-				aM: node.clientWidth,
-				ao: node.clientHeight
+			aM: {
+				aO: node.scrollLeft,
+				aP: node.scrollTop,
+				aN: node.clientWidth,
+				am: node.clientHeight
 			}
 		};
 	});
@@ -4310,17 +4310,17 @@ function _Browser_getElement(id)
 		var y = _Browser_window.pageYOffset;
 		return {
 			aG: _Browser_getScene(),
-			aL: {
-				aN: x,
-				aO: y,
-				aM: _Browser_doc.documentElement.clientWidth,
-				ao: _Browser_doc.documentElement.clientHeight
+			aM: {
+				aO: x,
+				aP: y,
+				aN: _Browser_doc.documentElement.clientWidth,
+				am: _Browser_doc.documentElement.clientHeight
 			},
-			aZ: {
-				aN: x + rect.left,
-				aO: y + rect.top,
-				aM: rect.width,
-				ao: rect.height
+			a_: {
+				aO: x + rect.left,
+				aP: y + rect.top,
+				aN: rect.width,
+				am: rect.height
 			}
 		};
 	});
@@ -4447,8 +4447,8 @@ var _Regex_never = /.^/;
 var _Regex_fromStringWith = F2(function(options, string)
 {
 	var flags = 'g';
-	if (options.ba) { flags += 'm'; }
-	if (options.aU) { flags += 'i'; }
+	if (options.bb) { flags += 'm'; }
+	if (options.aV) { flags += 'i'; }
 
 	try
 	{
@@ -4539,6 +4539,105 @@ var _Regex_splitAtMost = F3(function(n, re, str)
 });
 
 var _Regex_infinity = Infinity;
+
+
+
+
+// VIRTUAL-DOM WIDGETS
+
+
+var _Markdown_toHtml = F3(function(options, factList, rawMarkdown)
+{
+	return _VirtualDom_custom(
+		factList,
+		{
+			a: options,
+			b: rawMarkdown
+		},
+		_Markdown_render,
+		_Markdown_diff
+	);
+});
+
+
+
+// WIDGET IMPLEMENTATION
+
+
+function _Markdown_render(model)
+{
+	return A2(_Markdown_replace, model, _VirtualDom_doc.createElement('div'));
+}
+
+
+function _Markdown_diff(x, y)
+{
+	return x.b === y.b && x.a === y.a
+		? false
+		: _Markdown_replace(y);
+}
+
+
+var _Markdown_replace = F2(function(model, div)
+{
+	div.innerHTML = _Markdown_marked(model.b, _Markdown_formatOptions(model.a));
+	return div;
+});
+
+
+
+// ACTUAL MARKDOWN PARSER
+
+
+var _Markdown_marked = function() {
+	// catch the `marked` object regardless of the outer environment.
+	// (ex. a CommonJS module compatible environment.)
+	// note that this depends on marked's implementation of environment detection.
+	var module = {};
+	var exports = module.exports = {};
+
+	/**
+	 * marked - a markdown parser
+	 * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
+	 * https://github.com/chjj/marked
+	 * commit cd2f6f5b7091154c5526e79b5f3bfb4d15995a51
+	 */
+	(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\s*\1 *(?:\n+|$)/,paragraph:/^/,heading:/^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]||""});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:!this.options.sanitizer&&(cap[1]==="pre"||cap[1]==="script"||cap[1]==="style"),text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^_\_([\s\S]+?)_\_(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:[^_]|_\_)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^_\_(?=\S)([\s\S]*?\S)_\_(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?this.options.sanitizer?this.options.sanitizer(cap[0]):escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.text(escape(this.smartypants(cap[0])));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/---/g,"—").replace(/--/g,"–").replace(/(^|[-\u2014\/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014\/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){if(!this.options.mangle)return text;var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0||prot.indexOf("vbscript:")===0||prot.indexOf("data:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};Renderer.prototype.text=function(text){return text};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,sanitizer:null,mangle:true,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
+
+	return module.exports;
+}();
+
+
+// FORMAT OPTIONS FOR MARKED IMPLEMENTATION
+
+function _Markdown_formatOptions(options)
+{
+	function toHighlight(code, lang)
+	{
+		if (!lang && $elm$core$Maybe$isJust(options.ah))
+		{
+			lang = options.ah.a;
+		}
+
+		if (typeof hljs !== 'undefined' && lang && hljs.listLanguages().indexOf(lang) >= 0)
+		{
+			return hljs.highlight(lang, code, true).value;
+		}
+
+		return code;
+	}
+
+	var gfm = options.a4.a;
+
+	return {
+		highlight: toHighlight,
+		gfm: gfm,
+		tables: gfm && gfm.bw,
+		breaks: gfm && gfm.aU,
+		sanitize: options.bs,
+		smartypants: options.bt
+	};
+}
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -5044,7 +5143,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {am: fragment, ap: host, aw: path, ay: port_, aB: protocol, aC: query};
+		return {ak: fragment, an: host, av: path, ax: port_, aB: protocol, aC: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5325,7 +5424,7 @@ var $elm$core$Task$perform = F2(
 var $elm$browser$Browser$element = _Browser_element;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $author$project$Main$NewWord = function (a) {
-	return {$: 3, a: a};
+	return {$: 4, a: a};
 };
 var $elm$random$Random$Generate = $elm$core$Basics$identity;
 var $elm$random$Random$Seed = F2(
@@ -5437,8 +5536,9 @@ var $author$project$Main$getWords = function (lang) {
 };
 var $author$project$Main$initialModel = function (lang) {
 	return {
-		q: lang,
-		o: $author$project$Main$Idle,
+		m: lang,
+		H: $elm$core$Maybe$Nothing,
+		p: $author$project$Main$Idle,
 		R: $author$project$Main$getWords(lang)
 	};
 };
@@ -5554,7 +5654,7 @@ var $author$project$Main$randomWord = function (words) {
 };
 var $author$project$Main$init = function (flags) {
 	var model = $author$project$Main$initialModel(
-		$author$project$Main$parseLang(flags.q));
+		$author$project$Main$parseLang(flags.m));
 	return _Utils_Tuple2(
 		model,
 		A2(
@@ -5564,10 +5664,11 @@ var $author$project$Main$init = function (flags) {
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$BackSpace = {$: 0};
+var $author$project$Main$CloseModal = {$: 1};
 var $author$project$Main$KeyPressed = function (a) {
-	return {$: 1, a: a};
+	return {$: 2, a: a};
 };
-var $author$project$Main$Submit = {$: 5};
+var $author$project$Main$Submit = {$: 7};
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$core$String$foldr = _String_foldr;
@@ -5583,6 +5684,8 @@ var $author$project$Main$decodeKey = A2(
 				return $elm$json$Json$Decode$succeed($author$project$Main$BackSpace);
 			case 'Enter':
 				return $elm$json$Json$Decode$succeed($author$project$Main$Submit);
+			case 'Escape':
+				return $elm$json$Json$Decode$succeed($author$project$Main$CloseModal);
 			default:
 				var string = keyCode;
 				if ($elm$core$String$length(string) !== 1) {
@@ -5611,7 +5714,7 @@ var $elm$browser$Browser$Events$MySub = F3(
 	});
 var $elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {ax: pids, aJ: subs};
+		return {aw: pids, aK: subs};
 	});
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -5843,7 +5946,7 @@ var $elm$core$Dict$merge = F6(
 	});
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {al: event, aq: key};
+		return {aj: event, ao: key};
 	});
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
@@ -5918,7 +6021,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.ax,
+			state.aw,
 			$elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
 		var deadPids = _v0.a;
@@ -5964,8 +6067,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.aq;
-		var event = _v0.al;
+		var key = _v0.ao;
+		var event = _v0.aj;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -5974,7 +6077,7 @@ var $elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _v3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.aJ);
+		var messages = A2($elm$core$List$filterMap, toMessage, state.aK);
 		return A2(
 			$elm$core$Task$andThen,
 			function (_v1) {
@@ -6006,7 +6109,7 @@ var $elm$browser$Browser$Events$on = F3(
 	});
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
 var $author$project$Main$subscriptions = function (_v0) {
-	var state = _v0.o;
+	var state = _v0.p;
 	if (state.$ === 2) {
 		return $elm$browser$Browser$Events$onKeyDown($author$project$Main$decodeKey);
 	} else {
@@ -6016,7 +6119,7 @@ var $author$project$Main$subscriptions = function (_v0) {
 var $author$project$Main$Errored = function (a) {
 	return {$: 1, a: a};
 };
-var $author$project$Main$NewGame = {$: 2};
+var $author$project$Main$NewGame = {$: 3};
 var $author$project$Main$Ongoing = F4(
 	function (a, b, c, d) {
 		return {$: 2, a: a, b: b, c: c, d: d};
@@ -6094,7 +6197,7 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $author$project$Main$NoOp = {$: 4};
+var $author$project$Main$NoOp = {$: 5};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
@@ -6377,7 +6480,7 @@ var $elm$core$Maybe$withDefault = F2(
 	});
 var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
 	function (replacements, _v0) {
-		var match = _v0.a8;
+		var match = _v0.a9;
 		var ordinalString = A2(
 			$elm$core$Basics$composeL,
 			$elm$core$String$dropLeft(1),
@@ -6429,13 +6532,13 @@ var $elm$core$Array$fromList = function (list) {
 };
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
-		return {a6: index, a8: match, bk: number, bt: submatches};
+		return {a7: index, a9: match, bl: number, bu: submatches};
 	});
 var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
 var $elm$regex$Regex$fromString = function (string) {
 	return A2(
 		$elm$regex$Regex$fromStringWith,
-		{aU: false, ba: false},
+		{aV: false, bb: false},
 		string);
 };
 var $elm$regex$Regex$never = _Regex_never;
@@ -6456,17 +6559,23 @@ var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
 var $author$project$Main$translations = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
+			_Utils_Tuple2('{0} is at the correct spot', '{0} est à la bonne position'),
+			_Utils_Tuple2('{0} is misplaced', '{0} est mal positionnée'),
+			_Utils_Tuple2('{0} is unused', '{0} n\'est pas utilisée'),
 			_Utils_Tuple2('Definition', 'Définition'),
 			_Utils_Tuple2('Game data couldn\'t load: {0}', 'Les données du jeu n\'ont pas été chargé\u00A0: {0}'),
 			_Utils_Tuple2('General game state error. This is bad.', 'Erreur générale. C\'est pas bon signe.'),
-			_Utils_Tuple2('Guess a {0} letters {1} word in {2} attempts or less.', 'Devinez un mot {0} de {1} lettres en {2} essais ou moins\u00A0.'),
-			_Utils_Tuple2('Inspired by [Wordle]({0}) - [Source code]({1})', 'Inspiré de [Wordle]({0}) - [Code source]({1})'),
+			_Utils_Tuple2('Guess a {0} letters {1} word in {2} attempts or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.'),
+			_Utils_Tuple2('Help', 'Aide'),
+			_Utils_Tuple2('In this example:', 'Dans cet exemple\u00A0:'),
+			_Utils_Tuple2('Inspired by [Wordle]({0}) - [Source code]({1}).', 'Inspiré de [Wordle]({0}) - [Code source]({1}).'),
 			_Utils_Tuple2('Loading game…', 'Chargement du jeu…'),
 			_Utils_Tuple2('Ok that was hard.', 'Pas facile, hein\u00A0?'),
 			_Utils_Tuple2('Play again', 'Rejouer'),
 			_Utils_Tuple2('Not in dictionary: {0}', 'Absent du dictionnaire\u00A0: {0}'),
 			_Utils_Tuple2('Not enough letters', 'Mot trop court'),
 			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.'),
+			_Utils_Tuple2('Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.'),
 			_Utils_Tuple2('Well done!', 'Bien joué\u00A0!')
 		]));
 var $author$project$Main$translate = F3(
@@ -6686,8 +6795,8 @@ var $author$project$Main$update = F2(
 	function (msg, model) {
 		update:
 		while (true) {
-			var _v0 = _Utils_Tuple2(msg, model.o);
-			_v0$11:
+			var _v0 = _Utils_Tuple2(msg, model.p);
+			_v0$13:
 			while (true) {
 				switch (_v0.a.$) {
 					case 0:
@@ -6708,7 +6817,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										o: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
+										p: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
@@ -6716,12 +6825,19 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					case 1:
+						var _v4 = _v0.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{H: $elm$core$Maybe$Nothing}),
+							$elm$core$Platform$Cmd$none);
+					case 2:
 						if (_v0.b.$ === 2) {
 							var _char = _v0.a.a;
-							var _v4 = _v0.b;
-							var word = _v4.a;
-							var attempts = _v4.b;
-							var input = _v4.c;
+							var _v5 = _v0.b;
+							var word = _v5.a;
+							var attempts = _v5.b;
+							var input = _v5.c;
 							var newInput = $elm$core$String$fromList(
 								A2(
 									$elm$core$List$take,
@@ -6734,31 +6850,31 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										o: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
+										p: A4($author$project$Main$Ongoing, word, attempts, newInput, $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$none);
 						} else {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
-					case 2:
-						var _v5 = _v0.a;
-						var newModel = $author$project$Main$initialModel(model.q);
+					case 3:
+						var _v6 = _v0.a;
+						var newModel = $author$project$Main$initialModel(model.m);
 						return _Utils_Tuple2(
 							newModel,
 							A2(
 								$elm$random$Random$generate,
 								$author$project$Main$NewWord,
 								$author$project$Main$randomWord(newModel.R)));
-					case 3:
+					case 4:
 						if (!_v0.a.a.$) {
 							if (!_v0.b.$) {
 								var newWord = _v0.a.a.a;
-								var _v6 = _v0.b;
+								var _v7 = _v0.b;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											o: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
+											p: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 										}),
 									$elm$core$Platform$Cmd$batch(
 										A2(
@@ -6767,54 +6883,63 @@ var $author$project$Main$update = F2(
 											_List_fromArray(
 												[0, 1]))));
 							} else {
-								break _v0$11;
+								break _v0$13;
 							}
 						} else {
 							if (!_v0.b.$) {
-								var _v7 = _v0.a.a;
-								var _v8 = _v0.b;
+								var _v8 = _v0.a.a;
+								var _v9 = _v0.b;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											o: $author$project$Main$Errored(
-												A3($author$project$Main$translate, model.q, _List_Nil, 'Unable to pick a word.'))
+											p: $author$project$Main$Errored(
+												A3($author$project$Main$translate, model.m, _List_Nil, 'Unable to pick a word.'))
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								break _v0$11;
+								break _v0$13;
 							}
 						}
-					case 4:
-						var _v9 = _v0.a;
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					case 5:
+						var _v10 = _v0.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 6:
+						var modal = _v0.a.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									H: $elm$core$Maybe$Just(modal)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 7:
 						if (_v0.b.$ === 2) {
-							var _v10 = _v0.a;
-							var _v11 = _v0.b;
-							var word = _v11.a;
-							var attempts = _v11.b;
-							var input = _v11.c;
-							var _v12 = A3($author$project$Main$validateAttempt, model.q, word, input);
-							if (!_v12.$) {
-								var attempt = _v12.a;
+							var _v11 = _v0.a;
+							var _v12 = _v0.b;
+							var word = _v12.a;
+							var attempts = _v12.b;
+							var input = _v12.c;
+							var _v13 = A3($author$project$Main$validateAttempt, model.m, word, input);
+							if (!_v13.$) {
+								var attempt = _v13.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											o: A2(
+											p: A2(
 												$author$project$Main$checkGame,
 												word,
 												A2($elm$core$List$cons, attempt, attempts))
 										}),
 									$elm$core$Platform$Cmd$none);
 							} else {
-								var error = _v12.a;
+								var error = _v13.a;
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											o: A4(
+											p: A4(
 												$author$project$Main$Ongoing,
 												word,
 												attempts,
@@ -6824,7 +6949,7 @@ var $author$project$Main$update = F2(
 									$elm$core$Platform$Cmd$none);
 							}
 						} else {
-							var _v13 = _v0.a;
+							var _v14 = _v0.a;
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					default:
@@ -6832,7 +6957,7 @@ var $author$project$Main$update = F2(
 						var $temp$msg = $author$project$Main$NewGame,
 							$temp$model = _Utils_update(
 							model,
-							{q: lang});
+							{m: lang});
 						msg = $temp$msg;
 						model = $temp$model;
 						continue update;
@@ -6842,8 +6967,8 @@ var $author$project$Main$update = F2(
 				_Utils_update(
 					model,
 					{
-						o: $author$project$Main$Errored(
-							A3($author$project$Main$translate, model.q, _List_Nil, 'General game state error. This is bad.'))
+						p: $author$project$Main$Errored(
+							A3($author$project$Main$translate, model.m, _List_Nil, 'General game state error. This is bad.'))
 					}),
 				$elm$core$Platform$Cmd$none);
 		}
@@ -6957,11 +7082,15 @@ var $author$project$Main$endGameButtons = F2(
 					$author$project$Main$newGameButton(lang)
 				]));
 	});
+var $author$project$Main$HelpModal = 0;
+var $author$project$Main$OpenModal = function (a) {
+	return {$: 6, a: a};
+};
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$header = _VirtualDom_node('header');
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$SwitchLang = function (a) {
-	return {$: 6, a: a};
+	return {$: 8, a: a};
 };
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
@@ -6979,6 +7108,8 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 };
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Main$selectLang = function (lang) {
 	return A2(
@@ -7013,50 +7144,425 @@ var $author$project$Main$selectLang = function (lang) {
 											'active',
 											_Utils_eq(lang, lang_))
 										])),
+									$elm$html$Html$Attributes$title(
+									$author$project$Main$langToString(lang_)),
 									$elm$html$Html$Events$onClick(
 									$author$project$Main$SwitchLang(lang_))
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(
-									$author$project$Main$langToString(lang_))
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('d-none d-sm-block')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											$author$project$Main$langToString(lang_))
+										])),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('d-block d-sm-none')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											A3(
+												$elm$core$String$slice,
+												0,
+												2,
+												$author$project$Main$langToString(lang_)))
+										]))
 								]))
 						]));
 			},
 			_List_fromArray(
 				[0, 1])));
 };
-var $author$project$Main$layout = F2(
-	function (lang, content) {
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $elm$core$Char$toUpper = _Char_toUpper;
+var $author$project$Main$charToText = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$Char$toUpper,
+	A2($elm$core$Basics$composeR, $elm$core$List$singleton, $elm$core$String$fromList));
+var $author$project$Main$attemptDescription = function (lang) {
+	return $elm$core$List$map(
+		function (letter) {
+			var _v0 = function () {
+				switch (letter.$) {
+					case 1:
+						var c = letter.a;
+						return _Utils_Tuple2(c, '{0} is at the correct spot');
+					case 2:
+						var c = letter.a;
+						return _Utils_Tuple2(c, '{0} is misplaced');
+					case 0:
+						var c = letter.a;
+						return _Utils_Tuple2(c, '{0} is unused');
+					default:
+						var c = letter.a;
+						return _Utils_Tuple2(c, '{0} is unused');
+				}
+			}();
+			var _char = _v0.a;
+			var trans = _v0.b;
+			return A3(
+				$author$project$Main$translate,
+				lang,
+				_List_fromArray(
+					[
+						$author$project$Main$charToText(_char)
+					]),
+				trans);
+		});
+};
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	ah: $elm$core$Maybe$Nothing,
+	a4: $elm$core$Maybe$Just(
+		{aU: false, bw: false}),
+	bs: true,
+	bt: false
+};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (!maybe.$) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Main$viewBoardRow = $elm$html$Html$div(
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('BoardRow'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'grid-template-columns',
+			A2(
+				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+				'repeat({0}, 1fr)',
+				_List_fromArray(
+					[
+						$elm$core$String$fromInt($author$project$Main$numberOfLetters)
+					])))
+		]));
+var $author$project$Main$viewTile = F2(
+	function (classes, _char) {
 		return A2(
-			$elm$html$Html$main_,
+			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('Game')
+					$elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
 				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					$author$project$Main$charToText(_char))
+				]));
+	});
+var $author$project$Main$viewAttempt = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$List$map(
+		function (letter) {
+			switch (letter.$) {
+				case 2:
+					var _char = letter.a;
+					return A2($author$project$Main$viewTile, 'btn-warning', _char);
+				case 1:
+					var _char = letter.a;
+					return A2($author$project$Main$viewTile, 'btn-success', _char);
+				case 0:
+					var _char = letter.a;
+					return A2($author$project$Main$viewTile, 'btn-dark', _char);
+				default:
+					var _char = letter.a;
+					return A2($author$project$Main$viewTile, 'btn-secondary', _char);
+			}
+		}),
+	$author$project$Main$viewBoardRow);
+var $author$project$Main$viewHelp = function (lang) {
+	var demo = _List_fromArray(
+		[
+			$author$project$Main$Correct('m'),
+			$author$project$Main$Misplaced('e'),
+			$author$project$Main$Unused('t'),
+			$author$project$Main$Correct('a'),
+			$author$project$Main$Unused('s')
+		]);
+	return _List_fromArray(
+		[
 			A2(
-				$elm$core$List$cons,
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					A3(
+						$author$project$Main$translate,
+						lang,
+						_List_fromArray(
+							[
+								$elm$core$String$fromInt($author$project$Main$numberOfLetters),
+								$author$project$Main$langToString(lang),
+								$elm$core$String$fromInt($author$project$Main$maxAttempts)
+							]),
+						'Guess a {0} letters {1} word in {2} attempts or less.'))
+				])),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					A3($author$project$Main$translate, lang, _List_Nil, 'Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.'))
+				])),
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('mb-3')
+				]),
+			_List_fromArray(
+				[
+					$author$project$Main$viewAttempt(demo)
+				])),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					A3($author$project$Main$translate, lang, _List_Nil, 'In this example:'))
+				])),
+			A2(
+			$elm$html$Html$ul,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (line) {
+					return A2(
+						$elm$html$Html$li,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(line)
+							]));
+				},
+				A2($author$project$Main$attemptDescription, lang, demo))),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					A3($author$project$Main$translate, lang, _List_Nil, 'The keyboard at the bottom highlight letters which have been played already.'))
+				])),
+			A2(
+			$elm_explorations$markdown$Markdown$toHtml,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('Markdown')
+				]),
+			A3(
+				$author$project$Main$translate,
+				lang,
+				_List_fromArray(
+					['https://www.powerlanguage.co.uk/wordle/', 'https://github.com/n1k0/wordlem']),
+				'Inspired by [Wordle]({0}) - [Source code]({1}).'))
+		]);
+};
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm$virtual_dom$VirtualDom$Custom = function (a) {
+	return {$: 3, a: a};
+};
+var $elm$html$Html$Events$custom = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Custom(decoder));
+	});
+var $elm$html$Html$h6 = _VirtualDom_node('h6');
+var $author$project$Main$viewModal = F2(
+	function (lang, content) {
+		var modalContentAttrs = _List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('modal-content'),
 				A2(
-					$elm$html$Html$header,
+				$elm$html$Html$Events$custom,
+				'mouseup',
+				$elm$json$Json$Decode$succeed(
+					{ar: $author$project$Main$NoOp, ay: true, aH: true}))
+			]);
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('d-block')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('d-flex justify-content-between align-items-center p-2 pb-0')
+							$elm$html$Html$Attributes$class('modal d-block fade show'),
+							A2($elm$html$Html$Attributes$attribute, 'tabindex', '-1'),
+							A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true'),
+							A2($elm$html$Html$Attributes$attribute, 'role', 'dialog'),
+							A2(
+							$elm$html$Html$Events$custom,
+							'mouseup',
+							$elm$json$Json$Decode$succeed(
+								{ar: $author$project$Main$CloseModal, ay: true, aH: true}))
 						]),
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$h1,
+							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('p-0 fs-2')
+									$elm$html$Html$Attributes$class('modal-dialog modal-dialog-centered modal-dialog-scrollable'),
+									A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Wordlem')
-								])),
-							$author$project$Main$selectLang(lang)
+									A2(
+									$elm$html$Html$div,
+									modalContentAttrs,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$div,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('modal-header')
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$h6,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$class('modal-title')
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															A3($author$project$Main$translate, lang, _List_Nil, 'Help'))
+														])),
+													A2(
+													$elm$html$Html$button,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$type_('button'),
+															$elm$html$Html$Attributes$class('btn-close'),
+															A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Close'),
+															$elm$html$Html$Events$onClick($author$project$Main$CloseModal)
+														]),
+													_List_Nil)
+												])),
+											A2(
+											$elm$html$Html$div,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('modal-body no-scroll-chaining')
+												]),
+											content)
+										]))
+								]))
 						])),
-				content));
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('modal-backdrop fade show')
+						]),
+					_List_Nil)
+				]));
+	});
+var $author$project$Main$layout = F2(
+	function (_v0, content) {
+		var lang = _v0.m;
+		var modal = _v0.H;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$main_,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('Game')
+						]),
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$elm$html$Html$header,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('d-flex justify-content-between align-items-center p-2 pb-0')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$h1,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('p-0 fs-2')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Wordlem')
+										])),
+									$author$project$Main$selectLang(lang),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('btn btn-sm btn-dark fw-bold rounded-circle'),
+											$elm$html$Html$Attributes$title('Help'),
+											$elm$html$Html$Events$onClick(
+											$author$project$Main$OpenModal(0))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('\u00A0?\u00A0')
+										]))
+								])),
+						content)),
+					function () {
+					if (!modal.$) {
+						var _v2 = modal.a;
+						return A2(
+							$author$project$Main$viewModal,
+							lang,
+							$author$project$Main$viewHelp(lang));
+					} else {
+						return $elm$html$Html$text('');
+					}
+				}()
+				]));
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -7100,68 +7606,6 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $author$project$Main$viewBoardRow = $elm$html$Html$div(
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('BoardRow'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'grid-template-columns',
-			A2(
-				$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
-				'repeat({0}, 1fr)',
-				_List_fromArray(
-					[
-						$elm$core$String$fromInt($author$project$Main$numberOfLetters)
-					])))
-		]));
-var $elm$core$List$singleton = function (value) {
-	return _List_fromArray(
-		[value]);
-};
-var $elm$core$Char$toUpper = _Char_toUpper;
-var $author$project$Main$charToText = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$Char$toUpper,
-	A2(
-		$elm$core$Basics$composeR,
-		$elm$core$List$singleton,
-		A2($elm$core$Basics$composeR, $elm$core$String$fromList, $elm$html$Html$text)));
-var $author$project$Main$viewTile = F2(
-	function (classes, _char) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
-				]),
-			_List_fromArray(
-				[
-					$author$project$Main$charToText(_char)
-				]));
-	});
-var $author$project$Main$viewAttempt = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$List$map(
-		function (letter) {
-			switch (letter.$) {
-				case 2:
-					var _char = letter.a;
-					return A2($author$project$Main$viewTile, 'btn-warning', _char);
-				case 1:
-					var _char = letter.a;
-					return A2($author$project$Main$viewTile, 'btn-success', _char);
-				case 0:
-					var _char = letter.a;
-					return A2($author$project$Main$viewTile, 'btn-dark', _char);
-				default:
-					var _char = letter.a;
-					return A2($author$project$Main$viewTile, 'btn-secondary', _char);
-			}
-		}),
-	$author$project$Main$viewBoardRow);
 var $author$project$Main$viewBoardElement = $elm$html$Html$div(
 	_List_fromArray(
 		[
@@ -7341,7 +7785,8 @@ var $author$project$Main$viewKeyState = function (_v0) {
 			]),
 		_List_fromArray(
 			[
-				$author$project$Main$charToText(_char)
+				$elm$html$Html$text(
+				$author$project$Main$charToText(_char))
 			]));
 };
 var $author$project$Main$viewKeyboard = F2(
@@ -7368,12 +7813,12 @@ var $author$project$Main$viewKeyboard = F2(
 							$author$project$Main$viewKeyState))),
 				$author$project$Main$dispositions(lang)));
 	});
-var $author$project$Main$view = function (_v0) {
-	var lang = _v0.q;
-	var state = _v0.o;
+var $author$project$Main$view = function (model) {
+	var lang = model.m;
+	var state = model.p;
 	return A2(
 		$author$project$Main$layout,
-		lang,
+		model,
 		function () {
 			switch (state.$) {
 				case 0:
@@ -7455,12 +7900,12 @@ var $author$project$Main$view = function (_v0) {
 		}());
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{a7: $author$project$Main$init, bu: $author$project$Main$subscriptions, by: $author$project$Main$update, bz: $author$project$Main$view});
+	{a8: $author$project$Main$init, bv: $author$project$Main$subscriptions, bz: $author$project$Main$update, bA: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
 		function (lang) {
 			return $elm$json$Json$Decode$succeed(
-				{q: lang});
+				{m: lang});
 		},
 		A2($elm$json$Json$Decode$field, 'lang', $elm$json$Json$Decode$string)))(0)}});}(this));
