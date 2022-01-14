@@ -1,7 +1,5 @@
 module Main exposing (Lang(..), Letter(..), main, validateAttempt)
 
--- import Markdown
-
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
@@ -11,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import List.Extra as LE
+import Markdown
 import Process
 import Random
 import String.Extra as SE
@@ -32,6 +31,7 @@ type alias Model =
     { lang : Lang
     , words : List WordToFind
     , state : GameState
+    , modal : Maybe Modal
     }
 
 
@@ -48,6 +48,10 @@ type Letter
     | Correct Char
     | Misplaced Char
     | Handled Char
+
+
+type Modal
+    = HelpModal
 
 
 type alias KeyState =
@@ -72,10 +76,12 @@ type alias WordToFind =
 
 type Msg
     = BackSpace
+    | CloseModal
     | KeyPressed Char
     | NewGame
     | NewWord (Maybe WordToFind)
     | NoOp
+    | OpenModal Modal
     | Submit
     | SwitchLang Lang
 
@@ -106,6 +112,7 @@ initialModel lang =
     { lang = lang
     , words = getWords lang
     , state = Idle
+    , modal = Nothing
     }
 
 
@@ -303,6 +310,9 @@ update msg model =
         ( BackSpace, _ ) ->
             ( model, Cmd.none )
 
+        ( CloseModal, _ ) ->
+            ( { model | modal = Nothing }, Cmd.none )
+
         ( KeyPressed char, Ongoing word attempts input _ ) ->
             let
                 newInput =
@@ -347,6 +357,9 @@ update msg model =
         ( NoOp, _ ) ->
             ( model, Cmd.none )
 
+        ( OpenModal modal, _ ) ->
+            ( { model | modal = Just modal }, Cmd.none )
+
         ( Submit, Ongoing word attempts input _ ) ->
             case validateAttempt model.lang word input of
                 Ok attempt ->
@@ -376,9 +389,9 @@ update msg model =
             )
 
 
-charToText : Char -> Html Msg
+charToText : Char -> String
 charToText =
-    Char.toUpper >> List.singleton >> String.fromList >> text
+    Char.toUpper >> List.singleton >> String.fromList
 
 
 viewAttempt : Attempt -> Html Msg
@@ -527,7 +540,7 @@ viewKeyState ( char, letter ) =
         [ class (String.join " " [ baseClasses, classes ])
         , onClick msg
         ]
-        [ charToText char ]
+        [ text (charToText char) ]
 
 
 viewBoard : Maybe UserInput -> List Attempt -> Html Msg
@@ -573,7 +586,7 @@ viewTile : String -> Char -> Html Msg
 viewTile classes char =
     div
         [ class <| "btn BoardTile rounded-0 " ++ classes ]
-        [ charToText char ]
+        [ text (charToText char) ]
 
 
 viewInput : UserInput -> Html Msg
@@ -611,49 +624,109 @@ selectLang lang =
                         , id (langBtnId lang_)
                         , class "nav-link px-2 py-1 mx-1"
                         , classList [ ( "active", lang == lang_ ) ]
+                        , title (langToString lang_)
                         , onClick (SwitchLang lang_)
                         ]
-                        [ text <| langToString lang_ ]
+                        [ span [ class "d-none d-sm-block" ]
+                            [ lang_ |> langToString |> text ]
+                        , span [ class "d-block d-sm-none" ]
+                            [ lang_ |> langToString |> String.slice 0 2 |> text ]
+                        ]
                     ]
             )
         |> div [ class "nav nav-pills nav-fill" ]
 
 
+attemptDescription : Lang -> Attempt -> List String
+attemptDescription lang =
+    List.map
+        (\letter ->
+            let
+                ( char, trans ) =
+                    case letter of
+                        Correct c ->
+                            ( c, "{0} is at the correct spot" )
 
--- TODO: help modal
--- viewHelp : Lang -> Html Msg
--- viewHelp lang =
---     div []
---         [ p []
---             [ "Guess a {0} letters {1} word in {2} attempts or less."
---                 |> translate lang
---                     [ String.fromInt numberOfLetters,
---                     , langToString lang
---                     , String.fromInt maxAttempts
---                     ]
---                 |> text
---             ]
---         , "Inspired by [Wordle]({0}) - [Source code]({1})"
---             |> translate lang
---                 [ "https://www.powerlanguage.co.uk/wordle/"
---                 , "https://github.com/n1k0/wordlem"
---                 ]
---             |> Markdown.toHtml
---                 [ class "text-center text-muted"
---                 , style "font-size" ".8em"
---                 ]
---         ]
+                        Misplaced c ->
+                            ( c, "{0} is misplaced" )
 
+                        Unused c ->
+                            ( c, "{0} is unused" )
 
-layout : Lang -> List (Html Msg) -> Html Msg
-layout lang content =
-    main_ [ class "Game" ]
-        (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
-            [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
-            , selectLang lang
-            ]
-            :: content
+                        Handled c ->
+                            ( c, "{0} is unused" )
+            in
+            trans |> translate lang [ charToText char ]
         )
+
+
+viewHelp : Lang -> List (Html Msg)
+viewHelp lang =
+    let
+        demo =
+            [ Correct 'm'
+            , Misplaced 'e'
+            , Unused 't'
+            , Correct 'a'
+            , Unused 's'
+            ]
+    in
+    [ p []
+        [ "Guess a {0} letters {1} word in {2} attempts or less."
+            |> translate lang
+                [ String.fromInt numberOfLetters
+                , langToString lang
+                , String.fromInt maxAttempts
+                ]
+            |> text
+        ]
+    , p []
+        [ "Use your dekstop computer keyboard to enter words, or the virtual one at the bottom."
+            |> translate lang []
+            |> text
+        ]
+    , div [ class "mb-3" ] [ viewAttempt demo ]
+    , p [] [ "In this example:" |> translate lang [] |> text ]
+    , attemptDescription lang demo
+        |> List.map (\line -> li [] [ text line ])
+        |> ul []
+    , p []
+        [ "The keyboard at the bottom highlight letters which have been played already."
+            |> translate lang []
+            |> text
+        ]
+    , "Inspired by [Wordle]({0}) - [Source code]({1})."
+        |> translate lang
+            [ "https://www.powerlanguage.co.uk/wordle/"
+            , "https://github.com/n1k0/wordlem"
+            ]
+        |> Markdown.toHtml [ class "Markdown" ]
+    ]
+
+
+layout : Model -> List (Html Msg) -> Html Msg
+layout { lang, modal } content =
+    div []
+        [ main_ [ class "Game" ]
+            (header [ class "d-flex justify-content-between align-items-center p-2 pb-0" ]
+                [ h1 [ class "p-0 fs-2" ] [ text "Wordlem" ]
+                , selectLang lang
+                , button
+                    [ class "btn btn-sm btn-dark fw-bold rounded-circle"
+                    , title "Help"
+                    , onClick (OpenModal HelpModal)
+                    ]
+                    [ text "\u{00A0}?\u{00A0}" ]
+                ]
+                :: content
+            )
+        , case modal of
+            Just HelpModal ->
+                viewModal lang (viewHelp lang)
+
+            Nothing ->
+                text ""
+        ]
 
 
 alert : String -> String -> Html Msg
@@ -663,9 +736,63 @@ alert level message =
         [ text message ]
 
 
+viewModal : Lang -> List (Html Msg) -> Html Msg
+viewModal lang content =
+    let
+        modalContentAttrs =
+            [ class "modal-content"
+            , custom "mouseup"
+                (Decode.succeed
+                    { message = NoOp
+                    , stopPropagation = True
+                    , preventDefault = True
+                    }
+                )
+            ]
+    in
+    div [ class "d-block" ]
+        [ div
+            [ class "modal d-block fade show"
+            , attribute "tabindex" "-1"
+            , attribute "aria-modal" "true"
+            , attribute "role" "dialog"
+            , custom "mouseup"
+                (Decode.succeed
+                    { message = CloseModal
+                    , stopPropagation = True
+                    , preventDefault = True
+                    }
+                )
+            ]
+            [ div
+                [ class "modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                , attribute "aria-modal" "true"
+                ]
+                [ div modalContentAttrs
+                    [ div [ class "modal-header" ]
+                        [ h6 [ class "modal-title" ]
+                            [ "Help" |> translate lang [] |> text ]
+                        , button
+                            [ type_ "button"
+                            , class "btn-close"
+                            , attribute "aria-label" "Close"
+                            , onClick CloseModal
+                            ]
+                            []
+                        ]
+                    , div
+                        [ class "modal-body no-scroll-chaining" ]
+                        content
+                    ]
+                ]
+            ]
+        , div [ class "modal-backdrop fade show" ] []
+        ]
+
+
 view : Model -> Html Msg
-view { lang, state } =
-    layout lang
+view ({ lang, state } as model) =
+    layout model
         (case state of
             Idle ->
                 [ "Loading game…"
@@ -726,7 +853,16 @@ translate lang params string =
 translations : Dict String String
 translations =
     Dict.fromList
-        [ ( "Definition"
+        [ ( "{0} is at the correct spot"
+          , "{0} est à la bonne position"
+          )
+        , ( "{0} is misplaced"
+          , "{0} est mal positionnée"
+          )
+        , ( "{0} is unused"
+          , "{0} n'est pas utilisée"
+          )
+        , ( "Definition"
           , "Définition"
           )
         , ( "Game data couldn't load: {0}"
@@ -736,10 +872,16 @@ translations =
           , "Erreur générale. C'est pas bon signe."
           )
         , ( "Guess a {0} letters {1} word in {2} attempts or less."
-          , "Devinez un mot {0} de {1} lettres en {2} essais ou moins\u{00A0}."
+          , "Devinez un mot {1} de {0} lettres en {2} essais ou moins."
           )
-        , ( "Inspired by [Wordle]({0}) - [Source code]({1})"
-          , "Inspiré de [Wordle]({0}) - [Code source]({1})"
+        , ( "Help"
+          , "Aide"
+          )
+        , ( "In this example:"
+          , "Dans cet exemple\u{00A0}:"
+          )
+        , ( "Inspired by [Wordle]({0}) - [Source code]({1})."
+          , "Inspiré de [Wordle]({0}) - [Code source]({1})."
           )
         , ( "Loading game…"
           , "Chargement du jeu…"
@@ -758,6 +900,9 @@ translations =
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
+          )
+        , ( "Use your dekstop computer keyboard to enter words, or the virtual one at the bottom."
+          , "Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l'écran."
           )
         , ( "Well done!"
           , "Bien joué\u{00A0}!"
@@ -800,6 +945,9 @@ decodeKey =
 
                     "Enter" ->
                         Decode.succeed Submit
+
+                    "Escape" ->
+                        Decode.succeed CloseModal
 
                     string ->
                         if String.length string /= 1 then

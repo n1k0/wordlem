@@ -87,3 +87,13 @@
   pointer-events: none;
   width: fit-content;
 }
+
+.Markdown p:last-child {
+  margin-bottom: 0;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .btn-close {
+    filter: invert(1);
+  }
+}
