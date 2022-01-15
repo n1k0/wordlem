@@ -29,8 +29,8 @@ body { touch-action: manipulation; }
   justify-content: center;
   align-items: center;
   flex-grow: 5;
-  overflow: hidden;
-  padding-top: 54px; /* height of header */
+  overflow: scroll;
+  padding-top: 34px; /* height of header */
 }
 
 .Board {
@@ -106,7 +106,7 @@ body { touch-action: manipulation; }
   flex: 1;
   height: 7.3vh;
   padding: 0.5rem 0.25rem;
-  line-height: 1.2rem;
+  line-height: 0;
 }
 
 .KeyboardKey:active,

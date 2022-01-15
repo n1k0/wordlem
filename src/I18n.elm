@@ -35,7 +35,6 @@ type Id
     | LoadError
     | NotEnoughLetters
     | PlayAgain
-    | StateError
     | Statistics
     | StatsAverageGuesses
     | StatsGamesPlayed
@@ -142,11 +141,6 @@ getSet id =
             set []
                 "Play again"
                 "Rejouer"
-
-        StateError ->
-            set []
-                "General game state error. This is bad."
-                "Erreur générale. C'est pas bon signe."
 
         Statistics ->
             set []

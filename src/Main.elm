@@ -81,7 +81,6 @@ type Modal
 type Error
     = DecodeError String
     | LoadError
-    | StateError
 
 
 type alias KeyState =
@@ -184,6 +183,20 @@ initialModel store =
     , modal = Nothing
     , time = Time.millisToPosix 0
     }
+
+
+
+-- sampleOngoingState : GameState
+-- sampleOngoingState =
+--     -- this is useful to debug specific states
+--     Ongoing "xxxxx"
+--         ("voila"
+--             |> String.toList
+--             |> List.map Unused
+--             |> List.repeat 5
+--         )
+--         "voila"
+--         Nothing
 
 
 getWords : Lang -> List WordToFind
@@ -342,6 +355,14 @@ defocus domId =
         |> Task.attempt (always NoOp)
 
 
+scrollToBottom : String -> Cmd Msg
+scrollToBottom id =
+    Process.sleep 10
+        |> Task.andThen (\_ -> Dom.getViewportOf id)
+        |> Task.andThen (\{ scene } -> Dom.setViewportOf id 0 scene.height)
+        |> Task.attempt (always NoOp)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
@@ -403,7 +424,7 @@ update msg ({ store } as model) =
             , Cmd.none
             )
 
-        ( NewWord _, Errored _ ) ->
+        ( NewWord _, _ ) ->
             ( model, Cmd.none )
 
         ( NoOp, _ ) ->
@@ -428,9 +449,18 @@ update msg ({ store } as model) =
         ( Submit, Ongoing word guesses input _ ) ->
             case validateGuess store.lang word input of
                 Ok guess ->
+                    let
+                        newState =
+                            checkGame word (guess :: guesses)
+                    in
                     logResult
-                        ( { model | state = checkGame word (guess :: guesses) }
-                        , Cmd.none
+                        ( { model | state = newState }
+                        , case newState of
+                            Lost _ _ ->
+                                scrollToBottom "board-container"
+
+                            _ ->
+                                Cmd.none
                         )
 
                 Err error ->
@@ -454,11 +484,6 @@ update msg ({ store } as model) =
                 [ newStore |> encodeStore |> Encode.encode 0 |> saveStore
                 , Random.generate NewWord (randomWord newModel.words)
                 ]
-            )
-
-        _ ->
-            ( { model | state = Errored StateError }
-            , Cmd.none
             )
 
 
@@ -634,7 +659,7 @@ viewBoard input guesses =
                 - List.length guesses
                 - (input |> Maybe.map (always 2) |> Maybe.withDefault 1)
     in
-    div [ class "BoardContainer" ]
+    div [ class "BoardContainer", id "board-container" ]
         [ [ guesses
                 |> List.reverse
                 |> List.map (viewAttempt >> Just)
@@ -1005,9 +1030,6 @@ viewError lang error =
 
             LoadError ->
                 I18n.htmlText lang I18n.LoadError
-
-            StateError ->
-                I18n.htmlText lang I18n.StateError
         ]
 
 
