@@ -2,6 +2,10 @@
   max-width: 600px;
 }
 
+.HeaderButton {
+  min-width: 0;
+}
+
 .Game {
   width: 100%;
   max-width: 600px;
