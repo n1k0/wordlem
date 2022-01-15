@@ -26,7 +26,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
+  flex-grow: 5;
   overflow: hidden;
   padding-top: 54px; /* height of header */
 }
@@ -35,17 +35,30 @@
   /* Note: grid-template-columns is handled programmatically in Elm land */
   display: grid;
   grid-gap: 5px;
-  padding: 10px;
   box-sizing: border-box;
   width: 80%;
   max-width: 350px;
   max-height: 454px;
 }
 
+@media screen and (max-height: 480px) {
+  .Board {
+    max-width: 175px;
+    max-height: 227px;
+    grid-gap: 2px;
+  }
+}
+
 .BoardRow {
   /* Note: grid-template-columns is handled programmatically in Elm land */
   display: grid;
   grid-gap: 5px;
+}
+
+@media screen and (max-height: 480px) {
+  .BoardRow {
+    grid-gap: 2px;
+  }
 }
 
 .BoardTile {
@@ -64,6 +77,13 @@
   content: '';
   display: inline-block;
   padding-bottom: 100%;
+}
+
+@media screen and (max-height: 480px) {
+  .BoardTile {
+    font-size: 1rem;
+    line-height: 1rem;
+  }
 }
 
 .Keyboard {
@@ -94,7 +114,14 @@
 
 .EndGameButtons {
   width: calc(100% - 20px);
-  margin-top: 4px;
+  margin: 4px 10px 0 10px;
+  flex-grow: 1;
+}
+
+@media screen and (max-height: 480px) {
+  .EndGameButtons a, .EndGameButtons button {
+    font-size: .8rem;
+  }
 }
 
 .Flash {

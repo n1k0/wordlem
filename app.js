@@ -7537,7 +7537,7 @@ var $author$project$Main$definitionLink = F2(
 			$elm$html$Html$a,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('btn btn-lg btn-info rounded-0'),
+					$elm$html$Html$Attributes$class('btn btn-lg btn-info'),
 					$elm$html$Html$Attributes$target('_blank'),
 					$elm$html$Html$Attributes$href(
 					function () {
@@ -7579,7 +7579,7 @@ var $author$project$Main$newGameButton = function (lang) {
 		$elm$html$Html$button,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('btn btn-lg btn-success rounded-0'),
+				$elm$html$Html$Attributes$class('btn btn-lg btn-success'),
 				$elm$html$Html$Events$onClick($author$project$Main$NewGame)
 			]),
 		_List_fromArray(
@@ -7594,12 +7594,21 @@ var $author$project$Main$endGameButtons = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('EndGameButtons btn-group')
+					$elm$html$Html$Attributes$class('EndGameButtons')
 				]),
 			_List_fromArray(
 				[
-					A2($author$project$Main$definitionLink, lang, word),
-					$author$project$Main$newGameButton(lang)
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('btn-group w-100')
+						]),
+					_List_fromArray(
+						[
+							A2($author$project$Main$definitionLink, lang, word),
+							$author$project$Main$newGameButton(lang)
+						]))
 				]));
 	});
 var $author$project$I18n$Help = {$: 7};
@@ -9189,6 +9198,7 @@ var $author$project$Main$view = function (model) {
 						[
 							A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, guesses),
 							A2($author$project$Main$endGameButtons, store.ac, word),
+							A2($author$project$Main$viewKeyboard, store.ac, guesses),
 							A2(
 							$author$project$Main$alert,
 							'success',
@@ -9210,6 +9220,7 @@ var $author$project$Main$view = function (model) {
 									$author$project$Main$Correct,
 									$elm$core$String$toList(word)))),
 							A2($author$project$Main$endGameButtons, store.ac, word),
+							A2($author$project$Main$viewKeyboard, store.ac, guesses),
 							A2(
 							$author$project$Main$alert,
 							'info',
