@@ -7261,7 +7261,7 @@ var $author$project$Main$validateGuess = F3(
 				$author$project$I18n$translate,
 				lang,
 				$author$project$I18n$AbsentFromDictionary(
-					{b0: word}))) : $elm$core$Result$Ok(
+					{b0: input}))) : $elm$core$Result$Ok(
 			A2(
 				$author$project$Main$handleMisplacedDuplicates,
 				wordChars,
