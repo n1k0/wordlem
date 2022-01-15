@@ -7545,7 +7545,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 						$elm$html$Html$span,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('fw-bold me-2')
+								$elm$html$Html$Attributes$class('text-white fw-bold me-2')
 							]),
 						_List_fromArray(
 							[
@@ -7557,7 +7557,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-en'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
 								$elm$html$Html$Attributes$classList(
 								_List_fromArray(
 									[
@@ -7576,7 +7576,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-fr'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
 								$elm$html$Html$Attributes$classList(
 								_List_fromArray(
 									[
@@ -7595,7 +7595,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-stats'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
 								$elm$html$Html$Attributes$classList(
 								_List_fromArray(
 									[
@@ -7620,7 +7620,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-help'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
 								$elm$html$Html$Attributes$classList(
 								_List_fromArray(
 									[
