@@ -9114,7 +9114,7 @@ var $author$project$Main$viewKeyState = function (_v0) {
 				break _v2$3;
 			}
 		}
-		return (_char === '⌫') ? _Utils_Tuple2('btn-info px-3', $author$project$Main$BackSpace) : ((_char === '⏎') ? _Utils_Tuple2('btn-info px-3', $author$project$Main$Submit) : _Utils_Tuple2(
+		return (_char === '⌫') ? _Utils_Tuple2('btn-info large-key', $author$project$Main$BackSpace) : ((_char === '⏎') ? _Utils_Tuple2('btn-info large-key', $author$project$Main$Submit) : _Utils_Tuple2(
 			'btn-secondary',
 			$author$project$Main$KeyPressed(_char)));
 	}();
