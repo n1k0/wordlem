@@ -17,6 +17,7 @@
   align-items: center;
   flex-grow: 1;
   overflow: hidden;
+  padding-top: 60px; /* height of header */
 }
 
 .Board {
