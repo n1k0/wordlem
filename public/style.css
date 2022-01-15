@@ -114,6 +114,10 @@ body { touch-action: manipulation; }
   box-shadow: none;
 }
 
+.KeyboardKey.large-key {
+  flex: 2.5;
+}
+
 .EndGameButtons {
   width: calc(100% - 20px);
   margin: 4px 10px 0 10px;

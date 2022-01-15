@@ -596,10 +596,10 @@ viewKeyState ( char, letter ) =
 
                 _ ->
                     if char == '⌫' then
-                        ( "btn-info px-3", BackSpace )
+                        ( "btn-info large-key", BackSpace )
 
                     else if char == '⏎' then
-                        ( "btn-info px-3", Submit )
+                        ( "btn-info large-key", Submit )
 
                     else
                         ( "btn-secondary", KeyPressed char )
