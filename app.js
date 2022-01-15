@@ -7525,6 +7525,14 @@ var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('
 var $author$project$Main$viewHeader = function (_v0) {
 	var store = _v0.u;
 	var modal = _v0.H;
+	var btnClass = function (active) {
+		return $elm$html$Html$Attributes$classList(
+			_List_fromArray(
+				[
+					_Utils_Tuple2('btn-dark', !active),
+					_Utils_Tuple2('btn-primary', active)
+				]));
+	};
 	return A2(
 		$elm$html$Html$nav,
 		_List_fromArray(
@@ -7557,12 +7565,8 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-en'),
-								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2('btn-primary', !store.a)
-									])),
+								$elm$html$Html$Attributes$class('btn btn-sm'),
+								btnClass(!store.a),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(0))
 							]),
@@ -7576,12 +7580,8 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-fr'),
-								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2('btn-primary', store.a === 1)
-									])),
+								$elm$html$Html$Attributes$class('btn btn-sm'),
+								btnClass(store.a === 1),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(1))
 							]),
@@ -7595,16 +7595,11 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-stats'),
-								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2(
-										'btn-primary',
-										_Utils_eq(
-											modal,
-											$elm$core$Maybe$Just(1)))
-									])),
+								$elm$html$Html$Attributes$class('btn btn-sm'),
+								btnClass(
+								_Utils_eq(
+									modal,
+									$elm$core$Maybe$Just(1))),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$OpenModal(1))
 							]),
@@ -7620,16 +7615,11 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-help'),
-								$elm$html$Html$Attributes$class('btn btn-sm btn-dark'),
-								$elm$html$Html$Attributes$classList(
-								_List_fromArray(
-									[
-										_Utils_Tuple2(
-										'btn-primary',
-										_Utils_eq(
-											modal,
-											$elm$core$Maybe$Just(0)))
-									])),
+								$elm$html$Html$Attributes$class('btn btn-sm'),
+								btnClass(
+								_Utils_eq(
+									modal,
+									$elm$core$Maybe$Just(0))),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$OpenModal(0))
 							]),
