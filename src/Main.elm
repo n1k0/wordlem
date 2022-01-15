@@ -61,7 +61,6 @@ type alias Model =
     , state : GameState
     , modal : Maybe Modal
     , time : Posix
-    , menuOpened : Bool
     }
 
 
@@ -123,7 +122,6 @@ type Msg
     | StoreChanged String
     | Submit
     | SwitchLang Lang
-    | ToggleMenu
 
 
 numberOfLetters : Int
@@ -191,7 +189,6 @@ initialModel store =
     , state = Idle
     , modal = Nothing
     , time = Time.millisToPosix 0
-    , menuOpened = False
     }
 
 
@@ -392,22 +389,15 @@ update msg ({ store } as model) =
                         |> List.reverse
                         |> String.fromList
             in
-            ( { model
-                | state = Ongoing word guesses newInput Nothing
-                , menuOpened = False
-              }
+            ( { model | state = Ongoing word guesses newInput Nothing }
             , Cmd.none
             )
 
         ( BackSpace, _ ) ->
-            ( { model | menuOpened = False }
-            , Cmd.none
-            )
+            ( model, Cmd.none )
 
         ( CloseModal, _ ) ->
-            ( { model | modal = Nothing, menuOpened = False }
-            , Cmd.none
-            )
+            ( { model | modal = Nothing }, Cmd.none )
 
         ( KeyPressed char, Ongoing word guesses input _ ) ->
             let
@@ -417,10 +407,7 @@ update msg ({ store } as model) =
                         |> List.take numberOfLetters
                         |> String.fromList
             in
-            ( { model
-                | state = Ongoing word guesses newInput Nothing
-                , menuOpened = False
-              }
+            ( { model | state = Ongoing word guesses newInput Nothing }
             , Cmd.none
             )
 
@@ -440,33 +427,25 @@ update msg ({ store } as model) =
             ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Idle ) ->
-            ( { model
-                | state = Ongoing newWord [] "" Nothing
-                , menuOpened = False
-              }
+            ( { model | state = Ongoing newWord [] "" Nothing }
             , [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help" ]
                 |> List.map defocus
                 |> Cmd.batch
             )
 
         ( NewWord Nothing, Idle ) ->
-            ( { model
-                | state = Errored LoadError
-                , menuOpened = False
-              }
+            ( { model | state = Errored LoadError }
             , Cmd.none
             )
 
         ( NewWord _, Errored _ ) ->
-            ( { model | menuOpened = False }
-            , Cmd.none
-            )
+            ( model, Cmd.none )
 
         ( NoOp, _ ) ->
             ( model, Cmd.none )
 
         ( OpenModal modal, _ ) ->
-            ( { model | modal = Just modal, menuOpened = False }, Cmd.none )
+            ( { model | modal = Just modal }, Cmd.none )
 
         ( StoreChanged rawStore, _ ) ->
             case Decode.decodeString decodeStore rawStore of
@@ -480,23 +459,17 @@ update msg ({ store } as model) =
             case validateGuess store.lang word input of
                 Ok guess ->
                     logResult
-                        ( { model
-                            | state = checkGame word (guess :: guesses)
-                            , menuOpened = False
-                          }
+                        ( { model | state = checkGame word (guess :: guesses) }
                         , Cmd.none
                         )
 
                 Err error ->
-                    ( { model
-                        | state = Ongoing word guesses input (Just error)
-                        , menuOpened = False
-                      }
+                    ( { model | state = Ongoing word guesses input (Just error) }
                     , Cmd.none
                     )
 
         ( Submit, _ ) ->
-            ( { model | menuOpened = False }, Cmd.none )
+            ( model, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
             let
@@ -513,13 +486,8 @@ update msg ({ store } as model) =
                 ]
             )
 
-        ( ToggleMenu, _ ) ->
-            ( { model | menuOpened = not model.menuOpened }
-            , Cmd.none
-            )
-
         _ ->
-            ( { model | state = Errored StateError, menuOpened = False }
+            ( { model | state = Errored StateError }
             , Cmd.none
             )
 
@@ -941,75 +909,45 @@ icon name =
 
 
 viewHeader : Model -> Html Msg
-viewHeader { store, menuOpened } =
-    nav [ class "navbar fixed-top navbar-expand-lg navbar-dark bg-dark" ]
+viewHeader { store, modal } =
+    nav [ class "navbar fixed-top navbar-dark bg-dark" ]
         [ div [ class "Header container" ]
-            [ span [ class "navbar-brand" ] [ text "Wordlem" ]
+            [ span [ class "fw-bold me-2" ] [ text "Wordlem" ]
             , button
                 [ type_ "button"
-                , class "navbar-toggler"
-                , classList [ ( "collapsed", not menuOpened ) ]
-                , onClick ToggleMenu
-                , attribute "aria-label" "Navigation"
-                , attribute "aria-controls" "menuBar"
-                , attribute "aria-expanded"
-                    (if menuOpened then
-                        "true"
-
-                     else
-                        "false"
-                    )
+                , id "btn-lang-en"
+                , class "btn btn-sm"
+                , classList [ ( "btn-primary", store.lang == English ) ]
+                , onClick (SwitchLang English)
                 ]
-                [ span [ class "navbar-toggler-icon" ] [] ]
-            , div
-                [ id "menuBar"
-                , class "navbar-collapse collapse"
-                , classList [ ( "show", menuOpened ) ]
+                [ text "English" ]
+            , button
+                [ type_ "button"
+                , id "btn-lang-fr"
+                , class "btn btn-sm"
+                , classList [ ( "btn-primary", store.lang == French ) ]
+                , onClick (SwitchLang French)
                 ]
-                [ ul [ class "navbar-nav me-auto mb-2 mb-lg-0" ]
-                    [ li [ class "nav-item" ]
-                        [ button
-                            [ type_ "button"
-                            , id "btn-lang-en"
-                            , class "btn btn-link nav-link"
-                            , classList [ ( "active", store.lang == English ) ]
-                            , onClick (SwitchLang English)
-                            ]
-                            [ text "English" ]
-                        ]
-                    , li [ class "nav-item" ]
-                        [ button
-                            [ type_ "button"
-                            , id "btn-lang-fr"
-                            , class "btn btn-link nav-link"
-                            , classList [ ( "active", store.lang == French ) ]
-                            , onClick (SwitchLang French)
-                            ]
-                            [ text "Français" ]
-                        ]
-                    , li [ class "nav-item" ]
-                        [ button
-                            [ type_ "button"
-                            , id "btn-stats"
-                            , class "btn btn-link nav-link"
-                            , onClick (OpenModal StatsModal)
-                            ]
-                            [ icon "stats"
-                            , "Stats" |> translate store.lang [] |> text
-                            ]
-                        ]
-                    , li [ class "nav-item" ]
-                        [ button
-                            [ type_ "button"
-                            , id "btn-help"
-                            , class "btn btn-link nav-link"
-                            , onClick (OpenModal HelpModal)
-                            ]
-                            [ icon "help"
-                            , "Help" |> translate store.lang [] |> text
-                            ]
-                        ]
-                    ]
+                [ text "Français" ]
+            , button
+                [ type_ "button"
+                , id "btn-stats"
+                , class "btn btn-sm"
+                , classList [ ( "btn-primary", modal == Just StatsModal ) ]
+                , onClick (OpenModal StatsModal)
+                ]
+                [ icon "stats"
+                , "Stats" |> translate store.lang [] |> text
+                ]
+            , button
+                [ type_ "button"
+                , id "btn-help"
+                , class "btn btn-sm"
+                , classList [ ( "btn-primary", modal == Just HelpModal ) ]
+                , onClick (OpenModal HelpModal)
+                ]
+                [ icon "help"
+                , "Help" |> translate store.lang [] |> text
                 ]
             ]
         ]
@@ -1263,7 +1201,7 @@ translations =
           , "Mot trop court"
           )
         , ( "Stats"
-          , "Statistiques"
+          , "Stats"
           )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
