@@ -139,7 +139,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         lang =
-            parseLang flags.lang
+            I18n.parseLang flags.lang
 
         store =
             flags.rawStore
@@ -186,35 +186,6 @@ initialModel store =
     }
 
 
-parseLang : String -> Lang
-parseLang string =
-    if String.startsWith "fr" string then
-        French
-
-    else
-        English
-
-
-langToString : Lang -> String
-langToString lang =
-    case lang of
-        English ->
-            "English"
-
-        French ->
-            "Français"
-
-
-langFromString : String -> Lang
-langFromString string =
-    case string of
-        "Français" ->
-            French
-
-        _ ->
-            English
-
-
 getWords : Lang -> List WordToFind
 getWords lang =
     case lang of
@@ -248,10 +219,10 @@ validateGuess lang word input =
             )
     in
     if List.length inputChars /= numberOfLetters then
-        "Not enough letters" |> translate lang [] |> Err
+        I18n.NotEnoughLetters |> translate lang |> Err
 
     else if not (List.member (normalize input) (getWords lang)) then
-        "Not in dictionary: {0}" |> translate lang [ String.toUpper input ] |> Err
+        I18n.AbsentFromDictionary { word = word } |> translate lang |> Err
 
     else
         wordChars
@@ -534,9 +505,7 @@ newGameButton lang =
         , onClick NewGame
         ]
         [ icon "play-again"
-        , "Play again"
-            |> translate lang []
-            |> text
+        , I18n.htmlText lang I18n.PlayAgain
         ]
 
 
@@ -555,9 +524,7 @@ definitionLink lang word =
             )
         ]
         [ icon "definition"
-        , "Definition"
-            |> translate lang [ String.toUpper word ]
-            |> text
+        , I18n.htmlText lang I18n.Definition
         ]
 
 
@@ -706,22 +673,20 @@ guessDescription : Lang -> Guess -> List String
 guessDescription lang =
     List.map
         (\letter ->
-            let
-                ( char, trans ) =
-                    case letter of
-                        Correct c ->
-                            ( c, "{0} is at the correct spot" )
+            translate lang
+                (case letter of
+                    Correct c ->
+                        I18n.HelpLetterCorrectlyPlaced { letter = charToText c }
 
-                        Misplaced c ->
-                            ( c, "{0} is misplaced" )
+                    Misplaced c ->
+                        I18n.HelpLetterMisplaced { letter = charToText c }
 
-                        Unused c ->
-                            ( c, "{0} is unused" )
+                    Unused c ->
+                        I18n.HelpLetterUnused { letter = charToText c }
 
-                        Handled c ->
-                            ( c, "{0} is unused" )
-            in
-            trans |> translate lang [ charToText char ]
+                    Handled c ->
+                        I18n.HelpLetterUnused { letter = charToText c }
+                )
         )
 
 
@@ -737,34 +702,28 @@ viewHelp { lang } =
             ]
     in
     [ p []
-        [ "Guess a {0} letters {1} word in {2} guesses or less."
-            |> translate lang
-                [ String.fromInt numberOfLetters
-                , langToString lang
-                , String.fromInt maxAttempts
-                ]
-            |> text
+        [ I18n.HelpGamePitch
+            { nbLetters = numberOfLetters
+            , lang = lang
+            , maxGuesses = maxAttempts
+            }
+            |> I18n.htmlText lang
         ]
     , p []
-        [ "Use your dekstop computer keyboard to enter words, or the virtual one at the bottom."
-            |> translate lang []
-            |> text
-        ]
-    , div [ class "mb-3" ] [ viewAttempt demo ]
-    , p [] [ "In this example:" |> translate lang [] |> text ]
+        [ I18n.htmlText lang I18n.HelpKeyboard ]
+    , div [ class "mb-3" ]
+        [ viewAttempt demo ]
+    , p []
+        [ I18n.htmlText lang I18n.HelpInThisExample ]
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
         |> ul []
-    , p []
-        [ "The keyboard at the bottom highlight letters which have been played already."
-            |> translate lang []
-            |> text
-        ]
-    , "Inspired by [Wordle]({0}) - [Source code]({1})."
+    , p [] [ I18n.htmlText lang I18n.HelpKeyboardLetter ]
+    , I18n.HelpInspiredBy
+        { wordleUrl = "https://www.powerlanguage.co.uk/wordle/"
+        , githubUrl = "https://github.com/n1k0/wordlem"
+        }
         |> translate lang
-            [ "https://www.powerlanguage.co.uk/wordle/"
-            , "https://github.com/n1k0/wordlem"
-            ]
         |> Markdown.toHtml [ class "Markdown" ]
     ]
 
@@ -795,9 +754,8 @@ viewStats : Store -> List (Html Msg)
 viewStats { lang, logs } =
     case List.filter (.lang >> (==) lang) logs of
         [] ->
-            [ "You haven't played in {0} yet, so I can't render any stats."
-                |> translate lang [ langToString lang ]
-                |> text
+            [ I18n.StatsLangDataMissing { lang = lang }
+                |> I18n.htmlText lang
             ]
 
         logs_ ->
@@ -847,20 +805,20 @@ viewLangStats lang langLogs =
         [ div [ class "card py-0" ]
             [ div [ class "card-body text-center" ]
                 [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-                , small [] [ "games played" |> translate lang [] |> text ]
+                , small [] [ I18n.htmlText lang I18n.StatsGamesPlayed ]
                 ]
             ]
         , div [ class "card py-0" ]
             [ div [ class "card-body text-center" ]
                 [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
-                , small [] [ "win rate" |> translate lang [] |> text ]
+                , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
                 ]
             ]
         , if guessAvg > 0 then
             div [ class "card py-0" ]
                 [ div [ class "card-body text-center" ]
                     [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
-                    , small [] [ "average guesses" |> translate lang [] |> text ]
+                    , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
                     ]
                 ]
 
@@ -869,9 +827,8 @@ viewLangStats lang langLogs =
         ]
     , div [ class "table-responsive" ]
         [ h2 [ class "fs-5" ]
-            [ "Guess distribution ({0})"
-                |> translate lang [ langToString lang ]
-                |> text
+            [ I18n.StatsGuessDistribution { lang = lang }
+                |> I18n.htmlText lang
             ]
         , table [ class "table" ]
             [ List.range 1 6
@@ -889,10 +846,10 @@ layout ({ store, modal } as model) content =
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
-                viewModal store "Help" (viewHelp store)
+                viewModal store I18n.Help (viewHelp store)
 
             Just StatsModal ->
-                viewModal store "Stats" (viewStats store)
+                viewModal store I18n.Statistics (viewStats store)
 
             Nothing ->
                 text ""
@@ -940,7 +897,7 @@ viewHeader { store, modal } =
                 , onClick (OpenModal StatsModal)
                 ]
                 [ icon "stats"
-                , "Stats" |> translate store.lang [] |> text
+                , I18n.htmlText store.lang I18n.Statistics
                 ]
             , button
                 [ type_ "button"
@@ -950,7 +907,7 @@ viewHeader { store, modal } =
                 , onClick (OpenModal HelpModal)
                 ]
                 [ icon "help"
-                , "Help" |> translate store.lang [] |> text
+                , I18n.htmlText store.lang I18n.Help
                 ]
             ]
         ]
@@ -963,8 +920,8 @@ alert level message =
         [ text message ]
 
 
-viewModal : Store -> String -> List (Html Msg) -> Html Msg
-viewModal { lang } title content =
+viewModal : Store -> I18n.Id -> List (Html Msg) -> Html Msg
+viewModal { lang } transationId content =
     let
         modalContentAttrs =
             [ class "modal-content"
@@ -998,7 +955,7 @@ viewModal { lang } title content =
                 [ div modalContentAttrs
                     [ div [ class "modal-header" ]
                         [ h6 [ class "modal-title" ]
-                            [ title |> translate lang [] |> text ]
+                            [ I18n.htmlText lang transationId ]
                         , button
                             [ type_ "button"
                             , class "btn-close"
@@ -1024,22 +981,16 @@ viewError lang error =
             DecodeError details ->
                 div []
                     [ p []
-                        [ "Unable to restore previously saved data."
-                            |> translate lang []
-                            |> text
-                        ]
-                    , pre [ class "pb-3" ] [ text details ]
+                        [ I18n.htmlText lang I18n.DecodeError ]
+                    , pre [ class "pb-3" ]
+                        [ text details ]
                     ]
 
             LoadError ->
-                "Unable to pick a word."
-                    |> translate lang []
-                    |> text
+                I18n.htmlText lang I18n.LoadError
 
             StateError ->
-                "General game state error. This is bad."
-                    |> translate lang []
-                    |> text
+                I18n.htmlText lang I18n.StateError
         ]
 
 
@@ -1048,10 +999,7 @@ view ({ store, state } as model) =
     layout model
         (case state of
             Idle ->
-                [ "Loading game…"
-                    |> translate store.lang []
-                    |> text
-                ]
+                [ I18n.htmlText store.lang I18n.GameLoading ]
 
             Errored error ->
                 [ viewError store.lang error
@@ -1062,8 +1010,7 @@ view ({ store, state } as model) =
             Won word guesses ->
                 [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
-                , "Well done!"
-                    |> translate store.lang []
+                , translate store.lang I18n.GameWin
                     |> alert "success"
                 ]
 
@@ -1074,9 +1021,8 @@ view ({ store, state } as model) =
                     |> (\a -> a :: guesses)
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
-                , "Ok that was hard."
-                    |> translate store.lang []
-                    |> alert "success"
+                , translate store.lang I18n.GameLost
+                    |> alert "info"
                 ]
 
             Ongoing _ guesses input error ->
@@ -1131,7 +1077,7 @@ logEntry log ({ logs } as store) =
 encodeStore : Store -> Encode.Value
 encodeStore store =
     Encode.object
-        [ ( "lang", Encode.string (langToString store.lang) )
+        [ ( "lang", Encode.string (I18n.langToString store.lang) )
         , ( "logs", Encode.list encodeLog store.logs )
         ]
 
@@ -1140,7 +1086,7 @@ encodeLog : Log -> Encode.Value
 encodeLog log =
     Encode.object
         [ ( "time", log.time |> Time.posixToMillis |> Encode.int )
-        , ( "lang", log.lang |> langToString |> Encode.string )
+        , ( "lang", log.lang |> I18n.langToString |> Encode.string )
         , ( "word", log.word |> Encode.string )
         , ( "victory", log.victory |> Encode.bool )
         , ( "guesses", log.guesses |> Encode.int )
@@ -1154,7 +1100,7 @@ encodeLog log =
 decodeStore : Decoder Store
 decodeStore =
     Decode.map2 Store
-        (Decode.field "lang" (Decode.map langFromString Decode.string))
+        (Decode.field "lang" (Decode.map I18n.langFromString Decode.string))
         (Decode.field "logs" (Decode.list decodeLog))
 
 
@@ -1162,7 +1108,7 @@ decodeLog : Decoder Log
 decodeLog =
     Decode.map5 Log
         (Decode.field "time" (Decode.map Time.millisToPosix Decode.int))
-        (Decode.field "lang" (Decode.map langFromString Decode.string))
+        (Decode.field "lang" (Decode.map I18n.langFromString Decode.string))
         (Decode.field "word" Decode.string)
         (Decode.field "victory" Decode.bool)
         (Decode.field "guesses" Decode.int)
