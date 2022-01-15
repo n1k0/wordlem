@@ -7546,7 +7546,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('Header container')
+						$elm$html$Html$Attributes$class('Header container flex-nowrap')
 					]),
 				_List_fromArray(
 					[
@@ -7566,7 +7566,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-en'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
 								btnClass(!store.a),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(0))
@@ -7581,7 +7581,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-fr'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
 								btnClass(store.a === 1),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(1))
@@ -7596,7 +7596,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-stats'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
 								btnClass(
 								_Utils_eq(
 									modal,
@@ -7616,7 +7616,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 							[
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-help'),
-								$elm$html$Html$Attributes$class('btn btn-sm'),
+								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
 								btnClass(
 								_Utils_eq(
 									modal,
