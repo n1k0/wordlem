@@ -1210,6 +1210,9 @@ translations =
         , ( "Stats"
           , "Stats"
           )
+        , ( "The keyboard at the bottom highlight letters which have been played already."
+          , "Le clavier en bas de page met en relief les lettres qui ont déjà été joué."
+          )
         , ( "Unable to pick a word."
           , "Impossible de sélectionner un mot à trouver."
           )
