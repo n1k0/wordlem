@@ -912,11 +912,11 @@ viewHeader : Model -> Html Msg
 viewHeader { store, modal } =
     nav [ class "navbar fixed-top navbar-dark bg-dark" ]
         [ div [ class "Header container" ]
-            [ span [ class "fw-bold me-2" ] [ text "Wordlem" ]
+            [ span [ class "text-white fw-bold me-2" ] [ text "Wordlem" ]
             , button
                 [ type_ "button"
                 , id "btn-lang-en"
-                , class "btn btn-sm"
+                , class "btn btn-sm btn-dark"
                 , classList [ ( "btn-primary", store.lang == English ) ]
                 , onClick (SwitchLang English)
                 ]
@@ -924,7 +924,7 @@ viewHeader { store, modal } =
             , button
                 [ type_ "button"
                 , id "btn-lang-fr"
-                , class "btn btn-sm"
+                , class "btn btn-sm btn-dark"
                 , classList [ ( "btn-primary", store.lang == French ) ]
                 , onClick (SwitchLang French)
                 ]
@@ -932,7 +932,7 @@ viewHeader { store, modal } =
             , button
                 [ type_ "button"
                 , id "btn-stats"
-                , class "btn btn-sm"
+                , class "btn btn-sm btn-dark"
                 , classList [ ( "btn-primary", modal == Just StatsModal ) ]
                 , onClick (OpenModal StatsModal)
                 ]
@@ -942,7 +942,7 @@ viewHeader { store, modal } =
             , button
                 [ type_ "button"
                 , id "btn-help"
-                , class "btn btn-sm"
+                , class "btn btn-sm btn-dark"
                 , classList [ ( "btn-primary", modal == Just HelpModal ) ]
                 , onClick (OpenModal HelpModal)
                 ]
