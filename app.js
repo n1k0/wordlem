@@ -7112,6 +7112,7 @@ var $author$project$Main$translations = $elm$core$Dict$fromList(
 			_Utils_Tuple2('Not in dictionary: {0}', 'Absent du dictionnaire\u00A0: {0}'),
 			_Utils_Tuple2('Not enough letters', 'Mot trop court'),
 			_Utils_Tuple2('Stats', 'Stats'),
+			_Utils_Tuple2('The keyboard at the bottom highlight letters which have been played already.', 'Le clavier en bas de page met en relief les lettres qui ont déjà été joué.'),
 			_Utils_Tuple2('Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.'),
 			_Utils_Tuple2('Unable to restore previously saved data.', 'Impossible de restaurer les données précedemment sauvegardées.'),
 			_Utils_Tuple2('Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.'),
