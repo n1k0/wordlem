@@ -536,10 +536,11 @@ letterIs build char =
 newGameButton : Lang -> Html Msg
 newGameButton lang =
     button
-        [ class "btn btn-lg btn-primary"
+        [ class "btn btn-lg btn-success rounded-0"
         , onClick NewGame
         ]
-        [ "Play again"
+        [ icon "play-again"
+        , "Play again"
             |> translate lang []
             |> text
         ]
@@ -548,7 +549,7 @@ newGameButton lang =
 definitionLink : Lang -> WordToFind -> Html Msg
 definitionLink lang word =
     a
-        [ class "btn btn-lg btn-info"
+        [ class "btn btn-lg btn-info rounded-0"
         , target "_blank"
         , href
             (case lang of
@@ -559,7 +560,8 @@ definitionLink lang word =
                     "https://en.wiktionary.org/wiki/" ++ word
             )
         ]
-        [ "Definition"
+        [ icon "definition"
+        , "Definition"
             |> translate lang [ String.toUpper word ]
             |> text
         ]
@@ -1066,7 +1068,6 @@ view ({ store, state } as model) =
             Won word guesses ->
                 [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang guesses
                 , "Well done!"
                     |> translate store.lang []
                     |> alert "success"
@@ -1079,7 +1080,6 @@ view ({ store, state } as model) =
                     |> (\a -> a :: guesses)
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang guesses
                 , "Ok that was hard."
                     |> translate store.lang []
                     |> alert "success"

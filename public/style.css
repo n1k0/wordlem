@@ -1,9 +1,16 @@
 .Header {
   max-width: 600px;
+  min-height: 34px;
 }
 
 .HeaderButton {
   min-width: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .HeaderButton {
+    font-size: 1em;
+  }
 }
 
 .Game {
@@ -21,7 +28,7 @@
   align-items: center;
   flex-grow: 1;
   overflow: hidden;
-  padding-top: 52px; /* height of header */
+  padding-top: 54px; /* height of header */
 }
 
 .Board {
@@ -50,6 +57,7 @@
   line-height: 1.5rem;
   user-select: none;
   padding: unset;
+  cursor: unset;
 }
 
 .BoardTile::before {
@@ -86,7 +94,7 @@
 
 .EndGameButtons {
   width: calc(100% - 20px);
-  margin: 4px 10px 0 10px;
+  margin-top: 4px;
 }
 
 .Flash {
@@ -96,6 +104,7 @@
   transform: translate(-50%, 0);
   pointer-events: none;
   width: fit-content;
+  z-index: 1099;
 }
 
 .Markdown p:last-child {
