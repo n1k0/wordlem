@@ -5663,7 +5663,7 @@ var $author$project$Main$getWords = function (lang) {
 var $author$project$Main$initialModel = function (store) {
 	return {
 		G: $elm$core$Maybe$Nothing,
-		h: $author$project$Main$Idle,
+		f: $author$project$Main$Idle,
 		t: store,
 		I: $elm$time$Time$millisToPosix(0),
 		S: $author$project$Main$getWords(store.ac)
@@ -5796,7 +5796,7 @@ var $author$project$Main$init = function (flags) {
 				_Utils_update(
 					newModel,
 					{
-						h: $author$project$Main$Errored(
+						f: $author$project$Main$Errored(
 							$author$project$Main$DecodeError(
 								$elm$json$Json$Decode$errorToString(error)))
 					}),
@@ -6476,7 +6476,7 @@ var $elm$browser$Browser$Events$on = F3(
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
 var $author$project$Main$storeChanged = _Platform_incomingPort('storeChanged', $elm$json$Json$Decode$string);
 var $author$project$Main$subscriptions = function (_v0) {
-	var state = _v0.h;
+	var state = _v0.f;
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
@@ -6607,7 +6607,7 @@ var $author$project$Main$logEntry = F2(
 var $author$project$Main$logResult = function (_v0) {
 	var model = _v0.a;
 	var store = model.t;
-	var state = model.h;
+	var state = model.f;
 	var time = model.I;
 	var cmds = _v0.b;
 	var logData = function () {
@@ -6655,6 +6655,16 @@ var $author$project$Main$logResult = function (_v0) {
 	}
 };
 var $author$project$Main$numberOfLetters = 5;
+var $author$project$Main$removeAlert = function (state) {
+	if ((state.$ === 2) && (!state.d.$)) {
+		var word = state.a;
+		var guesses = state.b;
+		var input = state.c;
+		return A4($author$project$Main$Ongoing, word, guesses, input, $elm$core$Maybe$Nothing);
+	} else {
+		return state;
+	}
+};
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -7277,7 +7287,7 @@ var $author$project$Main$validateGuess = F3(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var store = model.t;
-		var _v0 = _Utils_Tuple2(msg, model.h);
+		var _v0 = _Utils_Tuple2(msg, model.f);
 		switch (_v0.a.$) {
 			case 0:
 				if (_v0.b.$ === 2) {
@@ -7297,7 +7307,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+								f: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -7330,7 +7340,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+								f: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -7362,7 +7372,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										h: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
+										f: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$batch(
 									A2(
@@ -7377,7 +7387,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										h: $author$project$Main$Errored($author$project$Main$LoadError)
+										f: $author$project$Main$Errored($author$project$Main$LoadError)
 									}),
 								$elm$core$Platform$Cmd$none);
 						}
@@ -7388,7 +7398,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									h: $author$project$Main$Errored($author$project$Main$StateError)
+									f: $author$project$Main$Errored($author$project$Main$StateError)
 								}),
 							$elm$core$Platform$Cmd$none);
 				}
@@ -7401,7 +7411,8 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							G: $elm$core$Maybe$Just(modal)
+							G: $elm$core$Maybe$Just(modal),
+							f: $author$project$Main$removeAlert(model.f)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 8:
@@ -7432,7 +7443,7 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{
-										h: A2(
+										f: A2(
 											$author$project$Main$checkGame,
 											word,
 											A2($elm$core$List$cons, guess, guesses))
@@ -7444,7 +7455,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									h: A4(
+									f: A4(
 										$author$project$Main$Ongoing,
 										word,
 										guesses,
@@ -9164,7 +9175,7 @@ var $author$project$Main$viewKeyboard = F2(
 	});
 var $author$project$Main$view = function (model) {
 	var store = model.t;
-	var state = model.h;
+	var state = model.f;
 	return A2(
 		$author$project$Main$layout,
 		model,
