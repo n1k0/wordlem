@@ -410,7 +410,12 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( OpenModal modal, _ ) ->
-            ( { model | modal = Just modal }, Cmd.none )
+            ( { model
+                | modal = Just modal
+                , state = removeAlert model.state
+              }
+            , Cmd.none
+            )
 
         ( StoreChanged rawStore, _ ) ->
             case Decode.decodeString decodeStore rawStore of
@@ -455,6 +460,16 @@ update msg ({ store } as model) =
             ( { model | state = Errored StateError }
             , Cmd.none
             )
+
+
+removeAlert : GameState -> GameState
+removeAlert state =
+    case state of
+        Ongoing word guesses input (Just _) ->
+            Ongoing word guesses input Nothing
+
+        _ ->
+            state
 
 
 charToText : Char -> String
