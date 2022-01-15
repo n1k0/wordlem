@@ -1,3 +1,5 @@
+body { touch-action: manipulation; }
+
 .Header {
   max-width: 600px;
 }
