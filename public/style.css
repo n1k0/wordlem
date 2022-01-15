@@ -17,7 +17,7 @@
   align-items: center;
   flex-grow: 1;
   overflow: hidden;
-  padding-top: 60px; /* height of header */
+  padding-top: 52px; /* height of header */
 }
 
 .Board {
@@ -70,8 +70,9 @@
 
 .KeyboardKey {
   flex: 1;
-  height: 7vh;
+  height: 7.3vh;
   padding: 0.5rem 0.25rem;
+  line-height: 1.2rem;
 }
 
 .KeyboardKey:active,
