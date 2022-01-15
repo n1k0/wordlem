@@ -1,6 +1,7 @@
 module MainTest exposing (..)
 
 import Expect exposing (Expectation)
+import I18n exposing (Lang(..))
 import Main exposing (..)
 import Test exposing (..)
 
