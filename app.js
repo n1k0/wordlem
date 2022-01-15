@@ -1857,7 +1857,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.by,
+		impl.bx,
 		impl.b_,
 		impl.bW,
 		function() { return function() {} }
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		aJ: func(record.aJ),
-		a0: record.a0,
-		aT: record.aT
+		aI: func(record.aI),
+		a_: record.a_,
+		aS: record.aS
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.aJ;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.a0;
+		var message = !tag ? value : tag < 3 ? value.a : value.aI;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.a_;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.aT) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.aS) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,7 +3928,7 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.by,
+		impl.bx,
 		impl.b_,
 		impl.bW,
 		function(sendToApp, initialModel) {
@@ -3964,7 +3964,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.by,
+		impl.bx,
 		impl.b_,
 		impl.bW,
 		function(sendToApp, initialModel) {
@@ -3977,7 +3977,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.be);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.bc);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
@@ -4038,8 +4038,8 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.bN;
-	var onUrlRequest = impl.bO;
+	var onUrlChange = impl.bM;
+	var onUrlRequest = impl.bN;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
@@ -4059,9 +4059,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.aW === next.aW
-							&& curr.aD === next.aD
-							&& curr.aQ.a === next.aQ.a
+							&& curr.aV === next.aV
+							&& curr.aC === next.aC
+							&& curr.aP.a === next.aP.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,9 +4069,9 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		by: function(flags)
+		bx: function(flags)
 		{
-			return A3(impl.by, flags, _Browser_getUrl(), key);
+			return A3(impl.bx, flags, _Browser_getUrl(), key);
 		},
 		b$: impl.b$,
 		b_: impl.b_,
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { bv: 'hidden', bh: 'visibilitychange' }
+		? { bu: 'hidden', bf: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { bv: 'mozHidden', bh: 'mozvisibilitychange' }
+		? { bu: 'mozHidden', bf: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { bv: 'msHidden', bh: 'msvisibilitychange' }
+		? { bu: 'msHidden', bf: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { bv: 'webkitHidden', bh: 'webkitvisibilitychange' }
-		: { bv: 'hidden', bh: 'visibilitychange' };
+		? { bu: 'webkitHidden', bf: 'webkitvisibilitychange' }
+		: { bu: 'hidden', bf: 'visibilitychange' };
 }
 
 
@@ -4232,12 +4232,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		a$: _Browser_getScene(),
-		a5: {
-			a7: _Browser_window.pageXOffset,
-			a8: _Browser_window.pageYOffset,
-			a6: _Browser_doc.documentElement.clientWidth,
-			aC: _Browser_doc.documentElement.clientHeight
+		bT: _Browser_getScene(),
+		a3: {
+			a5: _Browser_window.pageXOffset,
+			a6: _Browser_window.pageYOffset,
+			a4: _Browser_doc.documentElement.clientWidth,
+			bt: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		a6: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		aC: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		a4: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		bt: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4271,15 +4271,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			a$: {
-				a6: node.scrollWidth,
-				aC: node.scrollHeight
+			bT: {
+				a4: node.scrollWidth,
+				bt: node.scrollHeight
 			},
-			a5: {
-				a7: node.scrollLeft,
-				a8: node.scrollTop,
-				a6: node.clientWidth,
-				aC: node.clientHeight
+			a3: {
+				a5: node.scrollLeft,
+				a6: node.scrollTop,
+				a4: node.clientWidth,
+				bt: node.clientHeight
 			}
 		};
 	});
@@ -4309,18 +4309,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			a$: _Browser_getScene(),
-			a5: {
-				a7: x,
-				a8: y,
-				a6: _Browser_doc.documentElement.clientWidth,
-				aC: _Browser_doc.documentElement.clientHeight
+			bT: _Browser_getScene(),
+			a3: {
+				a5: x,
+				a6: y,
+				a4: _Browser_doc.documentElement.clientWidth,
+				bt: _Browser_doc.documentElement.clientHeight
 			},
-			bm: {
-				a7: x + rect.left,
-				a8: y + rect.top,
-				a6: rect.width,
-				aC: rect.height
+			bk: {
+				a5: x + rect.left,
+				a6: y + rect.top,
+				a4: rect.width,
+				bt: rect.height
 			}
 		};
 	});
@@ -4447,8 +4447,8 @@ var _Regex_never = /.^/;
 var _Regex_fromStringWith = F2(function(options, string)
 {
 	var flags = 'g';
-	if (options.bB) { flags += 'm'; }
-	if (options.bg) { flags += 'i'; }
+	if (options.bA) { flags += 'm'; }
+	if (options.be) { flags += 'i'; }
 
 	try
 	{
@@ -4627,14 +4627,14 @@ function _Markdown_formatOptions(options)
 		return code;
 	}
 
-	var gfm = options.bt.a;
+	var gfm = options.br.a;
 
 	return {
 		highlight: toHighlight,
 		gfm: gfm,
 		tables: gfm && gfm.bX,
-		breaks: gfm && gfm.bf,
-		sanitize: options.bT,
+		breaks: gfm && gfm.bd,
+		sanitize: options.bS,
 		smartypants: options.bU
 	};
 }
@@ -5143,7 +5143,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {az: fragment, aD: host, aO: path, aQ: port_, aW: protocol, aX: query};
+		return {az: fragment, aC: host, aN: path, aP: port_, aV: protocol, aW: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5663,7 +5663,7 @@ var $author$project$Main$getWords = function (lang) {
 var $author$project$Main$initialModel = function (store) {
 	return {
 		G: $elm$core$Maybe$Nothing,
-		f: $author$project$Main$Idle,
+		h: $author$project$Main$Idle,
 		t: store,
 		I: $elm$time$Time$millisToPosix(0),
 		S: $author$project$Main$getWords(store.ac)
@@ -5796,7 +5796,7 @@ var $author$project$Main$init = function (flags) {
 				_Utils_update(
 					newModel,
 					{
-						f: $author$project$Main$Errored(
+						h: $author$project$Main$Errored(
 							$author$project$Main$DecodeError(
 								$elm$json$Json$Decode$errorToString(error)))
 					}),
@@ -5878,7 +5878,7 @@ var $elm$time$Time$Every = F2(
 	});
 var $elm$time$Time$State = F2(
 	function (taggers, processes) {
-		return {aV: processes, a4: taggers};
+		return {aU: processes, a2: taggers};
 	});
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -6159,7 +6159,7 @@ var $elm$time$Time$spawnHelp = F3(
 	});
 var $elm$time$Time$onEffects = F3(
 	function (router, subs, _v0) {
-		var processes = _v0.aV;
+		var processes = _v0.aU;
 		var rightStep = F3(
 			function (_v6, id, _v7) {
 				var spawns = _v7.a;
@@ -6225,7 +6225,7 @@ var $elm$time$Time$onEffects = F3(
 	});
 var $elm$time$Time$onSelfMsg = F3(
 	function (router, interval, state) {
-		var _v0 = A2($elm$core$Dict$get, interval, state.a4);
+		var _v0 = A2($elm$core$Dict$get, interval, state.a2);
 		if (_v0.$ === 1) {
 			return $elm$core$Task$succeed(state);
 		} else {
@@ -6279,7 +6279,7 @@ var $elm$browser$Browser$Events$MySub = F3(
 	});
 var $elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {aP: pids, a3: subs};
+		return {aO: pids, a1: subs};
 	});
 var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
 	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
@@ -6313,7 +6313,7 @@ var $elm$core$Dict$fromList = function (assocs) {
 };
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {ay: event, aF: key};
+		return {ay: event, aE: key};
 	});
 var $elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _v0) {
@@ -6387,7 +6387,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.aP,
+			state.aO,
 			$elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
 		var deadPids = _v0.a;
@@ -6433,7 +6433,7 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.aF;
+		var key = _v0.aE;
 		var event = _v0.ay;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
@@ -6443,7 +6443,7 @@ var $elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _v3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.a3);
+		var messages = A2($elm$core$List$filterMap, toMessage, state.a1);
 		return A2(
 			$elm$core$Task$andThen,
 			function (_v1) {
@@ -6476,7 +6476,7 @@ var $elm$browser$Browser$Events$on = F3(
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
 var $author$project$Main$storeChanged = _Platform_incomingPort('storeChanged', $elm$json$Json$Decode$string);
 var $author$project$Main$subscriptions = function (_v0) {
-	var state = _v0.f;
+	var state = _v0.h;
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
@@ -6496,7 +6496,6 @@ var $author$project$Main$Ongoing = F4(
 	function (a, b, c, d) {
 		return {$: 2, a: a, b: b, c: c, d: d};
 	});
-var $author$project$Main$StateError = {$: 2};
 var $author$project$Main$Lost = F2(
 	function (a, b) {
 		return {$: 3, a: a, b: b};
@@ -6607,7 +6606,7 @@ var $author$project$Main$logEntry = F2(
 var $author$project$Main$logResult = function (_v0) {
 	var model = _v0.a;
 	var store = model.t;
-	var state = model.f;
+	var state = model.h;
 	var time = model.I;
 	var cmds = _v0.b;
 	var logData = function () {
@@ -6664,6 +6663,25 @@ var $author$project$Main$removeAlert = function (state) {
 	} else {
 		return state;
 	}
+};
+var $elm$browser$Browser$Dom$getViewportOf = _Browser_getViewportOf;
+var $elm$browser$Browser$Dom$setViewportOf = _Browser_setViewportOf;
+var $author$project$Main$scrollToBottom = function (id) {
+	return A2(
+		$elm$core$Task$attempt,
+		$elm$core$Basics$always($author$project$Main$NoOp),
+		A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				var scene = _v1.bT;
+				return A3($elm$browser$Browser$Dom$setViewportOf, id, 0, scene.bt);
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v0) {
+					return $elm$browser$Browser$Dom$getViewportOf(id);
+				},
+				$elm$core$Process$sleep(10))));
 };
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
@@ -6917,13 +6935,13 @@ var $elm$core$Tuple$mapFirst = F2(
 	});
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
-		return {bx: index, aI: match, bM: number, bV: submatches};
+		return {bw: index, aH: match, bL: number, bV: submatches};
 	});
 var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
 var $elm$regex$Regex$fromString = function (string) {
 	return A2(
 		$elm$regex$Regex$fromStringWith,
-		{bg: false, bB: false},
+		{be: false, bA: false},
 		string);
 };
 var $elm$regex$Regex$never = _Regex_never;
@@ -7043,7 +7061,7 @@ var $elm$core$Array$get = F2(
 	});
 var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
 	function (replacements, _v0) {
-		var match = _v0.aI;
+		var match = _v0.aH;
 		var ordinalString = A2(
 			$elm$core$Basics$composeL,
 			$elm$core$String$dropLeft(1),
@@ -7128,7 +7146,7 @@ var $author$project$I18n$getSet = function (id) {
 		case 2:
 			return A3($author$project$I18n$set, _List_Nil, 'Definition', 'Définition');
 		case 3:
-			var error = id.a.bn;
+			var error = id.a.bl;
 			return A3(
 				$author$project$I18n$set,
 				_List_fromArray(
@@ -7144,9 +7162,9 @@ var $author$project$I18n$getSet = function (id) {
 		case 7:
 			return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
 		case 8:
-			var nbLetters = id.a.bE;
+			var nbLetters = id.a.bD;
 			var lang = id.a.ac;
-			var maxGuesses = id.a.bz;
+			var maxGuesses = id.a.by;
 			return A3(
 				$author$project$I18n$set,
 				_List_fromArray(
@@ -7161,7 +7179,7 @@ var $author$project$I18n$getSet = function (id) {
 			return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
 		case 9:
 			var wordleUrl = id.a.b1;
-			var githubUrl = id.a.bu;
+			var githubUrl = id.a.bs;
 			return A3(
 				$author$project$I18n$set,
 				_List_fromArray(
@@ -7203,14 +7221,12 @@ var $author$project$I18n$getSet = function (id) {
 		case 18:
 			return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
 		case 19:
-			return A3($author$project$I18n$set, _List_Nil, 'General game state error. This is bad.', 'Erreur générale. C\'est pas bon signe.');
-		case 20:
 			return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
-		case 21:
+		case 20:
 			return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
-		case 22:
+		case 21:
 			return A3($author$project$I18n$set, _List_Nil, 'games played', 'parties jouées');
-		case 23:
+		case 22:
 			var lang = id.a.ac;
 			return A3(
 				$author$project$I18n$set,
@@ -7220,9 +7236,9 @@ var $author$project$I18n$getSet = function (id) {
 					]),
 				'Guess distribution ({0})',
 				'Distribution des scores ({0})');
-		case 25:
-			return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
 		case 24:
+			return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
+		case 23:
 			var lang = id.a.ac;
 			return A3(
 				$author$project$I18n$set,
@@ -7287,92 +7303,93 @@ var $author$project$Main$validateGuess = F3(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var store = model.t;
-		var _v0 = _Utils_Tuple2(msg, model.f);
-		switch (_v0.a.$) {
-			case 0:
-				if (_v0.b.$ === 2) {
-					var _v1 = _v0.a;
-					var _v2 = _v0.b;
-					var word = _v2.a;
-					var guesses = _v2.b;
-					var input = _v2.c;
-					var newInput = $elm$core$String$fromList(
-						$elm$core$List$reverse(
+		var _v0 = _Utils_Tuple2(msg, model.h);
+		_v0$9:
+		while (true) {
+			switch (_v0.a.$) {
+				case 0:
+					if (_v0.b.$ === 2) {
+						var _v1 = _v0.a;
+						var _v2 = _v0.b;
+						var word = _v2.a;
+						var guesses = _v2.b;
+						var input = _v2.c;
+						var newInput = $elm$core$String$fromList(
+							$elm$core$List$reverse(
+								A2(
+									$elm$core$List$drop,
+									1,
+									$elm$core$List$reverse(
+										$elm$core$String$toList(input)))));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var _v3 = _v0.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				case 1:
+					var _v4 = _v0.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{G: $elm$core$Maybe$Nothing}),
+						$elm$core$Platform$Cmd$none);
+				case 2:
+					if (_v0.b.$ === 2) {
+						var _char = _v0.a.a;
+						var _v5 = _v0.b;
+						var word = _v5.a;
+						var guesses = _v5.b;
+						var input = _v5.c;
+						var newInput = $elm$core$String$fromList(
 							A2(
-								$elm$core$List$drop,
-								1,
-								$elm$core$List$reverse(
-									$elm$core$String$toList(input)))));
+								$elm$core$List$take,
+								$author$project$Main$numberOfLetters,
+								_Utils_ap(
+									$elm$core$String$toList(input),
+									_List_fromArray(
+										[_char]))));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				case 3:
+					var _v6 = _v0.a;
+					var newModel = $author$project$Main$initialModel(store);
 					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								f: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					var _v3 = _v0.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 1:
-				var _v4 = _v0.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{G: $elm$core$Maybe$Nothing}),
-					$elm$core$Platform$Cmd$none);
-			case 2:
-				if (_v0.b.$ === 2) {
-					var _char = _v0.a.a;
-					var _v5 = _v0.b;
-					var word = _v5.a;
-					var guesses = _v5.b;
-					var input = _v5.c;
-					var newInput = $elm$core$String$fromList(
+						newModel,
 						A2(
-							$elm$core$List$take,
-							$author$project$Main$numberOfLetters,
-							_Utils_ap(
-								$elm$core$String$toList(input),
-								_List_fromArray(
-									[_char]))));
+							$elm$random$Random$generate,
+							$author$project$Main$NewWord,
+							$author$project$Main$randomWord(newModel.S)));
+				case 4:
+					var time = _v0.a.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								f: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
-							}),
+							{I: time}),
 						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 3:
-				var _v6 = _v0.a;
-				var newModel = $author$project$Main$initialModel(store);
-				return _Utils_Tuple2(
-					newModel,
-					A2(
-						$elm$random$Random$generate,
-						$author$project$Main$NewWord,
-						$author$project$Main$randomWord(newModel.S)));
-			case 4:
-				var time = _v0.a.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{I: time}),
-					$elm$core$Platform$Cmd$none);
-			case 5:
-				switch (_v0.b.$) {
-					case 0:
-						if (!_v0.a.a.$) {
+				case 5:
+					if (!_v0.a.a.$) {
+						if (!_v0.b.$) {
 							var newWord = _v0.a.a.a;
 							var _v7 = _v0.b;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
 									{
-										f: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
+										h: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 									}),
 								$elm$core$Platform$Cmd$batch(
 									A2(
@@ -7381,115 +7398,118 @@ var $author$project$Main$update = F2(
 										_List_fromArray(
 											['btn-lang-en', 'btn-lang-fr', 'btn-stats', 'btn-help']))));
 						} else {
+							break _v0$9;
+						}
+					} else {
+						if (!_v0.b.$) {
 							var _v8 = _v0.a.a;
 							var _v9 = _v0.b;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
 									{
-										f: $author$project$Main$Errored($author$project$Main$LoadError)
+										h: $author$project$Main$Errored($author$project$Main$LoadError)
 									}),
 								$elm$core$Platform$Cmd$none);
+						} else {
+							break _v0$9;
 						}
-					case 1:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					default:
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									f: $author$project$Main$Errored($author$project$Main$StateError)
-								}),
-							$elm$core$Platform$Cmd$none);
-				}
-			case 6:
-				var _v10 = _v0.a;
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 7:
-				var modal = _v0.a.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							G: $elm$core$Maybe$Just(modal),
-							f: $author$project$Main$removeAlert(model.f)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 8:
-				var rawStore = _v0.a.a;
-				var _v11 = A2($elm$json$Json$Decode$decodeString, $author$project$Main$decodeStore, rawStore);
-				if (!_v11.$) {
-					var newStore = _v11.a;
+					}
+				case 6:
+					var _v10 = _v0.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 7:
+					var modal = _v0.a.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{t: newStore}),
+							{
+								G: $elm$core$Maybe$Just(modal),
+								h: $author$project$Main$removeAlert(model.h)
+							}),
 						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 9:
-				if (_v0.b.$ === 2) {
-					var _v12 = _v0.a;
-					var _v13 = _v0.b;
-					var word = _v13.a;
-					var guesses = _v13.b;
-					var input = _v13.c;
-					var _v14 = A3($author$project$Main$validateGuess, store.ac, word, input);
-					if (!_v14.$) {
-						var guess = _v14.a;
-						return $author$project$Main$logResult(
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										f: A2(
-											$author$project$Main$checkGame,
-											word,
-											A2($elm$core$List$cons, guess, guesses))
-									}),
-								$elm$core$Platform$Cmd$none));
-					} else {
-						var error = _v14.a;
+				case 8:
+					var rawStore = _v0.a.a;
+					var _v11 = A2($elm$json$Json$Decode$decodeString, $author$project$Main$decodeStore, rawStore);
+					if (!_v11.$) {
+						var newStore = _v11.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{
-									f: A4(
-										$author$project$Main$Ongoing,
-										word,
-										guesses,
-										input,
-										$elm$core$Maybe$Just(error))
-								}),
+								{t: newStore}),
 							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
-				} else {
-					var _v15 = _v0.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			default:
-				var lang = _v0.a.a;
-				var newStore = _Utils_update(
-					store,
-					{ac: lang});
-				var newModel = $author$project$Main$initialModel(newStore);
-				return _Utils_Tuple2(
-					newModel,
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								$author$project$Main$saveStore(
-								A2(
-									$elm$json$Json$Encode$encode,
-									0,
-									$author$project$Main$encodeStore(newStore))),
-								A2(
-								$elm$random$Random$generate,
-								$author$project$Main$NewWord,
-								$author$project$Main$randomWord(newModel.S))
-							])));
+				case 9:
+					if (_v0.b.$ === 2) {
+						var _v12 = _v0.a;
+						var _v13 = _v0.b;
+						var word = _v13.a;
+						var guesses = _v13.b;
+						var input = _v13.c;
+						var _v14 = A3($author$project$Main$validateGuess, store.ac, word, input);
+						if (!_v14.$) {
+							var guess = _v14.a;
+							var newState = A2(
+								$author$project$Main$checkGame,
+								word,
+								A2($elm$core$List$cons, guess, guesses));
+							return $author$project$Main$logResult(
+								_Utils_Tuple2(
+									_Utils_update(
+										model,
+										{h: newState}),
+									function () {
+										if (newState.$ === 3) {
+											return $author$project$Main$scrollToBottom('board-container');
+										} else {
+											return $elm$core$Platform$Cmd$none;
+										}
+									}()));
+						} else {
+							var error = _v14.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										h: A4(
+											$author$project$Main$Ongoing,
+											word,
+											guesses,
+											input,
+											$elm$core$Maybe$Just(error))
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						var _v16 = _v0.a;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				default:
+					var lang = _v0.a.a;
+					var newStore = _Utils_update(
+						store,
+						{ac: lang});
+					var newModel = $author$project$Main$initialModel(newStore);
+					return _Utils_Tuple2(
+						newModel,
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									$author$project$Main$saveStore(
+									A2(
+										$elm$json$Json$Encode$encode,
+										0,
+										$author$project$Main$encodeStore(newStore))),
+									A2(
+									$elm$random$Random$generate,
+									$author$project$Main$NewWord,
+									$author$project$Main$randomWord(newModel.S))
+								])));
+			}
 		}
+		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	});
 var $author$project$I18n$GameLoading = {$: 4};
 var $author$project$I18n$GameLost = {$: 5};
@@ -7623,7 +7643,7 @@ var $author$project$Main$endGameButtons = F2(
 				]));
 	});
 var $author$project$I18n$Help = {$: 7};
-var $author$project$I18n$Statistics = {$: 20};
+var $author$project$I18n$Statistics = {$: 19};
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$HelpModal = 0;
 var $author$project$Main$OpenModal = function (a) {
@@ -7826,9 +7846,9 @@ var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	av: $elm$core$Maybe$Nothing,
-	bt: $elm$core$Maybe$Just(
-		{bf: false, bX: false}),
-	bT: true,
+	br: $elm$core$Maybe$Just(
+		{bd: false, bX: false}),
+	bS: true,
 	bU: false
 };
 var $elm$core$Maybe$isJust = function (maybe) {
@@ -7913,7 +7933,7 @@ var $author$project$Main$viewHelp = function (_v0) {
 					$author$project$I18n$htmlText,
 					lang,
 					$author$project$I18n$HelpGamePitch(
-						{ac: lang, bz: $author$project$Main$maxAttempts, bE: $author$project$Main$numberOfLetters}))
+						{ac: lang, by: $author$project$Main$maxAttempts, bD: $author$project$Main$numberOfLetters}))
 				])),
 			A2(
 			$elm$html$Html$p,
@@ -7971,7 +7991,7 @@ var $author$project$Main$viewHelp = function (_v0) {
 				$author$project$I18n$translate,
 				lang,
 				$author$project$I18n$HelpInspiredBy(
-					{bu: 'https://github.com/n1k0/wordlem', b1: 'https://www.powerlanguage.co.uk/wordle/'})))
+					{bs: 'https://github.com/n1k0/wordlem', b1: 'https://www.powerlanguage.co.uk/wordle/'})))
 		]);
 };
 var $elm$virtual_dom$VirtualDom$attribute = F2(
@@ -8003,7 +8023,7 @@ var $author$project$Main$viewModal = F3(
 				$elm$html$Html$Events$custom,
 				'mouseup',
 				$elm$json$Json$Decode$succeed(
-					{aJ: $author$project$Main$NoOp, aT: true, a0: true}))
+					{aI: $author$project$Main$NoOp, aS: true, a_: true}))
 			]);
 		return A2(
 			$elm$html$Html$div,
@@ -8025,7 +8045,7 @@ var $author$project$Main$viewModal = F3(
 							$elm$html$Html$Events$custom,
 							'mouseup',
 							$elm$json$Json$Decode$succeed(
-								{aJ: $author$project$Main$CloseModal, aT: true, a0: true}))
+								{aI: $author$project$Main$CloseModal, aS: true, a_: true}))
 						]),
 					_List_fromArray(
 						[
@@ -8092,20 +8112,20 @@ var $author$project$Main$viewModal = F3(
 				]));
 	});
 var $author$project$I18n$StatsLangDataMissing = function (a) {
-	return {$: 24, a: a};
-};
-var $author$project$I18n$StatsAverageGuesses = {$: 21};
-var $author$project$I18n$StatsGamesPlayed = {$: 22};
-var $author$project$I18n$StatsGuessDistribution = function (a) {
 	return {$: 23, a: a};
 };
-var $author$project$I18n$StatsWinRate = {$: 26};
+var $author$project$I18n$StatsAverageGuesses = {$: 20};
+var $author$project$I18n$StatsGamesPlayed = {$: 21};
+var $author$project$I18n$StatsGuessDistribution = function (a) {
+	return {$: 22, a: a};
+};
+var $author$project$I18n$StatsWinRate = {$: 25};
 var $cuducos$elm_format_number$FormatNumber$Locales$Exact = function (a) {
 	return {$: 2, a: a};
 };
 var $cuducos$elm_format_number$FormatNumber$Parser$FormattedNumber = F5(
 	function (original, integers, decimals, prefix, suffix) {
-		return {bj: decimals, aE: integers, aN: original, W: prefix, Y: suffix};
+		return {bh: decimals, aD: integers, aM: original, W: prefix, Y: suffix};
 	});
 var $cuducos$elm_format_number$FormatNumber$Parser$Negative = 2;
 var $cuducos$elm_format_number$FormatNumber$Parser$Positive = 0;
@@ -8130,9 +8150,9 @@ var $cuducos$elm_format_number$FormatNumber$Parser$classify = function (formatte
 		$elm$core$String$concat(
 			A2(
 				$elm$core$List$append,
-				formatted.aE,
-				$elm$core$List$singleton(formatted.bj))));
-	return onlyZeros ? 1 : ((formatted.aN < 0) ? 2 : 0);
+				formatted.aD,
+				$elm$core$List$singleton(formatted.bh))));
+	return onlyZeros ? 1 : ((formatted.aM < 0) ? 2 : 0);
 };
 var $elm$core$String$filter = _String_filter;
 var $elm$core$Basics$abs = function (n) {
@@ -8173,7 +8193,7 @@ var $cuducos$elm_format_number$FormatNumber$Parser$removeZeros = function (decim
 };
 var $cuducos$elm_format_number$FormatNumber$Parser$getDecimals = F2(
 	function (locale, digits) {
-		var _v0 = locale.bj;
+		var _v0 = locale.bh;
 		switch (_v0.$) {
 			case 1:
 				return $cuducos$elm_format_number$FormatNumber$Parser$removeZeros(digits);
@@ -8401,7 +8421,7 @@ var $elm$core$List$tail = function (list) {
 var $cuducos$elm_format_number$FormatNumber$Parser$splitInParts = F2(
 	function (locale, value) {
 		var toString = function () {
-			var _v1 = locale.bj;
+			var _v1 = locale.bh;
 			switch (_v1.$) {
 				case 1:
 					var max = _v1.a;
@@ -8492,11 +8512,11 @@ var $cuducos$elm_format_number$FormatNumber$Parser$parse = F2(
 			case 0:
 				return _Utils_update(
 					partial,
-					{W: locale.aR, Y: locale.aS});
+					{W: locale.aQ, Y: locale.aR});
 			default:
 				return _Utils_update(
 					partial,
-					{W: locale.ba, Y: locale.bb});
+					{W: locale.a8, Y: locale.a9});
 		}
 	});
 var $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals = F2(
@@ -8506,8 +8526,8 @@ var $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals = F2(
 var $cuducos$elm_format_number$FormatNumber$Stringfy$stringfy = F2(
 	function (locale, formatted) {
 		var stringfyDecimals = $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals(locale);
-		var integers = A2($elm$core$String$join, locale.x, formatted.aE);
-		var decimals = stringfyDecimals(formatted.bj);
+		var integers = A2($elm$core$String$join, locale.x, formatted.aD);
+		var decimals = stringfyDecimals(formatted.bh);
 		return $elm$core$String$concat(
 			_List_fromArray(
 				[formatted.W, integers, decimals, formatted.Y]));
@@ -8525,21 +8545,21 @@ var $cuducos$elm_format_number$FormatNumber$Locales$Min = function (a) {
 var $cuducos$elm_format_number$FormatNumber$Locales$Western = 0;
 var $cuducos$elm_format_number$FormatNumber$Locales$base = {
 	z: '.',
-	bj: $cuducos$elm_format_number$FormatNumber$Locales$Min(0),
+	bh: $cuducos$elm_format_number$FormatNumber$Locales$Min(0),
 	af: '−',
 	ag: '',
+	aQ: '',
 	aR: '',
-	aS: '',
 	Z: 0,
 	x: '',
-	ba: '',
-	bb: ''
+	a8: '',
+	a9: ''
 };
 var $cuducos$elm_format_number$FormatNumber$Locales$frenchLocale = _Utils_update(
 	$cuducos$elm_format_number$FormatNumber$Locales$base,
 	{
 		z: ',',
-		bj: $cuducos$elm_format_number$FormatNumber$Locales$Exact(3),
+		bh: $cuducos$elm_format_number$FormatNumber$Locales$Exact(3),
 		x: '\u202F'
 	});
 var $author$project$Main$formatFloat = function (decimals) {
@@ -8547,7 +8567,7 @@ var $author$project$Main$formatFloat = function (decimals) {
 		_Utils_update(
 			$cuducos$elm_format_number$FormatNumber$Locales$frenchLocale,
 			{
-				bj: $cuducos$elm_format_number$FormatNumber$Locales$Exact(decimals)
+				bh: $cuducos$elm_format_number$FormatNumber$Locales$Exact(decimals)
 			}));
 };
 var $author$project$Main$formatPercent = function (_float) {
@@ -8981,7 +9001,8 @@ var $author$project$Main$viewBoard = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('BoardContainer')
+					$elm$html$Html$Attributes$class('BoardContainer'),
+					$elm$html$Html$Attributes$id('board-container')
 				]),
 			_List_fromArray(
 				[
@@ -9014,7 +9035,6 @@ var $author$project$Main$viewBoard = F2(
 	});
 var $author$project$I18n$DecodeError = {$: 1};
 var $author$project$I18n$LoadError = {$: 16};
-var $author$project$I18n$StateError = {$: 19};
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $author$project$Main$viewError = F2(
 	function (lang, error) {
@@ -9027,36 +9047,33 @@ var $author$project$Main$viewError = F2(
 			_List_fromArray(
 				[
 					function () {
-					switch (error.$) {
-						case 0:
-							var details = error.a;
-							return A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$p,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2($author$project$I18n$htmlText, lang, $author$project$I18n$DecodeError)
-											])),
-										A2(
-										$elm$html$Html$pre,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('pb-3')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text(details)
-											]))
-									]));
-						case 1:
-							return A2($author$project$I18n$htmlText, lang, $author$project$I18n$LoadError);
-						default:
-							return A2($author$project$I18n$htmlText, lang, $author$project$I18n$StateError);
+					if (!error.$) {
+						var details = error.a;
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2($author$project$I18n$htmlText, lang, $author$project$I18n$DecodeError)
+										])),
+									A2(
+									$elm$html$Html$pre,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('pb-3')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(details)
+										]))
+								]));
+					} else {
+						return A2($author$project$I18n$htmlText, lang, $author$project$I18n$LoadError);
 					}
 				}()
 				]));
@@ -9175,7 +9192,7 @@ var $author$project$Main$viewKeyboard = F2(
 	});
 var $author$project$Main$view = function (model) {
 	var store = model.t;
-	var state = model.f;
+	var state = model.h;
 	return A2(
 		$author$project$Main$layout,
 		model,
@@ -9260,7 +9277,7 @@ var $author$project$Main$view = function (model) {
 		}());
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{by: $author$project$Main$init, bW: $author$project$Main$subscriptions, b_: $author$project$Main$update, b$: $author$project$Main$view});
+	{bx: $author$project$Main$init, bW: $author$project$Main$subscriptions, b_: $author$project$Main$update, b$: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
