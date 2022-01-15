@@ -499,11 +499,19 @@ update msg ({ store } as model) =
             ( { model | menuOpened = False }, Cmd.none )
 
         ( SwitchLang lang, _ ) ->
-            update NewGame
-                { model
-                    | store = { store | lang = lang }
-                    , menuOpened = False
-                }
+            let
+                newStore =
+                    { store | lang = lang }
+
+                newModel =
+                    initialModel newStore
+            in
+            ( newModel
+            , Cmd.batch
+                [ newStore |> encodeStore |> Encode.encode 0 |> saveStore
+                , Random.generate NewWord (randomWord newModel.words)
+                ]
+            )
 
         ( ToggleMenu, _ ) ->
             ( { model | menuOpened = not model.menuOpened }
@@ -884,12 +892,16 @@ viewLangStats lang langLogs =
                 , small [] [ "win rate" |> translate lang [] |> text ]
                 ]
             ]
-        , div [ class "card py-0" ]
-            [ div [ class "card-body text-center" ]
-                [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
-                , small [] [ "average guesses" |> translate lang [] |> text ]
+        , if guessAvg > 0 then
+            div [ class "card py-0" ]
+                [ div [ class "card-body text-center" ]
+                    [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
+                    , small [] [ "average guesses" |> translate lang [] |> text ]
+                    ]
                 ]
-            ]
+
+          else
+            text ""
         ]
     , div [ class "table-responsive" ]
         [ h2 [ class "fs-5" ]
@@ -958,22 +970,22 @@ viewHeader { store, menuOpened } =
                     [ li [ class "nav-item" ]
                         [ button
                             [ type_ "button"
-                            , id "btn-lang-fr"
-                            , class "btn btn-link nav-link"
-                            , classList [ ( "active", store.lang == French ) ]
-                            , onClick (SwitchLang French)
-                            ]
-                            [ text "Jouer en Français" ]
-                        ]
-                    , li [ class "nav-item" ]
-                        [ button
-                            [ type_ "button"
                             , id "btn-lang-en"
                             , class "btn btn-link nav-link"
                             , classList [ ( "active", store.lang == English ) ]
                             , onClick (SwitchLang English)
                             ]
-                            [ text "Play in English" ]
+                            [ text "English" ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ button
+                            [ type_ "button"
+                            , id "btn-lang-fr"
+                            , class "btn btn-link nav-link"
+                            , classList [ ( "active", store.lang == French ) ]
+                            , onClick (SwitchLang French)
+                            ]
+                            [ text "Français" ]
                         ]
                     , li [ class "nav-item" ]
                         [ button
