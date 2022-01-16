@@ -854,7 +854,7 @@ viewLangStats lang langLogs =
         [ div [ class "card py-0" ]
             [ div [ class "card-body text-center" ]
                 [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-                , small [] [ I18n.htmlText lang I18n.StatsGamesPlayed ]
+                , small [] [ I18n.htmlText lang (I18n.StatsGamesPlayed { lang = lang }) ]
                 ]
             ]
         , div [ class "card py-0" ]
@@ -898,7 +898,9 @@ layout ({ store, modal } as model) content =
                 viewModal store I18n.Help (viewHelp store)
 
             Just StatsModal ->
-                viewModal store I18n.Statistics (viewStats store)
+                viewModal store
+                    (I18n.StatsLang { lang = store.lang })
+                    (viewStats store)
 
             Nothing ->
                 text ""
@@ -946,7 +948,7 @@ viewHeader { store, modal } =
                 , onClick (OpenModal StatsModal)
                 ]
                 [ icon "stats"
-                , I18n.htmlText store.lang I18n.Statistics
+                , I18n.htmlText store.lang I18n.StatsButton
                 ]
             , button
                 [ type_ "button"

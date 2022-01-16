@@ -35,10 +35,11 @@ type Id
     | LoadError
     | NotEnoughLetters
     | PlayAgain
-    | Statistics
     | StatsAverageGuesses
-    | StatsGamesPlayed
+    | StatsButton
+    | StatsGamesPlayed { lang : Lang }
     | StatsGuessDistribution { lang : Lang }
+    | StatsLang { lang : Lang }
     | StatsLangDataMissing { lang : Lang }
     | StatsMissingData
     | StatsWinRate
@@ -142,25 +143,30 @@ getSet id =
                 "Play again"
                 "Rejouer"
 
-        Statistics ->
-            set []
-                "Stats"
-                "Stats"
-
         StatsAverageGuesses ->
             set []
                 "average guesses"
                 "essais en moyenne"
 
-        StatsGamesPlayed ->
+        StatsButton ->
             set []
-                "games played"
-                "parties jouées"
+                "Stats"
+                "Stats"
+
+        StatsGamesPlayed { lang } ->
+            set [ langToString lang ]
+                "games played in {0}"
+                "parties jouées en {0}"
 
         StatsGuessDistribution { lang } ->
             set [ langToString lang ]
                 "Guess distribution ({0})"
                 "Distribution des scores ({0})"
+
+        StatsLang { lang } ->
+            set [ langToString lang ]
+                "Statistics ({0})"
+                "Statistiques ({0})"
 
         StatsMissingData ->
             set []
