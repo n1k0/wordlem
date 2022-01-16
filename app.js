@@ -5835,40 +5835,17 @@ var $author$project$Main$KeyPressed = function (a) {
 };
 var $author$project$Main$Submit = {$: 9};
 var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$core$String$fromList = _String_fromList;
-var $elm$core$String$foldr = _String_foldr;
-var $elm$core$String$toList = function (string) {
-	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
-};
-var $elm$core$Char$toLower = _Char_toLower;
 var $author$project$Main$decodeKey = A2(
 	$elm$json$Json$Decode$andThen,
-	function (keyCode) {
-		switch (keyCode) {
-			case 'Backspace':
-				return $elm$json$Json$Decode$succeed($author$project$Main$BackSpace);
-			case 'Enter':
-				return $elm$json$Json$Decode$succeed($author$project$Main$Submit);
-			case 'Escape':
-				return $elm$json$Json$Decode$succeed($author$project$Main$CloseModal);
-			default:
-				var string = keyCode;
-				var _v1 = $elm$core$String$toList(string);
-				if (!_v1.b) {
-					return $elm$json$Json$Decode$fail('Discarded key ' + string);
-				} else {
-					if (!_v1.b.b) {
-						var _char = _v1.a;
-						return (($elm$core$Char$toCode(_char) < 65) || ($elm$core$Char$toCode(_char) > 122)) ? $elm$json$Json$Decode$fail(
-							'Unsupported char: ' + $elm$core$String$fromList(
-								_List_fromArray(
-									[_char]))) : $elm$json$Json$Decode$succeed(
-							$author$project$Main$KeyPressed(
-								$elm$core$Char$toLower(_char)));
-					} else {
-						return $elm$json$Json$Decode$fail('Discarded key ' + string);
-					}
-				}
+	function (key) {
+		var _v0 = $elm$core$String$uncons(key);
+		if ((!_v0.$) && (_v0.a.b === '')) {
+			var _v1 = _v0.a;
+			var _char = _v1.a;
+			return (($elm$core$Char$toCode(_char) < 65) || ($elm$core$Char$toCode(_char) > 122)) ? $elm$json$Json$Decode$fail('discarded char') : $elm$json$Json$Decode$succeed(
+				$author$project$Main$KeyPressed(_char));
+		} else {
+			return (key === 'Backspace') ? $elm$json$Json$Decode$succeed($author$project$Main$BackSpace) : ((key === 'Enter') ? $elm$json$Json$Decode$succeed($author$project$Main$Submit) : ((key === 'Escape') ? $elm$json$Json$Decode$succeed($author$project$Main$CloseModal) : $elm$json$Json$Decode$fail('discarded key')));
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
@@ -6594,6 +6571,13 @@ var $author$project$Main$defocus = function (domId) {
 			},
 			$elm$core$Process$sleep(1)));
 };
+var $author$project$Main$defocusMenuButtons = $elm$core$Platform$Cmd$batch(
+	A2(
+		$elm$core$List$map,
+		$author$project$Main$defocus,
+		_List_fromArray(
+			['btn-lang-en', 'btn-lang-fr', 'btn-stats', 'btn-help'])));
+var $elm$core$String$fromList = _String_fromList;
 var $author$project$Main$logEntry = F2(
 	function (log, store) {
 		var logs = store.F;
@@ -6809,6 +6793,10 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
 var $author$project$I18n$AbsentFromDictionary = function (a) {
 	return {$: 0, a: a};
 };
@@ -7338,7 +7326,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{G: $elm$core$Maybe$Nothing}),
-						$elm$core$Platform$Cmd$none);
+						$author$project$Main$defocusMenuButtons);
 				case 2:
 					if (_v0.b.$ === 2) {
 						var _char = _v0.a.a;
@@ -7391,12 +7379,7 @@ var $author$project$Main$update = F2(
 									{
 										h: A4($author$project$Main$Ongoing, newWord, _List_Nil, '', $elm$core$Maybe$Nothing)
 									}),
-								$elm$core$Platform$Cmd$batch(
-									A2(
-										$elm$core$List$map,
-										$author$project$Main$defocus,
-										_List_fromArray(
-											['btn-lang-en', 'btn-lang-fr', 'btn-stats', 'btn-help']))));
+								$author$project$Main$defocusMenuButtons);
 						} else {
 							break _v0$9;
 						}
