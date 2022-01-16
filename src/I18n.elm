@@ -39,6 +39,8 @@ type Id
     | StatsButton
     | StatsGamesPlayed { lang : Lang }
     | StatsGuessDistribution { lang : Lang }
+    | StatsGuessEvolution { lang : Lang }
+    | StatsGuessEvolutionHelp { lang : Lang, length : Int }
     | StatsLang { lang : Lang }
     | StatsLangDataMissing { lang : Lang }
     | StatsMissingData
@@ -162,6 +164,16 @@ getSet id =
             set [ langToString lang ]
                 "Guess distribution ({0})"
                 "Distribution des scores ({0})"
+
+        StatsGuessEvolution { lang } ->
+            set [ langToString lang ]
+                "Guess evolution ({0})"
+                "Évolution des scores ({0})"
+
+        StatsGuessEvolutionHelp { lang, length } ->
+            set [ langToString lang, String.fromInt length ]
+                "Chart based on latest {1} plated games in {0}. A 0 bar means lost game."
+                "Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue."
 
         StatsLang { lang } ->
             set [ langToString lang ]

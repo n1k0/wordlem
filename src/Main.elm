@@ -9,6 +9,7 @@ port module Main exposing
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
+import Charts
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Html exposing (..)
@@ -811,6 +812,11 @@ viewLangStats lang langLogs =
         guessAvg =
             toFloat totalGuesses / toFloat totalWins
 
+        chartLogs =
+            langLogs
+                |> List.reverse
+                |> List.take 100
+
         row nbGuess =
             let
                 wins =
@@ -864,6 +870,18 @@ viewLangStats lang langLogs =
                 |> tbody []
             ]
         ]
+    , div []
+        [ h2 [ class "fs-5" ]
+            [ I18n.StatsGuessEvolution { lang = lang }
+                |> I18n.htmlText lang
+            ]
+        , p []
+            [ I18n.StatsGuessEvolutionHelp { lang = lang, length = List.length chartLogs }
+                |> I18n.htmlText lang
+            ]
+        , chartLogs
+            |> Charts.logs
+        ]
     ]
 
 
@@ -901,7 +919,7 @@ viewHeader { store, modal } =
                 ]
     in
     nav [ class "navbar sticky-top navbar-dark bg-dark" ]
-        [ div [ class "Header container flex-nowrap" ]
+        [ div [ class "Header container-fluid flex-nowrap" ]
             [ span [ class "text-white fw-bold me-2" ] [ text "Wordlem" ]
             , button
                 [ type_ "button"
