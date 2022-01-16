@@ -7673,16 +7673,8 @@ var $author$project$I18n$HelpLetterMisplaced = function (a) {
 var $author$project$I18n$HelpLetterUnused = function (a) {
 	return {$: 15, a: a};
 };
-var $elm$core$String$fromList = _String_fromList;
-var $elm$core$List$singleton = function (value) {
-	return _List_fromArray(
-		[value]);
-};
 var $elm$core$Char$toUpper = _Char_toUpper;
-var $author$project$Main$charToText = A2(
-	$elm$core$Basics$composeR,
-	$elm$core$Char$toUpper,
-	A2($elm$core$Basics$composeR, $elm$core$List$singleton, $elm$core$String$fromList));
+var $author$project$Main$charToText = A2($elm$core$Basics$composeR, $elm$core$Char$toUpper, $elm$core$String$fromChar);
 var $author$project$Main$guessDescription = function (lang) {
 	return $elm$core$List$map(
 		function (letter) {
@@ -8019,6 +8011,10 @@ var $elm$core$List$append = F2(
 	});
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
+};
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
 };
 var $cuducos$elm_format_number$FormatNumber$Parser$classify = function (formatted) {
 	var onlyZeros = A2(
@@ -8796,6 +8792,7 @@ var $author$project$Main$layout = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
+var $elm$core$String$fromList = _String_fromList;
 var $elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
 		repeatHelp:
