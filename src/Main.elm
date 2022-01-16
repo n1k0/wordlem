@@ -709,24 +709,20 @@ viewHelp { lang } =
             , Unused 's'
             ]
     in
-    [ p []
-        [ I18n.HelpGamePitch
-            { nbLetters = numberOfLetters
-            , lang = lang
-            , maxGuesses = maxAttempts
-            }
-            |> I18n.htmlText lang
-        ]
-    , p []
-        [ I18n.htmlText lang I18n.HelpKeyboard ]
+    [ I18n.HelpGamePitch
+        { nbLetters = numberOfLetters
+        , lang = lang
+        , maxGuesses = maxAttempts
+        }
+        |> I18n.paragraph lang
+    , I18n.paragraph lang I18n.HelpKeyboard
     , div [ class "mb-3" ]
         [ viewAttempt demo ]
-    , p []
-        [ I18n.htmlText lang I18n.HelpInThisExample ]
+    , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
         |> ul []
-    , p [] [ I18n.htmlText lang I18n.HelpKeyboardLetter ]
+    , I18n.paragraph lang I18n.HelpKeyboardLetter
     , I18n.HelpInspiredBy
         { wordleUrl = "https://www.powerlanguage.co.uk/wordle/"
         , githubUrl = "https://github.com/n1k0/wordlem"
@@ -852,10 +848,9 @@ viewLangStats lang langLogs =
             [ I18n.StatsGuessEvolution { lang = lang }
                 |> I18n.htmlText lang
             ]
-        , p []
-            [ I18n.StatsGuessEvolutionHelp { lang = lang, length = List.length chartLogs }
-                |> I18n.htmlText lang
-            ]
+        , I18n.StatsGuessEvolutionHelp
+            { lang = lang, length = List.length chartLogs }
+            |> I18n.paragraph lang
         , chartLogs
             |> Charts.logs
         ]
@@ -1005,8 +1000,7 @@ viewError lang error =
         [ case error of
             DecodeError details ->
                 div []
-                    [ p []
-                        [ I18n.htmlText lang I18n.DecodeError ]
+                    [ I18n.paragraph lang I18n.DecodeError
                     , pre [ class "pb-3" ]
                         [ text details ]
                     ]

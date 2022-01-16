@@ -4,6 +4,7 @@ module I18n exposing
     , htmlText
     , langFromString
     , langToString
+    , paragraph
     , parseLang
     , translate
     )
@@ -224,6 +225,11 @@ translate lang id =
 htmlText : Lang -> Id -> Html msg
 htmlText lang id =
     text (translate lang id)
+
+
+paragraph : Lang -> Id -> Html msg
+paragraph lang id =
+    Html.p [] [ htmlText lang id ]
 
 
 parseLang : String -> Lang
