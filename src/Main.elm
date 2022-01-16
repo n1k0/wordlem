@@ -363,19 +363,17 @@ scrollToBottom id =
         |> Task.attempt (always NoOp)
 
 
+addChar : Char -> UserInput -> UserInput
+addChar char input =
+    (input ++ String.fromChar char)
+        |> String.slice 0 numberOfLetters
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
         ( BackSpace, Ongoing word guesses input _ ) ->
-            let
-                newInput =
-                    String.toList input
-                        |> List.reverse
-                        |> List.drop 1
-                        |> List.reverse
-                        |> String.fromList
-            in
-            ( { model | state = Ongoing word guesses newInput Nothing }
+            ( { model | state = Ongoing word guesses (String.dropRight 1 input) Nothing }
             , Cmd.none
             )
 
