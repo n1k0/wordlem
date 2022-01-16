@@ -137,9 +137,6 @@ defaultStore lang =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        lang =
-            I18n.parseLang flags.lang
-
         store =
             flags.rawStore
                 |> Decode.decodeString decodeStore
@@ -152,7 +149,7 @@ init flags =
                 Err error ->
                     let
                         newStore =
-                            defaultStore lang
+                            defaultStore (I18n.parseLang flags.lang)
 
                         newModel =
                             initialModel newStore
@@ -164,7 +161,7 @@ init flags =
                                 |> DecodeError
                                 |> Errored
                       }
-                    , newStore |> encodeStore |> Encode.encode 0 |> saveStore
+                    , encodeAndSaveStore newStore
                     )
     in
     ( model
@@ -213,11 +210,7 @@ randomWord : List WordToFind -> Random.Generator (Maybe WordToFind)
 randomWord words =
     Random.int 0 (List.length words - 1)
         |> Random.andThen
-            (\int ->
-                words
-                    |> LE.getAt int
-                    |> Random.constant
-            )
+            (\int -> words |> LE.getAt int |> Random.constant)
 
 
 validateGuess : Lang -> WordToFind -> UserInput -> Result String Guess
@@ -488,7 +481,7 @@ update msg ({ store } as model) =
             in
             ( newModel
             , Cmd.batch
-                [ newStore |> encodeStore |> Encode.encode 0 |> saveStore
+                [ encodeAndSaveStore newStore
                 , Random.generate NewWord (randomWord newModel.words)
                 ]
             )
@@ -1084,6 +1077,15 @@ view ({ store, state } as model) =
 
 
 
+-- Store
+
+
+encodeAndSaveStore : Store -> Cmd Msg
+encodeAndSaveStore =
+    encodeStore >> Encode.encode 0 >> saveStore
+
+
+
 -- Logging
 
 
@@ -1108,7 +1110,7 @@ logResult ( { store, state, time } as model, cmds ) =
                     store |> logEntry (Log time store.lang word victory nbAttempts)
             in
             ( { model | store = newStore }
-            , newStore |> encodeStore |> Encode.encode 0 |> saveStore
+            , encodeAndSaveStore newStore
             )
 
         Nothing ->
