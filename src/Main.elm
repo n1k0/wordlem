@@ -355,6 +355,13 @@ defocus domId =
         |> Task.attempt (always NoOp)
 
 
+defocusMenuButtons : Cmd Msg
+defocusMenuButtons =
+    [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help" ]
+        |> List.map defocus
+        |> Cmd.batch
+
+
 scrollToBottom : String -> Cmd Msg
 scrollToBottom id =
     Process.sleep 10
@@ -383,7 +390,9 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( CloseModal, _ ) ->
-            ( { model | modal = Nothing }, Cmd.none )
+            ( { model | modal = Nothing }
+            , defocusMenuButtons
+            )
 
         ( KeyPressed char, Ongoing word guesses input _ ) ->
             let
@@ -414,9 +423,7 @@ update msg ({ store } as model) =
 
         ( NewWord (Just newWord), Idle ) ->
             ( { model | state = Ongoing newWord [] "" Nothing }
-            , [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help" ]
-                |> List.map defocus
-                |> Cmd.batch
+            , defocusMenuButtons
             )
 
         ( NewWord Nothing, Idle ) ->
