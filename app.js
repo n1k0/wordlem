@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.al.L === region.aw.L)
+	if (region.al.M === region.aw.M)
 	{
-		return 'on line ' + region.al.L;
+		return 'on line ' + region.al.M;
 	}
-	return 'on lines ' + region.al.L + ' through ' + region.aw.L;
+	return 'on lines ' + region.al.M + ' through ' + region.aw.M;
 }
 
 
@@ -5435,11 +5435,11 @@ var $author$project$Main$NewWord = function (a) {
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $author$project$Main$Store = F2(
 	function (lang, logs) {
-		return {ac: lang, F: logs};
+		return {L: lang, F: logs};
 	});
 var $author$project$Main$Log = F5(
 	function (time, lang, word, victory, guesses) {
-		return {T: guesses, ac: lang, I: time, ao: victory, b0: word};
+		return {U: guesses, L: lang, I: time, ao: victory, b0: word};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -5484,7 +5484,7 @@ var $author$project$Main$decodeStore = A3(
 		$elm$json$Json$Decode$list($author$project$Main$decodeLog)));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $author$project$Main$defaultStore = function (lang) {
-	return {ac: lang, F: _List_Nil};
+	return {L: lang, F: _List_Nil};
 };
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$json$Json$Encode$int = _Json_wrap;
@@ -5524,7 +5524,7 @@ var $author$project$Main$encodeLog = function (log) {
 				_Utils_Tuple2(
 				'lang',
 				$elm$json$Json$Encode$string(
-					$author$project$I18n$langToString(log.ac))),
+					$author$project$I18n$langToString(log.L))),
 				_Utils_Tuple2(
 				'word',
 				$elm$json$Json$Encode$string(log.b0)),
@@ -5533,7 +5533,7 @@ var $author$project$Main$encodeLog = function (log) {
 				$elm$json$Json$Encode$bool(log.ao)),
 				_Utils_Tuple2(
 				'guesses',
-				$elm$json$Json$Encode$int(log.T))
+				$elm$json$Json$Encode$int(log.U))
 			]));
 };
 var $elm$json$Json$Encode$list = F2(
@@ -5552,7 +5552,7 @@ var $author$project$Main$encodeStore = function (store) {
 				_Utils_Tuple2(
 				'lang',
 				$elm$json$Json$Encode$string(
-					$author$project$I18n$langToString(store.ac))),
+					$author$project$I18n$langToString(store.L))),
 				_Utils_Tuple2(
 				'logs',
 				A2($elm$json$Json$Encode$list, $author$project$Main$encodeLog, store.F))
@@ -5666,7 +5666,7 @@ var $author$project$Main$initialModel = function (store) {
 		h: $author$project$Main$Idle,
 		t: store,
 		I: $elm$time$Time$millisToPosix(0),
-		S: $author$project$Main$getWords(store.ac)
+		T: $author$project$Main$getWords(store.L)
 	};
 };
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -5781,7 +5781,7 @@ var $author$project$Main$randomWord = function (words) {
 var $author$project$Main$saveStore = _Platform_outgoingPort('saveStore', $elm$json$Json$Encode$string);
 var $author$project$Main$init = function (flags) {
 	var store = A2($elm$json$Json$Decode$decodeString, $author$project$Main$decodeStore, flags.aj);
-	var lang = $author$project$I18n$parseLang(flags.ac);
+	var lang = $author$project$I18n$parseLang(flags.L);
 	var _v0 = function () {
 		if (!store.$) {
 			var store_ = store.a;
@@ -5817,7 +5817,7 @@ var $author$project$Main$init = function (flags) {
 					A2(
 					$elm$random$Random$generate,
 					$author$project$Main$NewWord,
-					$author$project$Main$randomWord(model.S)),
+					$author$project$Main$randomWord(model.T)),
 					cmds
 				])));
 };
@@ -6622,7 +6622,7 @@ var $author$project$Main$logResult = function (_v0) {
 		var nbAttempts = _v2.c;
 		var newStore = A2(
 			$author$project$Main$logEntry,
-			A5($author$project$Main$Log, time, store.ac, word, victory, nbAttempts),
+			A5($author$project$Main$Log, time, store.L, word, victory, nbAttempts),
 			store);
 		return _Utils_Tuple2(
 			_Utils_update(
@@ -7151,7 +7151,7 @@ var $author$project$I18n$getSet = function (id) {
 			return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
 		case 8:
 			var nbLetters = id.a.bD;
-			var lang = id.a.ac;
+			var lang = id.a.L;
 			var maxGuesses = id.a.by;
 			return A3(
 				$author$project$I18n$set,
@@ -7209,13 +7209,21 @@ var $author$project$I18n$getSet = function (id) {
 		case 18:
 			return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
 		case 19:
-			return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
-		case 20:
 			return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
+		case 20:
+			return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
 		case 21:
-			return A3($author$project$I18n$set, _List_Nil, 'games played', 'parties jouées');
+			var lang = id.a.L;
+			return A3(
+				$author$project$I18n$set,
+				_List_fromArray(
+					[
+						$author$project$I18n$langToString(lang)
+					]),
+				'games played in {0}',
+				'parties jouées en {0}');
 		case 22:
-			var lang = id.a.ac;
+			var lang = id.a.L;
 			return A3(
 				$author$project$I18n$set,
 				_List_fromArray(
@@ -7224,10 +7232,20 @@ var $author$project$I18n$getSet = function (id) {
 					]),
 				'Guess distribution ({0})',
 				'Distribution des scores ({0})');
-		case 24:
-			return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
 		case 23:
-			var lang = id.a.ac;
+			var lang = id.a.L;
+			return A3(
+				$author$project$I18n$set,
+				_List_fromArray(
+					[
+						$author$project$I18n$langToString(lang)
+					]),
+				'Statistics ({0})',
+				'Statistiques ({0})');
+		case 25:
+			return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
+		case 24:
+			var lang = id.a.L;
 			return A3(
 				$author$project$I18n$set,
 				_List_fromArray(
@@ -7360,7 +7378,7 @@ var $author$project$Main$update = F2(
 						A2(
 							$elm$random$Random$generate,
 							$author$project$Main$NewWord,
-							$author$project$Main$randomWord(newModel.S)));
+							$author$project$Main$randomWord(newModel.T)));
 				case 4:
 					var time = _v0.a.a;
 					return _Utils_Tuple2(
@@ -7431,7 +7449,7 @@ var $author$project$Main$update = F2(
 						var word = _v13.a;
 						var guesses = _v13.b;
 						var input = _v13.c;
-						var _v14 = A3($author$project$Main$validateGuess, store.ac, word, input);
+						var _v14 = A3($author$project$Main$validateGuess, store.L, word, input);
 						if (!_v14.$) {
 							var guess = _v14.a;
 							var newState = A2(
@@ -7473,7 +7491,7 @@ var $author$project$Main$update = F2(
 					var lang = _v0.a.a;
 					var newStore = _Utils_update(
 						store,
-						{ac: lang});
+						{L: lang});
 					var newModel = $author$project$Main$initialModel(newStore);
 					return _Utils_Tuple2(
 						newModel,
@@ -7488,7 +7506,7 @@ var $author$project$Main$update = F2(
 									A2(
 									$elm$random$Random$generate,
 									$author$project$Main$NewWord,
-									$author$project$Main$randomWord(newModel.S))
+									$author$project$Main$randomWord(newModel.T))
 								])));
 			}
 		}
@@ -7626,12 +7644,15 @@ var $author$project$Main$endGameButtons = F2(
 				]));
 	});
 var $author$project$I18n$Help = {$: 7};
-var $author$project$I18n$Statistics = {$: 19};
+var $author$project$I18n$StatsLang = function (a) {
+	return {$: 23, a: a};
+};
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$HelpModal = 0;
 var $author$project$Main$OpenModal = function (a) {
 	return {$: 7, a: a};
 };
+var $author$project$I18n$StatsButton = {$: 20};
 var $author$project$Main$StatsModal = 1;
 var $author$project$Main$SwitchLang = function (a) {
 	return {$: 10, a: a};
@@ -7698,7 +7719,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-en'),
 								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-								btnClass(!store.ac),
+								btnClass(!store.L),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(0))
 							]),
@@ -7713,7 +7734,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 								$elm$html$Html$Attributes$type_('button'),
 								$elm$html$Html$Attributes$id('btn-lang-fr'),
 								$elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-								btnClass(store.ac === 1),
+								btnClass(store.L === 1),
 								$elm$html$Html$Events$onClick(
 								$author$project$Main$SwitchLang(1))
 							]),
@@ -7738,7 +7759,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 						_List_fromArray(
 							[
 								$author$project$Main$icon('stats'),
-								A2($author$project$I18n$htmlText, store.ac, $author$project$I18n$Statistics)
+								A2($author$project$I18n$htmlText, store.L, $author$project$I18n$StatsButton)
 							])),
 						A2(
 						$elm$html$Html$button,
@@ -7757,7 +7778,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 						_List_fromArray(
 							[
 								$author$project$Main$icon('help'),
-								A2($author$project$I18n$htmlText, store.ac, $author$project$I18n$Help)
+								A2($author$project$I18n$htmlText, store.L, $author$project$I18n$Help)
 							]))
 					]))
 			]));
@@ -7896,7 +7917,7 @@ var $author$project$Main$viewAttempt = A2(
 		}),
 	$author$project$Main$viewBoardRow);
 var $author$project$Main$viewHelp = function (_v0) {
-	var lang = _v0.ac;
+	var lang = _v0.L;
 	var demo = _List_fromArray(
 		[
 			$author$project$Main$Correct('m'),
@@ -7916,7 +7937,7 @@ var $author$project$Main$viewHelp = function (_v0) {
 					$author$project$I18n$htmlText,
 					lang,
 					$author$project$I18n$HelpGamePitch(
-						{ac: lang, by: $author$project$Main$maxAttempts, bD: $author$project$Main$numberOfLetters}))
+						{L: lang, by: $author$project$Main$maxAttempts, bD: $author$project$Main$numberOfLetters}))
 				])),
 			A2(
 			$elm$html$Html$p,
@@ -7998,7 +8019,7 @@ var $elm$html$Html$Events$custom = F2(
 var $elm$html$Html$h6 = _VirtualDom_node('h6');
 var $author$project$Main$viewModal = F3(
 	function (_v0, transationId, content) {
-		var lang = _v0.ac;
+		var lang = _v0.L;
 		var modalContentAttrs = _List_fromArray(
 			[
 				$elm$html$Html$Attributes$class('modal-content'),
@@ -8095,20 +8116,22 @@ var $author$project$Main$viewModal = F3(
 				]));
 	});
 var $author$project$I18n$StatsLangDataMissing = function (a) {
-	return {$: 23, a: a};
+	return {$: 24, a: a};
 };
-var $author$project$I18n$StatsAverageGuesses = {$: 20};
-var $author$project$I18n$StatsGamesPlayed = {$: 21};
+var $author$project$I18n$StatsAverageGuesses = {$: 19};
+var $author$project$I18n$StatsGamesPlayed = function (a) {
+	return {$: 21, a: a};
+};
 var $author$project$I18n$StatsGuessDistribution = function (a) {
 	return {$: 22, a: a};
 };
-var $author$project$I18n$StatsWinRate = {$: 25};
+var $author$project$I18n$StatsWinRate = {$: 26};
 var $cuducos$elm_format_number$FormatNumber$Locales$Exact = function (a) {
 	return {$: 2, a: a};
 };
 var $cuducos$elm_format_number$FormatNumber$Parser$FormattedNumber = F5(
 	function (original, integers, decimals, prefix, suffix) {
-		return {bh: decimals, aD: integers, aM: original, W: prefix, Y: suffix};
+		return {bh: decimals, aD: integers, aM: original, X: prefix, Z: suffix};
 	});
 var $cuducos$elm_format_number$FormatNumber$Parser$Negative = 2;
 var $cuducos$elm_format_number$FormatNumber$Parser$Positive = 0;
@@ -8482,7 +8505,7 @@ var $cuducos$elm_format_number$FormatNumber$Parser$parse = F2(
 		var parts = A2($cuducos$elm_format_number$FormatNumber$Parser$splitInParts, locale, original);
 		var integers = A2(
 			$cuducos$elm_format_number$FormatNumber$Parser$splitIntegers,
-			locale.Z,
+			locale._,
 			A2($elm$core$String$filter, $elm$core$Char$isDigit, parts.a));
 		var decimals = A2($cuducos$elm_format_number$FormatNumber$Parser$getDecimals, locale, parts.b);
 		var partial = A5($cuducos$elm_format_number$FormatNumber$Parser$FormattedNumber, original, integers, decimals, '', '');
@@ -8491,15 +8514,15 @@ var $cuducos$elm_format_number$FormatNumber$Parser$parse = F2(
 			case 2:
 				return _Utils_update(
 					partial,
-					{W: locale.af, Y: locale.ag});
+					{X: locale.af, Z: locale.ag});
 			case 0:
 				return _Utils_update(
 					partial,
-					{W: locale.aQ, Y: locale.aR});
+					{X: locale.aQ, Z: locale.aR});
 			default:
 				return _Utils_update(
 					partial,
-					{W: locale.a8, Y: locale.a9});
+					{X: locale.a8, Z: locale.a9});
 		}
 	});
 var $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals = F2(
@@ -8513,7 +8536,7 @@ var $cuducos$elm_format_number$FormatNumber$Stringfy$stringfy = F2(
 		var decimals = stringfyDecimals(formatted.bh);
 		return $elm$core$String$concat(
 			_List_fromArray(
-				[formatted.W, integers, decimals, formatted.Y]));
+				[formatted.X, integers, decimals, formatted.Z]));
 	});
 var $cuducos$elm_format_number$FormatNumber$format = F2(
 	function (locale, number_) {
@@ -8533,7 +8556,7 @@ var $cuducos$elm_format_number$FormatNumber$Locales$base = {
 	ag: '',
 	aQ: '',
 	aR: '',
-	Z: 0,
+	_: 0,
 	x: '',
 	a8: '',
 	a9: ''
@@ -8599,7 +8622,7 @@ var $author$project$Main$viewLangStats = F2(
 			A2(
 				$elm$core$List$map,
 				function ($) {
-					return $.T;
+					return $.U;
 				},
 				onlyVictories(langLogs)));
 		var totalWins = $elm$core$List$length(
@@ -8612,7 +8635,7 @@ var $author$project$Main$viewLangStats = F2(
 					A2(
 						$elm$core$Basics$composeR,
 						function ($) {
-							return $.T;
+							return $.U;
 						},
 						$elm$core$Basics$eq(nbGuess)),
 					onlyVictories(langLogs)));
@@ -8710,7 +8733,11 @@ var $author$project$Main$viewLangStats = F2(
 										_List_Nil,
 										_List_fromArray(
 											[
-												A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsGamesPlayed)
+												A2(
+												$author$project$I18n$htmlText,
+												lang,
+												$author$project$I18n$StatsGamesPlayed(
+													{L: lang}))
 											]))
 									]))
 							])),
@@ -8807,7 +8834,7 @@ var $author$project$Main$viewLangStats = F2(
 								$author$project$I18n$htmlText,
 								lang,
 								$author$project$I18n$StatsGuessDistribution(
-									{ac: lang}))
+									{L: lang}))
 							])),
 						A2(
 						$elm$html$Html$table,
@@ -8829,14 +8856,14 @@ var $author$project$Main$viewLangStats = F2(
 			]);
 	});
 var $author$project$Main$viewStats = function (_v0) {
-	var lang = _v0.ac;
+	var lang = _v0.L;
 	var logs = _v0.F;
 	var _v1 = A2(
 		$elm$core$List$filter,
 		A2(
 			$elm$core$Basics$composeR,
 			function ($) {
-				return $.ac;
+				return $.L;
 			},
 			$elm$core$Basics$eq(lang)),
 		logs);
@@ -8847,7 +8874,7 @@ var $author$project$Main$viewStats = function (_v0) {
 				$author$project$I18n$htmlText,
 				lang,
 				$author$project$I18n$StatsLangDataMissing(
-					{ac: lang}))
+					{L: lang}))
 			]);
 	} else {
 		var logs_ = _v1;
@@ -8887,7 +8914,8 @@ var $author$project$Main$layout = F2(
 							return A3(
 								$author$project$Main$viewModal,
 								store,
-								$author$project$I18n$Statistics,
+								$author$project$I18n$StatsLang(
+									{L: store.L}),
 								$author$project$Main$viewStats(store));
 						}
 					} else {
@@ -9184,13 +9212,13 @@ var $author$project$Main$view = function (model) {
 				case 0:
 					return _List_fromArray(
 						[
-							A2($author$project$I18n$htmlText, store.ac, $author$project$I18n$GameLoading)
+							A2($author$project$I18n$htmlText, store.L, $author$project$I18n$GameLoading)
 						]);
 				case 1:
 					var error = state.a;
 					return _List_fromArray(
 						[
-							A2($author$project$Main$viewError, store.ac, error),
+							A2($author$project$Main$viewError, store.L, error),
 							A2(
 							$elm$html$Html$p,
 							_List_fromArray(
@@ -9199,7 +9227,7 @@ var $author$project$Main$view = function (model) {
 								]),
 							_List_fromArray(
 								[
-									$author$project$Main$newGameButton(store.ac)
+									$author$project$Main$newGameButton(store.L)
 								]))
 						]);
 				case 4:
@@ -9208,12 +9236,12 @@ var $author$project$Main$view = function (model) {
 					return _List_fromArray(
 						[
 							A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, guesses),
-							A2($author$project$Main$endGameButtons, store.ac, word),
-							A2($author$project$Main$viewKeyboard, store.ac, guesses),
+							A2($author$project$Main$endGameButtons, store.L, word),
+							A2($author$project$Main$viewKeyboard, store.L, guesses),
 							A2(
 							$author$project$Main$alert,
 							'success',
-							A2($author$project$I18n$translate, store.ac, $author$project$I18n$GameWin))
+							A2($author$project$I18n$translate, store.L, $author$project$I18n$GameWin))
 						]);
 				case 3:
 					var word = state.a;
@@ -9230,12 +9258,12 @@ var $author$project$Main$view = function (model) {
 									$elm$core$List$map,
 									$author$project$Main$Correct,
 									$elm$core$String$toList(word)))),
-							A2($author$project$Main$endGameButtons, store.ac, word),
-							A2($author$project$Main$viewKeyboard, store.ac, guesses),
+							A2($author$project$Main$endGameButtons, store.L, word),
+							A2($author$project$Main$viewKeyboard, store.L, guesses),
 							A2(
 							$author$project$Main$alert,
 							'info',
-							A2($author$project$I18n$translate, store.ac, $author$project$I18n$GameLost))
+							A2($author$project$I18n$translate, store.L, $author$project$I18n$GameLost))
 						]);
 				default:
 					var guesses = state.b;
@@ -9254,7 +9282,7 @@ var $author$project$Main$view = function (model) {
 								$elm$core$Maybe$map,
 								$author$project$Main$alert('warning'),
 								error)),
-							A2($author$project$Main$viewKeyboard, store.ac, guesses)
+							A2($author$project$Main$viewKeyboard, store.L, guesses)
 						]);
 			}
 		}());
@@ -9269,7 +9297,7 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 				$elm$json$Json$Decode$andThen,
 				function (lang) {
 					return $elm$json$Json$Decode$succeed(
-						{ac: lang, aj: rawStore});
+						{L: lang, aj: rawStore});
 				},
 				A2($elm$json$Json$Decode$field, 'lang', $elm$json$Json$Decode$string));
 		},
