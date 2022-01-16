@@ -1,7 +1,6 @@
 port module Main exposing
     ( Letter(..)
     , Msg(..)
-    , decodeKey
     , main
     , saveStore
     , storeChanged
@@ -12,13 +11,14 @@ import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
 import Charts
+import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import I18n exposing (Lang(..), translate)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode
 import List.Extra as LE
 import Log exposing (Log)
 import Markdown
@@ -1101,38 +1101,6 @@ logEntry log ({ logs } as store) =
     { store | logs = log :: logs }
 
 
-decodeKey : Decoder Msg
-decodeKey =
-    Decode.field "key" Decode.string
-        |> Decode.andThen
-            (\key ->
-                case String.uncons (SE.removeAccents (String.toLower key)) of
-                    Just ( char, "" ) ->
-                        if Char.isAlpha char then
-                            Decode.succeed (KeyPressed char)
-
-                        else
-                            Decode.fail "discarded char"
-
-                    _ ->
-                        if key == "Backspace" then
-                            Decode.succeed BackSpace
-
-                        else if key == "Enter" then
-                            Decode.succeed Submit
-
-                        else if key == "Escape" then
-                            Decode.succeed CloseModal
-
-                        else
-                            Decode.fail "discarded key"
-            )
-
-
-
--- Main & subs
-
-
 main : Program Flags Model Msg
 main =
     Browser.element
@@ -1150,7 +1118,14 @@ subscriptions { state } =
         , storeChanged (Store.fromJson >> StoreChanged)
         , case state of
             Ongoing _ _ _ _ ->
-                BE.onKeyDown decodeKey
+                BE.onKeyDown
+                    (Event.decodeKey
+                        { onKeyPress = KeyPressed
+                        , onBackSpace = BackSpace
+                        , onEnter = Submit
+                        , onEscape = CloseModal
+                        }
+                    )
 
             _ ->
                 Sub.none
