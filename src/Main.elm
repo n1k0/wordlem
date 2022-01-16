@@ -19,11 +19,12 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import I18n exposing (Lang(..), translate)
 import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
 import List.Extra as LE
+import Log exposing (Log)
 import Markdown
 import Process
 import Random
+import Store exposing (Store)
 import String.Extra as SE
 import String.Interpolate exposing (interpolate)
 import Task
@@ -34,21 +35,6 @@ import Words
 type alias Flags =
     { lang : String
     , rawStore : String
-    }
-
-
-type alias Store =
-    { lang : Lang
-    , logs : List Log
-    }
-
-
-type alias Log =
-    { time : Posix
-    , lang : Lang
-    , word : WordToFind
-    , victory : Bool
-    , guesses : Int
     }
 
 
@@ -114,7 +100,7 @@ type Msg
     | NewWord (Maybe WordToFind)
     | NoOp
     | OpenModal Modal
-    | StoreChanged String
+    | StoreChanged (Result Decode.Error Store)
     | Submit
     | SwitchLang Lang
 
@@ -129,19 +115,11 @@ maxAttempts =
     6
 
 
-defaultStore : Lang -> Store
-defaultStore lang =
-    { lang = lang
-    , logs = []
-    }
-
-
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         store =
-            flags.rawStore
-                |> Decode.decodeString decodeStore
+            Store.fromJson flags.rawStore
 
         ( model, cmds ) =
             case store of
@@ -151,7 +129,7 @@ init flags =
                 Err error ->
                     let
                         newStore =
-                            defaultStore (I18n.parseLang flags.lang)
+                            Store.default (I18n.parseLang flags.lang)
 
                         newModel =
                             initialModel newStore
@@ -436,13 +414,12 @@ update msg ({ store } as model) =
             , Cmd.none
             )
 
-        ( StoreChanged rawStore, _ ) ->
-            case Decode.decodeString decodeStore rawStore of
-                Ok newStore ->
-                    ( { model | store = newStore }, Cmd.none )
+        ( StoreChanged (Ok newStore), _ ) ->
+            ( { model | store = newStore }, Cmd.none )
 
-                Err _ ->
-                    ( model, Cmd.none )
+        ( StoreChanged (Err _), _ ) ->
+            -- FIXME: render a toast when we have them
+            ( model, Cmd.none )
 
         ( Submit, Ongoing word guesses input _ ) ->
             case validateGuess store.lang word input of
@@ -1082,13 +1059,9 @@ view ({ store, state } as model) =
         )
 
 
-
--- Store
-
-
 encodeAndSaveStore : Store -> Cmd Msg
 encodeAndSaveStore =
-    encodeStore >> Encode.encode 0 >> saveStore
+    Store.toJson >> saveStore
 
 
 
@@ -1126,50 +1099,6 @@ logResult ( { store, state, time } as model, cmds ) =
 logEntry : Log -> Store -> Store
 logEntry log ({ logs } as store) =
     { store | logs = log :: logs }
-
-
-
--- Encoders
-
-
-encodeStore : Store -> Encode.Value
-encodeStore store =
-    Encode.object
-        [ ( "lang", Encode.string (I18n.langToString store.lang) )
-        , ( "logs", Encode.list encodeLog store.logs )
-        ]
-
-
-encodeLog : Log -> Encode.Value
-encodeLog log =
-    Encode.object
-        [ ( "time", log.time |> Time.posixToMillis |> Encode.int )
-        , ( "lang", log.lang |> I18n.langToString |> Encode.string )
-        , ( "word", log.word |> Encode.string )
-        , ( "victory", log.victory |> Encode.bool )
-        , ( "guesses", log.guesses |> Encode.int )
-        ]
-
-
-
--- Decoders
-
-
-decodeStore : Decoder Store
-decodeStore =
-    Decode.map2 Store
-        (Decode.field "lang" (Decode.map I18n.langFromString Decode.string))
-        (Decode.field "logs" (Decode.list decodeLog))
-
-
-decodeLog : Decoder Log
-decodeLog =
-    Decode.map5 Log
-        (Decode.field "time" (Decode.map Time.millisToPosix Decode.int))
-        (Decode.field "lang" (Decode.map I18n.langFromString Decode.string))
-        (Decode.field "word" Decode.string)
-        (Decode.field "victory" Decode.bool)
-        (Decode.field "guesses" Decode.int)
 
 
 decodeKey : Decoder Msg
@@ -1218,7 +1147,7 @@ subscriptions : Model -> Sub Msg
 subscriptions { state } =
     Sub.batch
         [ Time.every 1000 NewTime
-        , storeChanged StoreChanged
+        , storeChanged (Store.fromJson >> StoreChanged)
         , case state of
             Ongoing _ _ _ _ ->
                 BE.onKeyDown decodeKey
