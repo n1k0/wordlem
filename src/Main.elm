@@ -481,7 +481,7 @@ removeAlert state =
 
 charToText : Char -> String
 charToText =
-    Char.toUpper >> List.singleton >> String.fromList
+    Char.toUpper >> String.fromChar
 
 
 viewAttempt : Guess -> Html Msg
