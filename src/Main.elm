@@ -225,10 +225,14 @@ validateGuess lang word input =
             )
     in
     if List.length inputChars /= numberOfLetters then
-        I18n.NotEnoughLetters |> translate lang |> Err
+        I18n.NotEnoughLetters
+            |> translate lang
+            |> Err
 
     else if not (List.member (normalize input) (getWords lang)) then
-        I18n.AbsentFromDictionary { word = input } |> translate lang |> Err
+        I18n.AbsentFromDictionary { lang = lang, word = input }
+            |> translate lang
+            |> Err
 
     else
         wordChars

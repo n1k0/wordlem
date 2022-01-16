@@ -16,7 +16,7 @@ type alias Set =
 
 
 type Id
-    = AbsentFromDictionary { word : String }
+    = AbsentFromDictionary { lang : Lang, word : String }
     | DecodeError
     | Definition
     | ErrorDetail { error : String }
@@ -48,10 +48,10 @@ type Id
 getSet : Id -> Set
 getSet id =
     case id of
-        AbsentFromDictionary { word } ->
-            set [ word ]
-                "Not in dictionary: {0}"
-                "Absent du dictionnaire\u{00A0}: {0}"
+        AbsentFromDictionary { lang, word } ->
+            set [ langToString lang, word ]
+                "Not in {0} dictionary: {1}"
+                "Absent du dictionnaire {0}\u{00A0}: {1}"
 
         DecodeError ->
             set []
