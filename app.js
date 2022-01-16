@@ -14416,9 +14416,7 @@ var $author$project$Charts$logs = function (data) {
 						},
 						_List_fromArray(
 							[
-								$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$blue),
-								$terezka$elm_charts$Chart$Attributes$roundBottom(0.5),
-								$terezka$elm_charts$Chart$Attributes$roundTop(0.5)
+								$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$blue)
 							]))
 					]),
 				data)
