@@ -6481,6 +6481,21 @@ var $author$project$Main$Ongoing = F4(
 	function (a, b, c, d) {
 		return {$: 2, a: a, b: b, c: c, d: d};
 	});
+var $elm$core$String$cons = _String_cons;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $author$project$Main$numberOfLetters = 5;
+var $author$project$Main$addChar = F2(
+	function (_char, input) {
+		return A3(
+			$elm$core$String$slice,
+			0,
+			$author$project$Main$numberOfLetters,
+			_Utils_ap(
+				input,
+				$elm$core$String$fromChar(_char)));
+	});
 var $author$project$Main$Lost = F2(
 	function (a, b) {
 		return {$: 3, a: a, b: b};
@@ -6585,7 +6600,10 @@ var $author$project$Main$defocusMenuButtons = $elm$core$Platform$Cmd$batch(
 		$author$project$Main$defocus,
 		_List_fromArray(
 			['btn-lang-en', 'btn-lang-fr', 'btn-stats', 'btn-help'])));
-var $elm$core$String$fromList = _String_fromList;
+var $elm$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
+	});
 var $author$project$Main$logEntry = F2(
 	function (log, store) {
 		var logs = store.F;
@@ -6641,7 +6659,6 @@ var $author$project$Main$logResult = function (_v0) {
 		return _Utils_Tuple2(model, cmds);
 	}
 };
-var $author$project$Main$numberOfLetters = 5;
 var $author$project$Main$removeAlert = function (state) {
 	if ((state.$ === 2) && (!state.d.$)) {
 		var word = state.a;
@@ -6670,136 +6687,6 @@ var $author$project$Main$scrollToBottom = function (id) {
 					return $elm$browser$Browser$Dom$getViewportOf(id);
 				},
 				$elm$core$Process$sleep(10))));
-};
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $elm$core$String$foldr = _String_foldr;
-var $elm$core$String$toList = function (string) {
-	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
 };
 var $author$project$I18n$AbsentFromDictionary = function (a) {
 	return {$: 0, a: a};
@@ -6989,6 +6876,10 @@ var $elm_community$string_extra$String$Extra$removeAccents = function (string) {
 		return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
 	}
 };
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
 var $elm$core$String$toLower = _String_toLower;
 var $author$project$I18n$Set = F2(
 	function (english, french) {
@@ -7002,10 +6893,6 @@ var $elm$core$Maybe$andThen = F2(
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
-	});
-var $elm$core$String$dropRight = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
 	});
 var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
 var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
@@ -7319,18 +7206,16 @@ var $author$project$Main$update = F2(
 						var word = _v2.a;
 						var guesses = _v2.b;
 						var input = _v2.c;
-						var newInput = $elm$core$String$fromList(
-							$elm$core$List$reverse(
-								A2(
-									$elm$core$List$drop,
-									1,
-									$elm$core$List$reverse(
-										$elm$core$String$toList(input)))));
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
-									h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+									h: A4(
+										$author$project$Main$Ongoing,
+										word,
+										guesses,
+										A2($elm$core$String$dropRight, 1, input),
+										$elm$core$Maybe$Nothing)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
@@ -7351,21 +7236,18 @@ var $author$project$Main$update = F2(
 						var word = _v5.a;
 						var guesses = _v5.b;
 						var input = _v5.c;
-						var newInput = $elm$core$String$fromList(
-							A2(
-								$elm$core$List$take,
-								$author$project$Main$numberOfLetters,
-								_Utils_ap(
-									$elm$core$String$toList(input),
-									_List_fromArray(
-										[_char]))));
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
-									h: A4($author$project$Main$Ongoing, word, guesses, newInput, $elm$core$Maybe$Nothing)
+									h: A4(
+										$author$project$Main$Ongoing,
+										word,
+										guesses,
+										A2($author$project$Main$addChar, _char, input),
+										$elm$core$Maybe$Nothing)
 								}),
-							$elm$core$Platform$Cmd$none);
+							$author$project$Main$scrollToBottom('board-container'));
 					} else {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
@@ -7451,22 +7333,17 @@ var $author$project$Main$update = F2(
 						var _v14 = A3($author$project$Main$validateGuess, store.L, word, input);
 						if (!_v14.$) {
 							var guess = _v14.a;
-							var newState = A2(
-								$author$project$Main$checkGame,
-								word,
-								A2($elm$core$List$cons, guess, guesses));
 							return $author$project$Main$logResult(
 								_Utils_Tuple2(
 									_Utils_update(
 										model,
-										{h: newState}),
-									function () {
-										if (newState.$ === 3) {
-											return $author$project$Main$scrollToBottom('board-container');
-										} else {
-											return $elm$core$Platform$Cmd$none;
-										}
-									}()));
+										{
+											h: A2(
+												$author$project$Main$checkGame,
+												word,
+												A2($elm$core$List$cons, guess, guesses))
+										}),
+									$author$project$Main$scrollToBottom('board-container')));
 						} else {
 							var error = _v14.a;
 							return _Utils_Tuple2(
@@ -7483,7 +7360,7 @@ var $author$project$Main$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						var _v16 = _v0.a;
+						var _v15 = _v0.a;
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
 				default:
@@ -7796,6 +7673,7 @@ var $author$project$I18n$HelpLetterMisplaced = function (a) {
 var $author$project$I18n$HelpLetterUnused = function (a) {
 	return {$: 15, a: a};
 };
+var $elm$core$String$fromList = _String_fromList;
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
 		[value]);
@@ -8218,7 +8096,6 @@ var $myrho$elm_round$Round$addSign = F2(
 			(signed && isNotZero) ? '-' : '',
 			str);
 	});
-var $elm$core$String$cons = _String_cons;
 var $elm$core$Char$fromCode = _Char_fromCode;
 var $myrho$elm_round$Round$increaseNum = function (_v0) {
 	var head = _v0.a;
@@ -8254,9 +8131,6 @@ var $elm$core$Maybe$map = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
 var $elm$core$String$padRight = F3(
 	function (n, _char, string) {
 		return _Utils_ap(
