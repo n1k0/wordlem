@@ -7010,6 +7010,7 @@ var $author$project$I18n$set = F3(
 			A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, english, params),
 			A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, french, params));
 	});
+var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$I18n$getSet = function (id) {
 	switch (id.$) {
 		case 0:
@@ -7020,7 +7021,7 @@ var $author$project$I18n$getSet = function (id) {
 				_List_fromArray(
 					[
 						$author$project$I18n$langToString(lang),
-						word
+						$elm$core$String$toUpper(word)
 					]),
 				'Not in {0} dictionary: {1}',
 				'Absent du dictionnaire {0}\u00A0: {1}');
@@ -12643,7 +12644,6 @@ var $elm$time$Time$toSecond = F2(
 				$elm$time$Time$posixToMillis(time),
 				1000));
 	});
-var $elm$core$String$toUpper = _String_toUpper;
 var $ryannhg$date_format$DateFormat$millisecondsPerYear = $elm$core$Basics$round((((1000 * 60) * 60) * 24) * 365.25);
 var $ryannhg$date_format$DateFormat$firstDayOfYear = F2(
 	function (zone, time) {
