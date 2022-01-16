@@ -7563,7 +7563,7 @@ var $author$project$Main$viewHeader = function (_v0) {
 		$elm$html$Html$nav,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('navbar fixed-top navbar-dark bg-dark')
+				$elm$html$Html$Attributes$class('navbar sticky-top navbar-dark bg-dark')
 			]),
 		_List_fromArray(
 			[
