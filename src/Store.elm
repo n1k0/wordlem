@@ -12,6 +12,11 @@ type alias Store =
     }
 
 
+addLog : Log -> Store -> Store
+addLog log ({ logs } as store) =
+    { store | logs = log :: logs }
+
+
 default : Lang -> Store
 default lang =
     { lang = lang

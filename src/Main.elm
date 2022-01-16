@@ -813,26 +813,24 @@ viewLangStats lang langLogs =
                 , td [ class "text-end" ] [ text (formatPercent percent) ]
                 , td [ class "w-100" ] [ progressBar percent ]
                 ]
+
+        card nodes =
+            div [ class "card py-0" ]
+                [ div [ class "card-body text-center" ] nodes ]
     in
     [ div [ class "card-group mb-3" ]
-        [ div [ class "card py-0" ]
-            [ div [ class "card-body text-center" ]
-                [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-                , small [] [ I18n.htmlText lang (I18n.StatsGamesPlayed { lang = lang }) ]
-                ]
+        [ card
+            [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
+            , small [] [ I18n.htmlText lang (I18n.StatsGamesPlayed { lang = lang }) ]
             ]
-        , div [ class "card py-0" ]
-            [ div [ class "card-body text-center" ]
-                [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
-                , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
-                ]
+        , card
+            [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
+            , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
             ]
         , if guessAvg > 0 then
-            div [ class "card py-0" ]
-                [ div [ class "card-body text-center" ]
-                    [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
-                    , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
-                    ]
+            card
+                [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
+                , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
                 ]
 
           else
@@ -1086,7 +1084,7 @@ logResult ( { store, state, time } as model, cmds ) =
         Just ( victory, word, nbAttempts ) ->
             let
                 newStore =
-                    store |> logEntry (Log time store.lang word victory nbAttempts)
+                    store |> Store.addLog (Log time store.lang word victory nbAttempts)
             in
             ( { model | store = newStore }
             , encodeAndSaveStore newStore
@@ -1094,11 +1092,6 @@ logResult ( { store, state, time } as model, cmds ) =
 
         Nothing ->
             ( model, cmds )
-
-
-logEntry : Log -> Store -> Store
-logEntry log ({ logs } as store) =
-    { store | logs = log :: logs }
 
 
 main : Program Flags Model Msg
