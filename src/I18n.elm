@@ -59,7 +59,7 @@ getSet : Id -> Set
 getSet id =
     case id of
         AbsentFromDictionary { lang, word } ->
-            set [ langToString lang, word ]
+            set [ langToString lang, String.toUpper word ]
                 "Not in {0} dictionary: {1}"
                 "Absent du dictionnaire {0}\u{00A0}: {1}"
 
