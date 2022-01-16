@@ -1170,18 +1170,19 @@ decodeLog =
         (Decode.field "guesses" Decode.int)
 
 
-decodeKey : Decoder Msg
-decodeKey =
+decodeKey : Lang -> Decoder Msg
+decodeKey lang =
     Decode.field "key" Decode.string
         |> Decode.andThen
             (\key ->
                 case String.uncons key of
                     Just ( char, "" ) ->
-                        if Char.toCode char < 65 || Char.toCode char > 122 then
-                            Decode.fail "discarded char"
+                        case I18n.mapChar lang char of
+                            Ok c ->
+                                Decode.succeed (KeyPressed c)
 
-                        else
-                            Decode.succeed (KeyPressed char)
+                            Err error ->
+                                Decode.fail error
 
                     _ ->
                         if key == "Backspace" then
@@ -1213,13 +1214,13 @@ main =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { state } =
+subscriptions { store, state } =
     Sub.batch
         [ Time.every 1000 NewTime
         , storeChanged StoreChanged
         , case state of
             Ongoing _ _ _ _ ->
-                BE.onKeyDown decodeKey
+                BE.onKeyDown (decodeKey store.lang)
 
             _ ->
                 Sub.none
