@@ -51,7 +51,6 @@ type alias Log =
 
 type alias Model =
     { store : Store
-    , words : List WordToFind
     , state : GameState
     , modal : Maybe Modal
     , time : Posix
@@ -165,17 +164,13 @@ init flags =
                     )
     in
     ( model
-    , Cmd.batch
-        [ Random.generate NewWord (randomWord model.words)
-        , cmds
-        ]
+    , Cmd.batch [ getRandomWord model.store.lang, cmds ]
     )
 
 
 initialModel : Store -> Model
 initialModel store =
     { store = store
-    , words = getWords store.lang
     , state = Idle
     , modal = Nothing
     , time = Time.millisToPosix 0
@@ -204,6 +199,11 @@ getWords lang =
 
         French ->
             Words.french
+
+
+getRandomWord : Lang -> Cmd Msg
+getRandomWord =
+    getWords >> randomWord >> Random.generate NewWord
 
 
 randomWord : List WordToFind -> Random.Generator (Maybe WordToFind)
@@ -399,7 +399,7 @@ update msg ({ store } as model) =
                     initialModel store
             in
             ( newModel
-            , Random.generate NewWord (randomWord newModel.words)
+            , getRandomWord store.lang
             )
 
         ( NewTime time, _ ) ->
@@ -464,7 +464,7 @@ update msg ({ store } as model) =
             ( newModel
             , Cmd.batch
                 [ encodeAndSaveStore newStore
-                , Random.generate NewWord (randomWord newModel.words)
+                , getRandomWord lang
                 ]
             )
 
