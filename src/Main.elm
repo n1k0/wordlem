@@ -1166,31 +1166,27 @@ decodeKey : Decoder Msg
 decodeKey =
     Decode.field "key" Decode.string
         |> Decode.andThen
-            (\keyCode ->
-                case keyCode of
-                    "Backspace" ->
-                        Decode.succeed BackSpace
+            (\key ->
+                case String.uncons key of
+                    Just ( char, "" ) ->
+                        if Char.toCode char < 65 || Char.toCode char > 122 then
+                            Decode.fail "discarded char"
 
-                    "Enter" ->
-                        Decode.succeed Submit
+                        else
+                            Decode.succeed (KeyPressed char)
 
-                    "Escape" ->
-                        Decode.succeed CloseModal
+                    _ ->
+                        if key == "Backspace" then
+                            Decode.succeed BackSpace
 
-                    string ->
-                        case String.toList string of
-                            [] ->
-                                Decode.fail ("Discarded key " ++ string)
+                        else if key == "Enter" then
+                            Decode.succeed Submit
 
-                            [ char ] ->
-                                if Char.toCode char < 65 || Char.toCode char > 122 then
-                                    Decode.fail ("Unsupported char: " ++ String.fromList [ char ])
+                        else if key == "Escape" then
+                            Decode.succeed CloseModal
 
-                                else
-                                    Decode.succeed (KeyPressed (Char.toLower char))
-
-                            _ ->
-                                Decode.fail ("Discarded key " ++ string)
+                        else
+                            Decode.fail "discarded key"
             )
 
 
