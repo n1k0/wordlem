@@ -1,7 +1,14 @@
-module I18n exposing (..)
+module I18n exposing
+    ( Id(..)
+    , Lang(..)
+    , htmlText
+    , langFromString
+    , langToString
+    , parseLang
+    , translate
+    )
 
 import Html exposing (Html, text)
-import String.Extra as SE
 import String.Interpolate exposing (interpolate)
 
 
@@ -246,40 +253,3 @@ langFromString string =
 
         _ ->
             English
-
-
-mapChar : Lang -> Char -> Result String Char
-mapChar lang char =
-    case lang of
-        English ->
-            -- ascii range
-            if Char.isAlpha char then
-                Ok char
-
-            else
-                Err <| "Unsupported char (English): " ++ String.fromChar char
-
-        French ->
-            -- ascii range and latin1 accented chars
-            let
-                allowed =
-                    "çéâêîôûàèìòùëïü" |> String.toList |> List.member char
-            in
-            if Char.isAlpha char || allowed then
-                case unaccentChar char of
-                    Just c ->
-                        Ok c
-
-                    Nothing ->
-                        Err <| "Unable to map accented French letter: " ++ String.fromChar char
-
-            else
-                Err <| "Unsupported char (French)" ++ String.fromChar char
-
-
-unaccentChar : Char -> Maybe Char
-unaccentChar =
-    String.fromChar
-        >> SE.removeAccents
-        >> String.toList
-        >> List.head

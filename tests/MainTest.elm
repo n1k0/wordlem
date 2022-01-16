@@ -2,6 +2,8 @@ module MainTest exposing (..)
 
 import Expect exposing (Expectation)
 import I18n exposing (Lang(..))
+import Json.Decode as Decode
+import Json.Encode as Encode
 import Main exposing (..)
 import Test exposing (..)
 
@@ -45,6 +47,32 @@ suite =
                     |> asTest "should avoid duplicating misplaced letters (2 dupes, bis)"
                 ]
             ]
+        , describe "decodeKey"
+            [ keyJsonEvent "a"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok (KeyPressed 'a'))
+                |> asTest "should decode a single char"
+            , keyJsonEvent "A"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok (KeyPressed 'a'))
+                |> asTest "should decode a single char to its lowercase version"
+            , keyJsonEvent "ç"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok (KeyPressed 'c'))
+                |> asTest "should decode a single char to its unaccented version"
+            , keyJsonEvent "Backspace"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok BackSpace)
+                |> asTest "should decode the Backspace key"
+            , keyJsonEvent "Enter"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok Submit)
+                |> asTest "should decode the Enter key"
+            , keyJsonEvent "Escape"
+                |> Decode.decodeString decodeKey
+                |> Expect.equal (Ok CloseModal)
+                |> asTest "should decode the Escape key"
+            ]
         ]
 
 
@@ -66,3 +94,9 @@ u =
 h : Char -> Letter
 h =
     Handled
+
+
+keyJsonEvent : String -> String
+keyJsonEvent key =
+    Encode.object [ ( "key", Encode.string key ) ]
+        |> Encode.encode 0

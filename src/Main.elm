@@ -1,5 +1,7 @@
 port module Main exposing
     ( Letter(..)
+    , Msg(..)
+    , decodeKey
     , main
     , saveStore
     , storeChanged
@@ -1170,19 +1172,18 @@ decodeLog =
         (Decode.field "guesses" Decode.int)
 
 
-decodeKey : Lang -> Decoder Msg
-decodeKey lang =
+decodeKey : Decoder Msg
+decodeKey =
     Decode.field "key" Decode.string
         |> Decode.andThen
             (\key ->
-                case String.uncons key of
+                case String.uncons (SE.removeAccents (String.toLower key)) of
                     Just ( char, "" ) ->
-                        case I18n.mapChar lang char of
-                            Ok c ->
-                                Decode.succeed (KeyPressed c)
+                        if Char.isAlpha char then
+                            Decode.succeed (KeyPressed char)
 
-                            Err error ->
-                                Decode.fail error
+                        else
+                            Decode.fail "discarded char"
 
                     _ ->
                         if key == "Backspace" then
@@ -1214,13 +1215,13 @@ main =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { store, state } =
+subscriptions { state } =
     Sub.batch
         [ Time.every 1000 NewTime
         , storeChanged StoreChanged
         , case state of
             Ongoing _ _ _ _ ->
-                BE.onKeyDown (decodeKey store.lang)
+                BE.onKeyDown decodeKey
 
             _ ->
                 Sub.none
