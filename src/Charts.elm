@@ -27,10 +27,7 @@ logs data =
                     else
                         0
                 )
-                [ CA.color CA.blue
-                , CA.roundBottom 0.5
-                , CA.roundTop 0.5
-                ]
+                [ CA.color CA.blue ]
             ]
             data
         ]
