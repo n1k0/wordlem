@@ -900,7 +900,7 @@ viewHeader { store, modal } =
                 , ( "btn-primary", active )
                 ]
     in
-    nav [ class "navbar fixed-top navbar-dark bg-dark" ]
+    nav [ class "navbar sticky-top navbar-dark bg-dark" ]
         [ div [ class "Header container flex-nowrap" ]
             [ span [ class "text-white fw-bold me-2" ] [ text "Wordlem" ]
             , button

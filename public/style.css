@@ -29,8 +29,9 @@ body { touch-action: manipulation; }
   justify-content: center;
   align-items: center;
   flex-grow: 5;
-  overflow: scroll;
-  padding-top: 34px; /* height of header */
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y proximity;
 }
 
 .Board {
@@ -38,29 +39,15 @@ body { touch-action: manipulation; }
   display: grid;
   grid-gap: 5px;
   box-sizing: border-box;
-  width: 80%;
-  max-width: 350px;
-  max-height: 454px;
-}
-
-@media screen and (max-height: 480px) {
-  .Board {
-    max-width: 175px;
-    max-height: 227px;
-    grid-gap: 2px;
-  }
+  width: 37vh;
+  /* scroll snapping is great: https://css-tricks.com/practical-css-scroll-snapping/ */
+  scroll-snap-align: end;
 }
 
 .BoardRow {
   /* Note: grid-template-columns is handled programmatically in Elm land */
   display: grid;
   grid-gap: 5px;
-}
-
-@media screen and (max-height: 480px) {
-  .BoardRow {
-    grid-gap: 2px;
-  }
 }
 
 .BoardTile {
@@ -79,13 +66,6 @@ body { touch-action: manipulation; }
   content: '';
   display: inline-block;
   padding-bottom: 100%;
-}
-
-@media screen and (max-height: 480px) {
-  .BoardTile {
-    font-size: 1rem;
-    line-height: 1rem;
-  }
 }
 
 .Keyboard {
@@ -127,7 +107,7 @@ body { touch-action: manipulation; }
 
 @media screen and (max-height: 480px) {
   .EndGameButtons a, .EndGameButtons button {
-    font-size: .8rem;
+    font-size: 1rem;
   }
 }
 
