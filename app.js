@@ -5789,7 +5789,7 @@ var $author$project$Main$initialModel = function (store) {
 	return {
 		au: $elm$core$Maybe$Nothing,
 		z: $author$project$Main$Idle,
-		Y: store,
+		Q: store,
 		ax: $elm$time$Time$millisToPosix(0)
 	};
 };
@@ -5828,7 +5828,7 @@ var $author$project$Main$init = function (flags) {
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
-					$author$project$Main$getRandomWord(model.Y.ac),
+					$author$project$Main$getRandomWord(model.Q.ac),
 					cmds
 				])));
 };
@@ -5846,20 +5846,176 @@ var $author$project$Main$KeyPressed = function (a) {
 };
 var $author$project$Main$Submit = {$: 9};
 var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$Main$decodeKey = A2(
-	$elm$json$Json$Decode$andThen,
-	function (key) {
-		var _v0 = $elm$core$String$uncons(key);
-		if ((!_v0.$) && (_v0.a.b === '')) {
-			var _v1 = _v0.a;
-			var _char = _v1.a;
-			return (($elm$core$Char$toCode(_char) < 65) || ($elm$core$Char$toCode(_char) > 122)) ? $elm$json$Json$Decode$fail('discarded char') : $elm$json$Json$Decode$succeed(
-				$author$project$Main$KeyPressed(_char));
-		} else {
-			return (key === 'Backspace') ? $elm$json$Json$Decode$succeed($author$project$Main$BackSpace) : ((key === 'Enter') ? $elm$json$Json$Decode$succeed($author$project$Main$Submit) : ((key === 'Escape') ? $elm$json$Json$Decode$succeed($author$project$Main$CloseModal) : $elm$json$Json$Decode$fail('discarded key')));
+var $elm$core$String$cons = _String_cons;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
 		}
-	},
-	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {du: index, ca: match, dR: number, d8: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{c$: false, dF: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $elm_community$string_extra$String$Extra$regexFromString = A2(
+	$elm$core$Basics$composeR,
+	$elm$regex$Regex$fromString,
+	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
+var $elm_community$string_extra$String$Extra$accentRegex = function () {
+	var matches = _List_fromArray(
+		[
+			_Utils_Tuple2('[à-æ]', 'a'),
+			_Utils_Tuple2('[À-Æ]', 'A'),
+			_Utils_Tuple2('ç', 'c'),
+			_Utils_Tuple2('Ç', 'C'),
+			_Utils_Tuple2('[è-ë]', 'e'),
+			_Utils_Tuple2('[È-Ë]', 'E'),
+			_Utils_Tuple2('[ì-ï]', 'i'),
+			_Utils_Tuple2('[Ì-Ï]', 'I'),
+			_Utils_Tuple2('ñ', 'n'),
+			_Utils_Tuple2('Ñ', 'N'),
+			_Utils_Tuple2('[ò-ö]', 'o'),
+			_Utils_Tuple2('[Ò-Ö]', 'O'),
+			_Utils_Tuple2('[ù-ü]', 'u'),
+			_Utils_Tuple2('[Ù-Ü]', 'U'),
+			_Utils_Tuple2('ý', 'y'),
+			_Utils_Tuple2('ÿ', 'y'),
+			_Utils_Tuple2('Ý', 'Y')
+		]);
+	return A2(
+		$elm$core$List$map,
+		$elm$core$Tuple$mapFirst($elm_community$string_extra$String$Extra$regexFromString),
+		matches);
+}();
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $elm_community$string_extra$String$Extra$removeAccents = function (string) {
+	if ($elm$core$String$isEmpty(string)) {
+		return string;
+	} else {
+		var do_regex_to_remove_acents = function (_v1) {
+			var regex = _v1.a;
+			var replace_character = _v1.b;
+			return A2(
+				$elm$regex$Regex$replace,
+				regex,
+				function (_v0) {
+					return replace_character;
+				});
+		};
+		return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
+	}
+};
+var $author$project$I18n$unaccentChar = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$String$fromChar,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm_community$string_extra$String$Extra$removeAccents,
+		A2($elm$core$Basics$composeR, $elm$core$String$toList, $elm$core$List$head)));
+var $author$project$I18n$mapChar = F2(
+	function (lang, _char) {
+		if (!lang) {
+			return $elm$core$Char$isAlpha(_char) ? $elm$core$Result$Ok(_char) : $elm$core$Result$Err(
+				'Unsupported char (English): ' + $elm$core$String$fromChar(_char));
+		} else {
+			var allowed = A2(
+				$elm$core$List$member,
+				_char,
+				$elm$core$String$toList('çéâêîôûàèìòùëïü'));
+			if ($elm$core$Char$isAlpha(_char) || allowed) {
+				var _v1 = $author$project$I18n$unaccentChar(_char);
+				if (!_v1.$) {
+					var c = _v1.a;
+					return $elm$core$Result$Ok(c);
+				} else {
+					return $elm$core$Result$Err(
+						'Unable to map accented French letter: ' + $elm$core$String$fromChar(_char));
+				}
+			} else {
+				return $elm$core$Result$Err(
+					'Unsupported char (French)' + $elm$core$String$fromChar(_char));
+			}
+		}
+	});
+var $author$project$Main$decodeKey = function (lang) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (key) {
+			var _v0 = $elm$core$String$uncons(key);
+			if ((!_v0.$) && (_v0.a.b === '')) {
+				var _v1 = _v0.a;
+				var _char = _v1.a;
+				var _v2 = A2($author$project$I18n$mapChar, lang, _char);
+				if (!_v2.$) {
+					var c = _v2.a;
+					return $elm$json$Json$Decode$succeed(
+						$author$project$Main$KeyPressed(c));
+				} else {
+					var error = _v2.a;
+					return $elm$json$Json$Decode$fail(error);
+				}
+			} else {
+				return (key === 'Backspace') ? $elm$json$Json$Decode$succeed($author$project$Main$BackSpace) : ((key === 'Enter') ? $elm$json$Json$Decode$succeed($author$project$Main$Submit) : ((key === 'Escape') ? $elm$json$Json$Decode$succeed($author$project$Main$CloseModal) : $elm$json$Json$Decode$fail('discarded key')));
+			}
+		},
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+};
 var $elm$time$Time$Every = F2(
 	function (a, b) {
 		return {$: 0, a: a, b: b};
@@ -6464,6 +6620,7 @@ var $elm$browser$Browser$Events$on = F3(
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
 var $author$project$Main$storeChanged = _Platform_incomingPort('storeChanged', $elm$json$Json$Decode$string);
 var $author$project$Main$subscriptions = function (_v0) {
+	var store = _v0.Q;
 	var state = _v0.z;
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
@@ -6472,7 +6629,8 @@ var $author$project$Main$subscriptions = function (_v0) {
 				$author$project$Main$storeChanged($author$project$Main$StoreChanged),
 				function () {
 				if (state.$ === 2) {
-					return $elm$browser$Browser$Events$onKeyDown($author$project$Main$decodeKey);
+					return $elm$browser$Browser$Events$onKeyDown(
+						$author$project$Main$decodeKey(store.ac));
 				} else {
 					return $elm$core$Platform$Sub$none;
 				}
@@ -6484,10 +6642,6 @@ var $author$project$Main$Ongoing = F4(
 	function (a, b, c, d) {
 		return {$: 2, a: a, b: b, c: c, d: d};
 	});
-var $elm$core$String$cons = _String_cons;
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
 var $author$project$Main$numberOfLetters = 5;
 var $author$project$Main$addChar = F2(
 	function (_char, input) {
@@ -6508,27 +6662,6 @@ var $author$project$Main$Won = F2(
 		return {$: 4, a: a, b: b};
 	});
 var $elm$core$Basics$ge = _Utils_ge;
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
 var $elm$core$Basics$not = _Basics_not;
 var $elm$core$List$all = F2(
 	function (isOkay, list) {
@@ -6618,7 +6751,7 @@ var $author$project$Main$logEntry = F2(
 	});
 var $author$project$Main$logResult = function (_v0) {
 	var model = _v0.a;
-	var store = model.Y;
+	var store = model.Q;
 	var state = model.z;
 	var time = model.ax;
 	var cmds = _v0.b;
@@ -6656,7 +6789,7 @@ var $author$project$Main$logResult = function (_v0) {
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
-				{Y: newStore}),
+				{Q: newStore}),
 			$author$project$Main$encodeAndSaveStore(newStore));
 	} else {
 		return _Utils_Tuple2(model, cmds);
@@ -6788,101 +6921,11 @@ var $author$project$Main$handleMisplacedDuplicates = function (wordChars) {
 var $author$project$Main$Unused = function (a) {
 	return {$: 0, a: a};
 };
-var $elm$core$List$member = F2(
-	function (x, xs) {
-		return A2(
-			$elm$core$List$any,
-			function (a) {
-				return _Utils_eq(a, x);
-			},
-			xs);
-	});
 var $author$project$Main$mapChars = F3(
 	function (wordChars, inputChar, wordChar) {
 		return _Utils_eq(inputChar, wordChar) ? $author$project$Main$Correct(inputChar) : (A2($elm$core$List$member, inputChar, wordChars) ? $author$project$Main$Misplaced(inputChar) : $author$project$Main$Unused(inputChar));
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $elm$core$Tuple$mapFirst = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			func(x),
-			y);
-	});
-var $elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {du: index, ca: match, dR: number, d8: submatches};
-	});
-var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var $elm$regex$Regex$fromString = function (string) {
-	return A2(
-		$elm$regex$Regex$fromStringWith,
-		{c$: false, dF: false},
-		string);
-};
-var $elm$regex$Regex$never = _Regex_never;
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $elm_community$string_extra$String$Extra$regexFromString = A2(
-	$elm$core$Basics$composeR,
-	$elm$regex$Regex$fromString,
-	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
-var $elm_community$string_extra$String$Extra$accentRegex = function () {
-	var matches = _List_fromArray(
-		[
-			_Utils_Tuple2('[à-æ]', 'a'),
-			_Utils_Tuple2('[À-Æ]', 'A'),
-			_Utils_Tuple2('ç', 'c'),
-			_Utils_Tuple2('Ç', 'C'),
-			_Utils_Tuple2('[è-ë]', 'e'),
-			_Utils_Tuple2('[È-Ë]', 'E'),
-			_Utils_Tuple2('[ì-ï]', 'i'),
-			_Utils_Tuple2('[Ì-Ï]', 'I'),
-			_Utils_Tuple2('ñ', 'n'),
-			_Utils_Tuple2('Ñ', 'N'),
-			_Utils_Tuple2('[ò-ö]', 'o'),
-			_Utils_Tuple2('[Ò-Ö]', 'O'),
-			_Utils_Tuple2('[ù-ü]', 'u'),
-			_Utils_Tuple2('[Ù-Ü]', 'U'),
-			_Utils_Tuple2('ý', 'y'),
-			_Utils_Tuple2('ÿ', 'y'),
-			_Utils_Tuple2('Ý', 'Y')
-		]);
-	return A2(
-		$elm$core$List$map,
-		$elm$core$Tuple$mapFirst($elm_community$string_extra$String$Extra$regexFromString),
-		matches);
-}();
-var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-var $elm_community$string_extra$String$Extra$removeAccents = function (string) {
-	if ($elm$core$String$isEmpty(string)) {
-		return string;
-	} else {
-		var do_regex_to_remove_acents = function (_v1) {
-			var regex = _v1.a;
-			var replace_character = _v1.b;
-			return A2(
-				$elm$regex$Regex$replace,
-				regex,
-				function (_v0) {
-					return replace_character;
-				});
-		};
-		return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
-	}
-};
-var $elm$core$String$foldr = _String_foldr;
-var $elm$core$String$toList = function (string) {
-	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
-};
 var $elm$core$String$toLower = _String_toLower;
 var $author$project$I18n$Set = F2(
 	function (english, french) {
@@ -7223,7 +7266,7 @@ var $author$project$Main$validateGuess = F3(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var store = model.Y;
+		var store = model.Q;
 		var _v0 = _Utils_Tuple2(msg, model.z);
 		_v0$9:
 		while (true) {
@@ -7344,7 +7387,7 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{Y: newStore}),
+								{Q: newStore}),
 							$elm$core$Platform$Cmd$none);
 					} else {
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -7571,7 +7614,7 @@ var $elm$html$Html$nav = _VirtualDom_node('nav');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Main$viewHeader = function (_v0) {
-	var store = _v0.Y;
+	var store = _v0.Q;
 	var modal = _v0.au;
 	var btnClass = function (active) {
 		return $elm$html$Html$Attributes$classList(
@@ -8877,7 +8920,7 @@ var $terezka$elm_charts$Chart$Attributes$color = F2(
 			{b: v});
 	});
 var $terezka$elm_charts$Internal$Helpers$pink = '#ea60df';
-var $terezka$elm_charts$Internal$Svg$defaultBar = {f: _List_Nil, A: 'white', C: 0, b: $terezka$elm_charts$Internal$Helpers$pink, a5: $elm$core$Maybe$Nothing, dq: 0, dr: '', ds: 10, V: 1, d0: 0, d1: 0};
+var $terezka$elm_charts$Internal$Svg$defaultBar = {f: _List_Nil, A: 'white', C: 0, b: $terezka$elm_charts$Internal$Helpers$pink, a5: $elm$core$Maybe$Nothing, dq: 0, dr: '', ds: 10, W: 1, d0: 0, d1: 0};
 var $terezka$elm_charts$Chart$Attributes$roundBottom = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -9687,7 +9730,7 @@ var $terezka$elm_charts$Internal$Svg$bar = F3(
 		var commands = _v1.a;
 		var highlightCommands = _v1.b;
 		var viewAuraBar = function (fill) {
-			return (!config.dq) ? A6(viewBar, fill, config.V, config.A, config.C, 1, commands) : A2(
+			return (!config.dq) ? A6(viewBar, fill, config.W, config.A, config.C, 1, commands) : A2(
 				$elm$svg$Svg$g,
 				_List_fromArray(
 					[
@@ -9696,7 +9739,7 @@ var $terezka$elm_charts$Internal$Svg$bar = F3(
 				_List_fromArray(
 					[
 						A6(viewBar, highlightColor, config.dq, 'transparent', 0, 0, highlightCommands),
-						A6(viewBar, fill, config.V, config.A, config.C, 1, commands)
+						A6(viewBar, fill, config.W, config.A, config.C, 1, commands)
 					]));
 		};
 		var _v3 = config.a5;
@@ -10437,12 +10480,12 @@ var $terezka$elm_charts$Chart$Attributes$orLower = F3(
 	});
 var $terezka$elm_charts$Chart$definePlane = F2(
 	function (config, elements) {
-		var width = A2($elm$core$Basics$max, 1, (config.cL - config.X.dz) - config.X.d$);
+		var width = A2($elm$core$Basics$max, 1, (config.cL - config.Y.dz) - config.Y.d$);
 		var toLimit = F5(
 			function (length, marginMin, marginMax, min, max) {
 				return {c4: max, c5: min, dA: length, dB: marginMax, dC: marginMin, D: max, P: min};
 			});
-		var height = A2($elm$core$Basics$max, 1, (config.$7 - config.X.cY) - config.X.eq);
+		var height = A2($elm$core$Basics$max, 1, (config.$7 - config.Y.cY) - config.Y.eq);
 		var fixSingles = function (bs) {
 			return _Utils_eq(bs.P, bs.D) ? _Utils_update(
 				bs,
@@ -10536,11 +10579,11 @@ var $terezka$elm_charts$Chart$definePlane = F2(
 		}();
 		var unpadded = {cM: calcRange, cN: calcDomain};
 		var scalePadX = $terezka$elm_charts$Internal$Coordinates$scaleCartesianX(unpadded);
-		var xMax = calcRange.D + scalePadX(config.X.d$);
-		var xMin = calcRange.P - scalePadX(config.X.dz);
+		var xMax = calcRange.D + scalePadX(config.Y.d$);
+		var xMin = calcRange.P - scalePadX(config.Y.dz);
 		var scalePadY = $terezka$elm_charts$Internal$Coordinates$scaleCartesianY(unpadded);
-		var yMax = calcDomain.D + scalePadY(config.X.eq);
-		var yMin = calcDomain.P - scalePadY(config.X.cY);
+		var yMax = calcDomain.D + scalePadY(config.Y.eq);
+		var yMin = calcDomain.P - scalePadY(config.Y.cY);
 		return {
 			cM: _Utils_update(
 				calcRange,
@@ -10644,7 +10687,7 @@ var $terezka$elm_charts$Chart$getLegends = function (elements) {
 };
 var $terezka$elm_charts$Chart$TickValues = F4(
 	function (xAxis, yAxis, xs, ys) {
-		return {aM: xAxis, G: xs, aN: yAxis, Q: ys};
+		return {aM: xAxis, G: xs, aN: yAxis, R: ys};
 	});
 var $terezka$elm_charts$Chart$getTickValues = F3(
 	function (plane, items, elements) {
@@ -10733,7 +10776,7 @@ var $terezka$elm_charts$Chart$Attributes$dashed = F2(
 			config,
 			{aO: value});
 	});
-var $terezka$elm_charts$Internal$Svg$defaultDot = {A: '', C: 0, b: $terezka$elm_charts$Internal$Helpers$pink, o: false, dq: 0, dr: '', ds: 5, V: 1, av: $elm$core$Maybe$Nothing, d4: 6};
+var $terezka$elm_charts$Internal$Svg$defaultDot = {A: '', C: 0, b: $terezka$elm_charts$Internal$Helpers$pink, o: false, dq: 0, dr: '', ds: 5, W: 1, av: $elm$core$Maybe$Nothing, d4: 6};
 var $terezka$elm_charts$Internal$Svg$isWithinPlane = F3(
 	function (plane, x, y) {
 		return _Utils_eq(
@@ -10807,7 +10850,7 @@ var $terezka$elm_charts$Internal$Svg$dot = F5(
 				$elm$svg$Svg$Attributes$strokeWidth(
 				$elm$core$String$fromFloat(config.C)),
 				$elm$svg$Svg$Attributes$fillOpacity(
-				$elm$core$String$fromFloat(config.V)),
+				$elm$core$String$fromFloat(config.W)),
 				$elm$svg$Svg$Attributes$fill(config.b),
 				$elm$svg$Svg$Attributes$class('elm-charts__dot'),
 				config.o ? $terezka$elm_charts$Internal$Svg$withinChartArea(plane) : $elm$svg$Svg$Attributes$class('')
@@ -10979,7 +11022,7 @@ var $terezka$elm_charts$Chart$Svg$dot = F4(
 			A2($terezka$elm_charts$Internal$Helpers$apply, edits, $terezka$elm_charts$Internal$Svg$defaultDot));
 	});
 var $terezka$elm_charts$Internal$Helpers$gray = '#EFF2FA';
-var $terezka$elm_charts$Internal$Svg$defaultLine = {f: _List_Nil, cZ: false, b: 'rgb(210, 210, 210)', aO: _List_Nil, h: false, o: false, V: 1, ec: -90, ed: 0, cL: 1, aA: $elm$core$Maybe$Nothing, aL: $elm$core$Maybe$Nothing, eA: $elm$core$Maybe$Nothing, j: 0, eB: $elm$core$Maybe$Nothing, bG: $elm$core$Maybe$Nothing, eC: $elm$core$Maybe$Nothing, k: 0};
+var $terezka$elm_charts$Internal$Svg$defaultLine = {f: _List_Nil, cZ: false, b: 'rgb(210, 210, 210)', aO: _List_Nil, h: false, o: false, W: 1, ec: -90, ed: 0, cL: 1, aA: $elm$core$Maybe$Nothing, aL: $elm$core$Maybe$Nothing, eA: $elm$core$Maybe$Nothing, j: 0, eB: $elm$core$Maybe$Nothing, bG: $elm$core$Maybe$Nothing, eC: $elm$core$Maybe$Nothing, k: 0};
 var $elm$core$Basics$cos = _Basics_cos;
 var $terezka$elm_charts$Internal$Svg$lengthInCartesianX = $terezka$elm_charts$Internal$Coordinates$scaleCartesianX;
 var $terezka$elm_charts$Internal$Svg$lengthInCartesianY = $terezka$elm_charts$Internal$Coordinates$scaleCartesianY;
@@ -11481,7 +11524,7 @@ var $terezka$elm_charts$Internal$Svg$line = F2(
 					$elm$svg$Svg$Attributes$strokeWidth(
 					$elm$core$String$fromFloat(config.cL)),
 					$elm$svg$Svg$Attributes$strokeOpacity(
-					$elm$core$String$fromFloat(config.V)),
+					$elm$core$String$fromFloat(config.W)),
 					$elm$svg$Svg$Attributes$strokeDasharray(
 					A2(
 						$elm$core$String$join,
@@ -11598,7 +11641,7 @@ var $terezka$elm_charts$Chart$grid = function (edits) {
 							return A2(
 								$elm$core$List$filterMap,
 								A3(toDot, vs, p, x),
-								vs.Q);
+								vs.R);
 						},
 						vs.G) : _List_fromArray(
 						[
@@ -11621,7 +11664,7 @@ var $terezka$elm_charts$Chart$grid = function (edits) {
 							A2(
 								$elm$core$List$filterMap,
 								A2(toYGrid, vs, p),
-								vs.Q))
+								vs.R))
 						]));
 			}));
 };
@@ -11840,7 +11883,7 @@ var $terezka$elm_charts$Chart$chart = F2(
 				$7: 300,
 				aS: _List_Nil,
 				ak: {cY: 0, dz: 0, d$: 0, eq: 0},
-				X: {cY: 0, dz: 0, d$: 0, eq: 0},
+				Y: {cY: 0, dz: 0, d$: 0, eq: 0},
 				bq: _List_Nil,
 				aY: true,
 				cL: 300
@@ -14290,8 +14333,8 @@ var $terezka$elm_charts$Chart$yLabels = function (edits) {
 		function (p, config) {
 			return A4(
 				$terezka$elm_charts$Chart$generateValues,
-				config.R,
-				config.T,
+				config.S,
+				config.U,
 				config.K,
 				A3(
 					$elm$core$List$foldl,
@@ -14307,8 +14350,8 @@ var $terezka$elm_charts$Chart$yLabels = function (edits) {
 			return (!config.i) ? ts : _Utils_update(
 				ts,
 				{
-					Q: _Utils_ap(
-						ts.Q,
+					R: _Utils_ap(
+						ts.R,
 						A2(
 							$elm$core$List$map,
 							function ($) {
@@ -14321,7 +14364,7 @@ var $terezka$elm_charts$Chart$yLabels = function (edits) {
 		return A2(
 			$terezka$elm_charts$Internal$Helpers$apply,
 			edits,
-			{R: 5, l: $elm$core$Maybe$Nothing, f: _List_Nil, b: '#808BAB', m: $elm$core$Maybe$Nothing, h: false, n: $elm$core$Maybe$Nothing, K: $elm$core$Maybe$Nothing, T: $terezka$elm_charts$Internal$Svg$Floats, i: false, o: false, x: _List_Nil, q: $terezka$elm_charts$Chart$Attributes$zero, r: 0, s: false, j: -10, k: 3});
+			{S: 5, l: $elm$core$Maybe$Nothing, f: _List_Nil, b: '#808BAB', m: $elm$core$Maybe$Nothing, h: false, n: $elm$core$Maybe$Nothing, K: $elm$core$Maybe$Nothing, U: $terezka$elm_charts$Internal$Svg$Floats, i: false, o: false, x: _List_Nil, q: $terezka$elm_charts$Chart$Attributes$zero, r: 0, s: false, j: -10, k: 3});
 	};
 	return A3(
 		$terezka$elm_charts$Chart$LabelsElement,
@@ -14758,7 +14801,7 @@ var $author$project$Main$viewStats = function (_v0) {
 };
 var $author$project$Main$layout = F2(
 	function (model, content) {
-		var store = model.Y;
+		var store = model.Q;
 		var modal = model.au;
 		return A2(
 			$elm$html$Html$div,
@@ -15075,7 +15118,7 @@ var $author$project$Main$viewKeyboard = F2(
 				$author$project$Main$dispositions(lang)));
 	});
 var $author$project$Main$view = function (model) {
-	var store = model.Y;
+	var store = model.Q;
 	var state = model.z;
 	return A2(
 		$author$project$Main$layout,
