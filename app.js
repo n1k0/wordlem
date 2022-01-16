@@ -5486,6 +5486,11 @@ var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $author$project$Main$defaultStore = function (lang) {
 	return {L: lang, F: _List_Nil};
 };
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$I18n$langToString = function (lang) {
@@ -5558,6 +5563,14 @@ var $author$project$Main$encodeStore = function (store) {
 				A2($elm$json$Json$Encode$list, $author$project$Main$encodeLog, store.F))
 			]));
 };
+var $author$project$Main$saveStore = _Platform_outgoingPort('saveStore', $elm$json$Json$Encode$string);
+var $author$project$Main$encodeAndSaveStore = A2(
+	$elm$core$Basics$composeR,
+	$author$project$Main$encodeStore,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm$json$Json$Encode$encode(0),
+		$author$project$Main$saveStore));
 var $elm$random$Random$Generate = $elm$core$Basics$identity;
 var $elm$random$Random$Seed = F2(
 	function (a, b) {
@@ -5778,10 +5791,8 @@ var $author$project$Main$randomWord = function (words) {
 			0,
 			$elm$core$List$length(words) - 1));
 };
-var $author$project$Main$saveStore = _Platform_outgoingPort('saveStore', $elm$json$Json$Encode$string);
 var $author$project$Main$init = function (flags) {
 	var store = A2($elm$json$Json$Decode$decodeString, $author$project$Main$decodeStore, flags.aj);
-	var lang = $author$project$I18n$parseLang(flags.L);
 	var _v0 = function () {
 		if (!store.$) {
 			var store_ = store.a;
@@ -5790,7 +5801,8 @@ var $author$project$Main$init = function (flags) {
 				$elm$core$Platform$Cmd$none);
 		} else {
 			var error = store.a;
-			var newStore = $author$project$Main$defaultStore(lang);
+			var newStore = $author$project$Main$defaultStore(
+				$author$project$I18n$parseLang(flags.L));
 			var newModel = $author$project$Main$initialModel(newStore);
 			return _Utils_Tuple2(
 				_Utils_update(
@@ -5800,11 +5812,7 @@ var $author$project$Main$init = function (flags) {
 							$author$project$Main$DecodeError(
 								$elm$json$Json$Decode$errorToString(error)))
 					}),
-				$author$project$Main$saveStore(
-					A2(
-						$elm$json$Json$Encode$encode,
-						0,
-						$author$project$Main$encodeStore(newStore))));
+				$author$project$Main$encodeAndSaveStore(newStore));
 		}
 	}();
 	var model = _v0.a;
@@ -6628,11 +6636,7 @@ var $author$project$Main$logResult = function (_v0) {
 			_Utils_update(
 				model,
 				{t: newStore}),
-			$author$project$Main$saveStore(
-				A2(
-					$elm$json$Json$Encode$encode,
-					0,
-					$author$project$Main$encodeStore(newStore))));
+			$author$project$Main$encodeAndSaveStore(newStore));
 	} else {
 		return _Utils_Tuple2(model, cmds);
 	}
@@ -6801,11 +6805,6 @@ var $author$project$I18n$AbsentFromDictionary = function (a) {
 	return {$: 0, a: a};
 };
 var $author$project$I18n$NotEnoughLetters = {$: 17};
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var $author$project$Main$Correct = function (a) {
 	return {$: 1, a: a};
 };
@@ -7498,11 +7497,7 @@ var $author$project$Main$update = F2(
 						$elm$core$Platform$Cmd$batch(
 							_List_fromArray(
 								[
-									$author$project$Main$saveStore(
-									A2(
-										$elm$json$Json$Encode$encode,
-										0,
-										$author$project$Main$encodeStore(newStore))),
+									$author$project$Main$encodeAndSaveStore(newStore),
 									A2(
 									$elm$random$Random$generate,
 									$author$project$Main$NewWord,

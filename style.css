@@ -104,6 +104,7 @@ body { touch-action: manipulation; }
 
 .KeyboardKey {
   flex: 1;
+  font-weight: 500;
   height: 7.3vh;
   padding: 0.5rem 0.25rem;
   line-height: 0;
