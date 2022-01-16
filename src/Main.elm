@@ -388,15 +388,8 @@ update msg ({ store } as model) =
             )
 
         ( KeyPressed char, Ongoing word guesses input _ ) ->
-            let
-                newInput =
-                    String.toList input
-                        ++ [ char ]
-                        |> List.take numberOfLetters
-                        |> String.fromList
-            in
-            ( { model | state = Ongoing word guesses newInput Nothing }
-            , Cmd.none
+            ( { model | state = Ongoing word guesses (addChar char input) Nothing }
+            , scrollToBottom "board-container"
             )
 
         ( KeyPressed _, _ ) ->
@@ -449,18 +442,9 @@ update msg ({ store } as model) =
         ( Submit, Ongoing word guesses input _ ) ->
             case validateGuess store.lang word input of
                 Ok guess ->
-                    let
-                        newState =
-                            checkGame word (guess :: guesses)
-                    in
                     logResult
-                        ( { model | state = newState }
-                        , case newState of
-                            Lost _ _ ->
-                                scrollToBottom "board-container"
-
-                            _ ->
-                                Cmd.none
+                        ( { model | state = checkGame word (guess :: guesses) }
+                        , scrollToBottom "board-container"
                         )
 
                 Err error ->
