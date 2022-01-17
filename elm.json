@@ -18,6 +18,7 @@
             "elm-community/string-extra": "4.0.1",
             "elm-explorations/markdown": "1.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
+            "pablen/toasty": "1.2.0",
             "terezka/elm-charts": "3.0.0"
         },
         "indirect": {

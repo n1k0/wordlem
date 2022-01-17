@@ -111,12 +111,14 @@ body { touch-action: manipulation; }
   }
 }
 
-.Flash {
+.Notifs {
   position: absolute;
   top: 8%;
   left: 50%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
   transform: translate(-50%, 0);
-  pointer-events: none;
   width: fit-content;
   z-index: 1099;
 }

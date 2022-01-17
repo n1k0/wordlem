@@ -22,6 +22,7 @@ import Json.Decode as Decode
 import List.Extra as LE
 import Log exposing (Log)
 import Markdown
+import Notif exposing (Notif)
 import Process
 import Random
 import Store exposing (Store)
@@ -29,6 +30,7 @@ import String.Extra as SE
 import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
+import Toasty
 import Words
 
 
@@ -42,6 +44,7 @@ type alias Model =
     { store : Store
     , state : GameState
     , modal : Maybe Modal
+    , toasties : Toasty.Stack Notif
     , time : Posix
     }
 
@@ -49,7 +52,7 @@ type alias Model =
 type GameState
     = Idle
     | Errored Error
-    | Ongoing WordToFind (List Guess) UserInput (Maybe AttemptError)
+    | Ongoing WordToFind (List Guess) UserInput
     | Lost WordToFind (List Guess)
     | Won WordToFind (List Guess)
 
@@ -79,10 +82,6 @@ type alias Guess =
     List Letter
 
 
-type alias AttemptError =
-    String
-
-
 type alias UserInput =
     String
 
@@ -103,6 +102,7 @@ type Msg
     | StoreChanged (Result Decode.Error Store)
     | Submit
     | SwitchLang Lang
+    | ToastyMsg (Toasty.Msg Notif)
 
 
 numberOfLetters : Int
@@ -154,6 +154,7 @@ initialModel store =
     { store = store
     , state = Idle
     , modal = Nothing
+    , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
     }
 
@@ -323,7 +324,57 @@ checkGame word guesses =
         Lost word guesses
 
     else
-        Ongoing word guesses "" Nothing
+        Ongoing word guesses ""
+
+
+processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+processStateNotif ( { store, state } as model, cmds ) =
+    case state of
+        Won _ _ ->
+            ( model, cmds )
+                |> Notif.add ToastyMsg (Notif.Success (translate store.lang I18n.GameWin))
+
+        Lost _ _ ->
+            ( model, cmds )
+                |> Notif.add ToastyMsg (Notif.Info (translate store.lang I18n.GameLost))
+
+        _ ->
+            ( model, cmds )
+
+
+logResult : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+logResult ( { store, state, time } as model, cmds ) =
+    let
+        logData =
+            case state of
+                Won word guesses ->
+                    Just ( True, word, List.length guesses )
+
+                Lost word guesses ->
+                    Just ( False, word, List.length guesses )
+
+                _ ->
+                    Nothing
+    in
+    case logData of
+        Just ( victory, word, nbAttempts ) ->
+            let
+                newStore =
+                    Store.addLog
+                        { time = time
+                        , lang = store.lang
+                        , word = word
+                        , victory = victory
+                        , guesses = nbAttempts
+                        }
+                        store
+            in
+            ( { model | store = newStore }
+            , Cmd.batch [ cmds, encodeAndSaveStore newStore ]
+            )
+
+        Nothing ->
+            ( model, cmds )
 
 
 defocus : String -> Cmd Msg
@@ -357,8 +408,8 @@ addChar char input =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
-        ( BackSpace, Ongoing word guesses input _ ) ->
-            ( { model | state = Ongoing word guesses (String.dropRight 1 input) Nothing }
+        ( BackSpace, Ongoing word guesses input ) ->
+            ( { model | state = Ongoing word guesses (String.dropRight 1 input) }
             , Cmd.none
             )
 
@@ -370,8 +421,8 @@ update msg ({ store } as model) =
             , defocusMenuButtons
             )
 
-        ( KeyPressed char, Ongoing word guesses input _ ) ->
-            ( { model | state = Ongoing word guesses (addChar char input) Nothing }
+        ( KeyPressed char, Ongoing word guesses input ) ->
+            ( { model | state = Ongoing word guesses (addChar char input) }
             , scrollToBottom "board-container"
             )
 
@@ -391,7 +442,7 @@ update msg ({ store } as model) =
             ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Idle ) ->
-            ( { model | state = Ongoing newWord [] "" Nothing }
+            ( { model | state = Ongoing newWord [] "" }
             , defocusMenuButtons
             )
 
@@ -407,10 +458,7 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( OpenModal modal, _ ) ->
-            ( { model
-                | modal = Just modal
-                , state = removeAlert model.state
-              }
+            ( { model | modal = Just modal }
             , Cmd.none
             )
 
@@ -421,18 +469,20 @@ update msg ({ store } as model) =
             -- FIXME: render a toast when we have them
             ( model, Cmd.none )
 
-        ( Submit, Ongoing word guesses input _ ) ->
+        ( Submit, Ongoing word guesses input ) ->
             case validateGuess store.lang word input of
                 Ok guess ->
-                    logResult
-                        ( { model | state = checkGame word (guess :: guesses) }
-                        , scrollToBottom "board-container"
-                        )
+                    ( { model | state = checkGame word (guess :: guesses) }
+                    , scrollToBottom "board-container"
+                    )
+                        |> processStateNotif
+                        |> logResult
 
                 Err error ->
-                    ( { model | state = Ongoing word guesses input (Just error) }
+                    ( { model | state = Ongoing word guesses input }
                     , Cmd.none
                     )
+                        |> Notif.add ToastyMsg (Notif.Warning error)
 
         ( Submit, _ ) ->
             ( model, Cmd.none )
@@ -452,15 +502,8 @@ update msg ({ store } as model) =
                 ]
             )
 
-
-removeAlert : GameState -> GameState
-removeAlert state =
-    case state of
-        Ongoing word guesses input (Just _) ->
-            Ongoing word guesses input Nothing
-
-        _ ->
-            state
+        ( ToastyMsg subMsg, _ ) ->
+            Toasty.update Notif.config ToastyMsg subMsg model
 
 
 charToText : Char -> String
@@ -858,9 +901,10 @@ viewLangStats lang langLogs =
 
 
 layout : Model -> List (Html Msg) -> Html Msg
-layout ({ store, modal } as model) content =
+layout ({ store, modal, toasties } as model) content =
     div []
-        [ main_ [ class "Game" ]
+        [ Notif.view ToastyMsg toasties
+        , main_ [ class "Game" ]
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
@@ -931,13 +975,6 @@ viewHeader { store, modal } =
                 ]
             ]
         ]
-
-
-alert : String -> String -> Html Msg
-alert level message =
-    div
-        [ class <| "Flash alert alert-" ++ level ]
-        [ text message ]
 
 
 viewModal : Store -> I18n.Id -> List (Html Msg) -> Html Msg
@@ -1027,8 +1064,6 @@ view ({ store, state } as model) =
                 [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
                 , viewKeyboard store.lang guesses
-                , translate store.lang I18n.GameWin
-                    |> alert "success"
                 ]
 
             Lost word guesses ->
@@ -1039,13 +1074,10 @@ view ({ store, state } as model) =
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard store.lang guesses
-                , translate store.lang I18n.GameLost
-                    |> alert "info"
                 ]
 
-            Ongoing _ guesses input error ->
+            Ongoing _ guesses input ->
                 [ viewBoard (Just input) guesses
-                , error |> Maybe.map (alert "warning") |> Maybe.withDefault (text "")
                 , viewKeyboard store.lang guesses
                 ]
         )
@@ -1054,38 +1086,6 @@ view ({ store, state } as model) =
 encodeAndSaveStore : Store -> Cmd Msg
 encodeAndSaveStore =
     Store.toJson >> saveStore
-
-
-
--- Logging
-
-
-logResult : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-logResult ( { store, state, time } as model, cmds ) =
-    let
-        logData =
-            case state of
-                Won word guesses ->
-                    Just ( True, word, List.length guesses )
-
-                Lost word guesses ->
-                    Just ( False, word, List.length guesses )
-
-                _ ->
-                    Nothing
-    in
-    case logData of
-        Just ( victory, word, nbAttempts ) ->
-            let
-                newStore =
-                    store |> Store.addLog (Log time store.lang word victory nbAttempts)
-            in
-            ( { model | store = newStore }
-            , encodeAndSaveStore newStore
-            )
-
-        Nothing ->
-            ( model, cmds )
 
 
 main : Program Flags Model Msg
@@ -1104,7 +1104,7 @@ subscriptions { state } =
         [ Time.every 1000 NewTime
         , storeChanged (Store.fromJson >> StoreChanged)
         , case state of
-            Ongoing _ _ _ _ ->
+            Ongoing _ _ _ ->
                 BE.onKeyDown
                     (Event.decodeKey
                         { onKeyPress = KeyPressed
