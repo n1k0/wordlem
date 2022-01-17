@@ -676,7 +676,16 @@ viewKeyState ( char, letter ) =
         [ class (String.join " " [ baseClasses, classes ])
         , onClick msg
         ]
-        [ text (charToText char) ]
+        [ case char of
+            '⌫' ->
+                Icon.icon Icon.Backspace []
+
+            '⏎' ->
+                Icon.icon Icon.Enter []
+
+            _ ->
+                text (charToText char)
+        ]
 
 
 viewBoard : Maybe UserInput -> List Guess -> Html Msg

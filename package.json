@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "rimraf dist && npm run build:init && parcel build index.html --public-url ./",
+    "build": "rimraf dist && npm run build:init && parcel build index.html --no-cache --public-url ./",
     "build:init": "mkdir -p dist && cp -r public/* dist/",
     "deploy": "npm run build && gh-pages --dist dist/",
     "elm:build": "elm make src/Main.elm --optimize --output=build/app.js",
