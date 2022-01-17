@@ -12263,12 +12263,6 @@ type alias Process =
     var $author$project$Main$keyState = F2(function(guesses, _char) {
         return _Utils_Tuple2(_char, A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Correct, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Correct(_char)) : A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Misplaced, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Misplaced(_char)) : A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Unused, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Unused(_char)) : $elm$core$Maybe$Nothing);
     });
-    var $author$project$Icon$Backspace = {
-        $: 'Backspace'
-    };
-    var $author$project$Icon$Enter = {
-        $: 'Enter'
-    };
     var $author$project$Main$viewKeyState = function(_v0) {
         var _char = _v0.a;
         var letter = _v0.b;
@@ -12298,16 +12292,7 @@ type alias Process =
             ]))),
             $elm$html$Html$Events$onClick(msg)
         ]), _List_fromArray([
-            function() {
-                switch(_char.valueOf()){
-                    case '⌫':
-                        return A2($author$project$Icon$icon, $author$project$Icon$Backspace, _List_Nil);
-                    case '⏎':
-                        return A2($author$project$Icon$icon, $author$project$Icon$Enter, _List_Nil);
-                    default:
-                        return $elm$html$Html$text($author$project$Main$charToText(_char));
-                }
-            }()
+            $elm$html$Html$text($author$project$Main$charToText(_char))
         ]));
     };
     var $author$project$Main$viewKeyboard = F2(function(lang, guesses) {
