@@ -1033,11 +1033,11 @@ viewModal { lang } transationId content =
                             [ I18n.htmlText lang transationId ]
                         , button
                             [ type_ "button"
-                            , class "btn-close"
+                            , class "btn fs-5 p-0"
                             , attribute "aria-label" "Close"
                             , onClick CloseModal
                             ]
-                            []
+                            [ icon "close" ]
                         ]
                     , div
                         [ class "modal-body no-scroll-chaining" ]

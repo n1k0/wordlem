@@ -1,4 +1,10 @@
-body { touch-action: manipulation; }
+@import "./node_modules/bootstrap/scss/bootstrap.scss";
+
+// TODO: migrate to SCSS
+
+body {
+  touch-action: manipulation;
+}
 
 .Header {
   max-width: 600px;
@@ -35,17 +41,17 @@ body { touch-action: manipulation; }
 }
 
 .Board {
-  /* Note: grid-template-columns is handled programmatically in Elm land */
+  // Note: grid-template-columns is handled programmatically in Elm land
   display: grid;
   grid-gap: 5px;
   box-sizing: border-box;
   width: 37vh;
-  /* scroll snapping is great: https://css-tricks.com/practical-css-scroll-snapping/ */
+  // scroll snapping is great: https://css-tricks.com/practical-css-scroll-snapping/
   scroll-snap-align: end;
 }
 
 .BoardRow {
-  /* Note: grid-template-columns is handled programmatically in Elm land */
+  // Note: grid-template-columns is handled programmatically in Elm land
   display: grid;
   grid-gap: 5px;
 }
