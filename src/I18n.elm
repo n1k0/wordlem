@@ -181,7 +181,7 @@ getSet id =
 
         StatsGuessEvolutionHelp { lang, length } ->
             set [ langToString lang, String.fromInt length ]
-                "Chart based on latest {1} plated games in {0}. A 0 bar means lost game."
+                "Chart based on latest {1} played games in {0}. A 0 bar means lost game."
                 "Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue."
 
         StatsLang { lang } ->
