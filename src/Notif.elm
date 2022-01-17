@@ -48,7 +48,7 @@ viewNotif notif =
                     ( "warning", string )
     in
     div
-        [ class <| "Notif fs-5 alert alert-" ++ level ]
+        [ class <| "Notif alert alert-" ++ level ]
         [ text message ]
 
 
