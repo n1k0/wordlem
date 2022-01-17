@@ -142,13 +142,13 @@
       this[globalName] = mainExports;
     }
   }
-})({"kI3VP":[function(require,module,exports) {
+})({"iKiqL":[function(require,module,exports) {
+"use strict";
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
-var HMR_ENV_HASH = "4a236f9275d0a351";
-module.bundle.HMR_BUNDLE_ID = "31648ca538661719";
-"use strict";
+var HMR_ENV_HASH = "d6ea1d42532a7575";
+module.bundle.HMR_BUNDLE_ID = "0a8ecb283d214d75";
 function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
 }
@@ -156,14 +156,14 @@ function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
 }
 function _arrayWithoutHoles(arr) {
     if (Array.isArray(arr)) return _arrayLikeToArray(arr);
 }
 function _createForOfIteratorHelper(o, allowArrayLike) {
-    var it;
-    if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+    if (!it) {
         if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
             if (it) o = it;
             var i = 0;
@@ -191,7 +191,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
     var normalCompletion = true, didErr = false, err;
     return {
         s: function s() {
-            it = o[Symbol.iterator]();
+            it = it.call(o);
         },
         n: function n() {
             var step = it.next();
@@ -518,7 +518,7 @@ function hmrAcceptRun(bundle, id) {
     acceptedAssets[id] = true;
 }
 
-},{}],"7BQdY":[function(require,module,exports) {
+},{}],"bB7Pu":[function(require,module,exports) {
 var _mainElm = require("./src/Main.elm");
 const storeKey = "wordlem";
 const lang = navigator.language || "en";
@@ -540,7 +540,7 @@ window.addEventListener("storage", (event)=>{
     if (event.storageArea === localStorage && event.key === storeKey) app.ports.storeChanged.send(event.newValue);
 }, false);
 
-},{"./src/Main.elm":"jaXzP"}],"jaXzP":[function(require,module,exports) {
+},{"./src/Main.elm":"4XkAe"}],"4XkAe":[function(require,module,exports) {
 var global = arguments[3];
 (function(scope) {
     function F(arity, fun, wrapper) {
@@ -12791,6 +12791,6 @@ type alias Process =
 //////////////////// HMR END ////////////////////
 })(this);
 
-},{}]},["kI3VP","7BQdY"], "7BQdY", "parcelRequire94c2")
+},{}]},["iKiqL","bB7Pu"], "bB7Pu", "parcelRequire94c2")
 
-//# sourceMappingURL=index.38661719.js.map
+//# sourceMappingURL=index.3d214d75.js.map
