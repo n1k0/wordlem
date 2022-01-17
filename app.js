@@ -7130,7 +7130,7 @@ var $author$project$I18n$getSet = function (id) {
 						$author$project$I18n$langToString(lang),
 						$elm$core$String$fromInt(length)
 					]),
-				'Chart based on latest {1} plated games in {0}. A 0 bar means lost game.',
+				'Chart based on latest {1} played games in {0}. A 0 bar means lost game.',
 				'Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue.');
 		case 25:
 			var lang = id.a.ac;
