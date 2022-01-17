@@ -940,7 +940,11 @@ layout ({ store, modal, toasties } as model) content =
 
 icon : String -> Html Msg
 icon name =
-    i [ class <| "me-1 icon icon-" ++ name ] []
+    i
+        [ class <| "me-1 icon icon-" ++ name
+        , attribute "aria-hidden" "true"
+        ]
+        []
 
 
 viewHeader : Model -> Html Msg
