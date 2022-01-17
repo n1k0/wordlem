@@ -1,10 +1,8 @@
 port module Main exposing
-    ( Letter(..)
-    , Msg(..)
+    ( Msg(..)
     , main
     , saveStore
     , storeChanged
-    , validateGuess
     )
 
 import Browser
@@ -14,6 +12,7 @@ import Charts
 import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
+import Game exposing (Letter)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -27,7 +26,6 @@ import Notif exposing (Notif)
 import Process
 import Random
 import Store exposing (Store)
-import String.Extra as SE
 import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
@@ -43,26 +41,11 @@ type alias Flags =
 
 type alias Model =
     { store : Store
-    , state : GameState
+    , state : Game.State
     , modal : Maybe Modal
     , toasties : Toasty.Stack Notif
     , time : Posix
     }
-
-
-type GameState
-    = Idle
-    | Errored Error
-    | Ongoing WordToFind (List Guess) UserInput
-    | Lost WordToFind (List Guess)
-    | Won WordToFind (List Guess)
-
-
-type Letter
-    = Unused Char
-    | Correct Char
-    | Misplaced Char
-    | Handled Char
 
 
 type Modal
@@ -70,25 +53,8 @@ type Modal
     | StatsModal
 
 
-type Error
-    = DecodeError String
-    | LoadError
-
-
 type alias KeyState =
     ( Char, Maybe Letter )
-
-
-type alias Guess =
-    List Letter
-
-
-type alias UserInput =
-    String
-
-
-type alias WordToFind =
-    String
 
 
 type Msg
@@ -97,7 +63,7 @@ type Msg
     | KeyPressed Char
     | NewGame
     | NewTime Posix
-    | NewWord (Maybe WordToFind)
+    | NewWord (Maybe Game.WordToFind)
     | NoOp
     | OpenModal Modal
     | StoreChanged (Result Decode.Error Store)
@@ -136,8 +102,8 @@ init flags =
                         | state =
                             error
                                 |> Decode.errorToString
-                                |> DecodeError
-                                |> Errored
+                                |> Game.DecodeError
+                                |> Game.Errored
                       }
                     , encodeAndSaveStore store
                     )
@@ -150,7 +116,7 @@ init flags =
 initialModel : Store -> Model
 initialModel store =
     { store = store
-    , state = Idle
+    , state = Game.Idle
     , modal =
         if store.helpViewed then
             Nothing
@@ -176,7 +142,7 @@ initialModel store =
 --         Nothing
 
 
-getWords : Lang -> List WordToFind
+getWords : Lang -> List Game.WordToFind
 getWords lang =
     case lang of
         English ->
@@ -191,153 +157,21 @@ getRandomWord =
     getWords >> randomWord >> Random.generate NewWord
 
 
-randomWord : List WordToFind -> Random.Generator (Maybe WordToFind)
+randomWord : List Game.WordToFind -> Random.Generator (Maybe Game.WordToFind)
 randomWord words =
     Random.int 0 (List.length words - 1)
         |> Random.andThen
             (\int -> words |> LE.getAt int |> Random.constant)
 
 
-validateGuess : Lang -> WordToFind -> UserInput -> Result String Guess
-validateGuess lang word input =
-    let
-        normalize =
-            String.toLower >> SE.removeAccents
-
-        ( wordChars, inputChars ) =
-            ( String.toList (normalize word)
-            , String.toList (normalize input)
-            )
-    in
-    if List.length inputChars /= numberOfLetters then
-        I18n.NotEnoughLetters
-            |> translate lang
-            |> Err
-
-    else if not (List.member (normalize input) (getWords lang)) then
-        I18n.AbsentFromDictionary { lang = lang, word = input }
-            |> translate lang
-            |> Err
-
-    else
-        wordChars
-            |> List.map2 (mapChars wordChars) inputChars
-            |> handleCorrectDuplicates wordChars
-            |> handleMisplacedDuplicates wordChars
-            |> Ok
-
-
-mapChars : List Char -> Char -> Char -> Letter
-mapChars wordChars inputChar wordChar =
-    if inputChar == wordChar then
-        Correct inputChar
-
-    else if List.member inputChar wordChars then
-        Misplaced inputChar
-
-    else
-        Unused inputChar
-
-
-{-| Find correctly placed letters; for each, if there's only one occurence in the word,
-then check for misplaced same letter in the guess and mark them as Handled.
--}
-handleCorrectDuplicates : List Char -> Guess -> Guess
-handleCorrectDuplicates wordChars guess =
-    guess
-        |> List.map
-            (\letter ->
-                case letter of
-                    Misplaced c ->
-                        let
-                            ( nbCharsInWord, nbCorrectInAttempt ) =
-                                ( -- count number of this char in target word
-                                  List.length (List.filter ((==) c) wordChars)
-                                  -- number of already correct char for
-                                , List.length (List.filter (letterIs Correct c) guess)
-                                )
-                        in
-                        if nbCorrectInAttempt >= nbCharsInWord then
-                            -- there's enough correct letters for this char already
-                            Handled c
-
-                        else
-                            letter
-
-                    _ ->
-                        letter
-            )
-
-
-{-| If a word contains a single A, and you provide an guess with 3 As, you'll have 3
-misplaced As while we only want one, ideally the first one, with others marked as Handled.
--}
-handleMisplacedDuplicates : List Char -> Guess -> Guess
-handleMisplacedDuplicates wordChars =
-    List.foldl
-        (\letter acc ->
-            case letter of
-                Misplaced c ->
-                    let
-                        ( nbCharInWord, nbCharInAcc ) =
-                            -- count number of this char in target word
-                            ( List.length (List.filter ((==) c) wordChars)
-                              -- number of already misplaced char for in accumulator
-                            , List.length (List.filter (letterIs Misplaced c) acc)
-                            )
-                    in
-                    if nbCharInAcc >= nbCharInWord then
-                        -- there's enough misplaced letters for this char already
-                        acc ++ [ Handled c ]
-
-                    else
-                        acc ++ [ letter ]
-
-                _ ->
-                    acc ++ [ letter ]
-        )
-        []
-
-
-hasWon : List Guess -> Bool
-hasWon guesses =
-    case guesses of
-        [] ->
-            False
-
-        last :: _ ->
-            List.all
-                (\letter ->
-                    case letter of
-                        Correct _ ->
-                            True
-
-                        _ ->
-                            False
-                )
-                last
-
-
-checkGame : WordToFind -> List Guess -> GameState
-checkGame word guesses =
-    if hasWon guesses then
-        Won word guesses
-
-    else if List.length guesses >= maxAttempts then
-        Lost word guesses
-
-    else
-        Ongoing word guesses ""
-
-
 processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 processStateNotif ( { store, state } as model, cmds ) =
     case state of
-        Won _ _ ->
+        Game.Won _ _ ->
             ( model, cmds )
                 |> Notif.add ToastyMsg (Notif.Success (translate store.lang I18n.GameWin))
 
-        Lost _ _ ->
+        Game.Lost _ _ ->
             ( model, cmds )
                 |> Notif.add ToastyMsg (Notif.Info (translate store.lang I18n.GameLost))
 
@@ -365,10 +199,10 @@ logResult ( { store, state, time } as model, cmds ) =
     let
         logData =
             case state of
-                Won word guesses ->
+                Game.Won word guesses ->
                     Just ( True, word, List.length guesses )
 
-                Lost word guesses ->
+                Game.Lost word guesses ->
                     Just ( False, word, List.length guesses )
 
                 _ ->
@@ -417,7 +251,7 @@ scrollToBottom id =
         |> Task.attempt (always NoOp)
 
 
-addChar : Char -> UserInput -> UserInput
+addChar : Char -> Game.UserInput -> Game.UserInput
 addChar char input =
     (input ++ String.fromChar char)
         |> String.slice 0 numberOfLetters
@@ -426,8 +260,8 @@ addChar char input =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
-        ( BackSpace, Ongoing word guesses input ) ->
-            ( { model | state = Ongoing word guesses (String.dropRight 1 input) }
+        ( BackSpace, Game.Ongoing word guesses input ) ->
+            ( { model | state = Game.Ongoing word guesses (String.dropRight 1 input) }
             , Cmd.none
             )
 
@@ -440,8 +274,8 @@ update msg ({ store } as model) =
                 , defocusMenuButtons
                 )
 
-        ( KeyPressed char, Ongoing word guesses input ) ->
-            ( { model | state = Ongoing word guesses (addChar char input) }
+        ( KeyPressed char, Game.Ongoing word guesses input ) ->
+            ( { model | state = Game.Ongoing word guesses (addChar char input) }
             , scrollToBottom "board-container"
             )
 
@@ -460,13 +294,13 @@ update msg ({ store } as model) =
         ( NewTime time, _ ) ->
             ( { model | time = time }, Cmd.none )
 
-        ( NewWord (Just newWord), Idle ) ->
-            ( { model | state = Ongoing newWord [] "" }
+        ( NewWord (Just newWord), Game.Idle ) ->
+            ( { model | state = Game.Ongoing newWord [] "" }
             , defocusMenuButtons
             )
 
-        ( NewWord Nothing, Idle ) ->
-            ( { model | state = Errored LoadError }
+        ( NewWord Nothing, Game.Idle ) ->
+            ( { model | state = Game.Errored Game.LoadError }
             , Cmd.none
             )
 
@@ -488,17 +322,17 @@ update msg ({ store } as model) =
             -- FIXME: render a toast when we have them
             ( model, Cmd.none )
 
-        ( Submit, Ongoing word guesses input ) ->
-            case validateGuess store.lang word input of
+        ( Submit, Game.Ongoing word guesses input ) ->
+            case Game.validateGuess store.lang (getWords store.lang) word input of
                 Ok guess ->
-                    ( { model | state = checkGame word (guess :: guesses) }
+                    ( { model | state = Game.checkGame maxAttempts word (guess :: guesses) }
                     , scrollToBottom "board-container"
                     )
                         |> processStateNotif
                         |> logResult
 
                 Err error ->
-                    ( { model | state = Ongoing word guesses input }
+                    ( { model | state = Game.Ongoing word guesses input }
                     , Cmd.none
                     )
                         |> Notif.add ToastyMsg (Notif.Warning error)
@@ -530,21 +364,21 @@ charToText =
     Char.toUpper >> String.fromChar
 
 
-viewAttempt : Guess -> Html Msg
+viewAttempt : Game.Guess -> Html Msg
 viewAttempt =
     List.map
         (\letter ->
             case letter of
-                Misplaced char ->
+                Game.Misplaced char ->
                     viewTile "btn-warning" char
 
-                Correct char ->
+                Game.Correct char ->
                     viewTile "btn-success" char
 
-                Unused char ->
+                Game.Unused char ->
                     viewTile "btn-dark" char
 
-                Handled char ->
+                Game.Handled char ->
                     viewTile "btn-secondary" char
         )
         >> viewBoardRow
@@ -561,11 +395,6 @@ viewBoardRow =
         ]
 
 
-letterIs : (Char -> Letter) -> Char -> Letter -> Bool
-letterIs build char =
-    (==) (build char)
-
-
 newGameButton : Lang -> Html Msg
 newGameButton lang =
     button
@@ -577,7 +406,7 @@ newGameButton lang =
         ]
 
 
-definitionLink : Lang -> WordToFind -> Html Msg
+definitionLink : Lang -> Game.WordToFind -> Html Msg
 definitionLink lang word =
     a
         [ class "btn btn-lg btn-info"
@@ -596,7 +425,7 @@ definitionLink lang word =
         ]
 
 
-endGameButtons : Lang -> WordToFind -> Html Msg
+endGameButtons : Lang -> Game.WordToFind -> Html Msg
 endGameButtons lang word =
     div [ class "EndGameButtons" ]
         [ div [ class "btn-group w-100" ]
@@ -618,24 +447,24 @@ dispositions lang =
         )
 
 
-keyState : List Guess -> Char -> KeyState
+keyState : List Game.Guess -> Char -> KeyState
 keyState guesses char =
     ( char
-    , if List.any (List.any (letterIs Correct char)) guesses then
-        Just (Correct char)
+    , if List.any (List.any (Game.letterIs Game.Correct char)) guesses then
+        Just (Game.Correct char)
 
-      else if List.any (List.any (letterIs Misplaced char)) guesses then
-        Just (Misplaced char)
+      else if List.any (List.any (Game.letterIs Game.Misplaced char)) guesses then
+        Just (Game.Misplaced char)
 
-      else if List.any (List.any (letterIs Unused char)) guesses then
-        Just (Unused char)
+      else if List.any (List.any (Game.letterIs Game.Unused char)) guesses then
+        Just (Game.Unused char)
 
       else
         Nothing
     )
 
 
-viewKeyboard : Lang -> List Guess -> Html Msg
+viewKeyboard : Lang -> List Game.Guess -> Html Msg
 viewKeyboard lang guesses =
     dispositions lang
         |> List.map
@@ -653,13 +482,13 @@ viewKeyState ( char, letter ) =
 
         ( classes, msg ) =
             case letter of
-                Just (Correct _) ->
+                Just (Game.Correct _) ->
                     ( "btn-success", KeyPressed char )
 
-                Just (Misplaced _) ->
+                Just (Game.Misplaced _) ->
                     ( "btn-warning", KeyPressed char )
 
-                Just (Unused _) ->
+                Just (Game.Unused _) ->
                     ( "bg-dark text-light", KeyPressed char )
 
                 _ ->
@@ -688,7 +517,7 @@ viewKeyState ( char, letter ) =
         ]
 
 
-viewBoard : Maybe UserInput -> List Guess -> Html Msg
+viewBoard : Maybe Game.UserInput -> List Game.Guess -> Html Msg
 viewBoard input guesses =
     let
         remaining =
@@ -734,7 +563,7 @@ viewTile classes char =
         [ text (charToText char) ]
 
 
-viewInput : UserInput -> Html Msg
+viewInput : Game.UserInput -> Html Msg
 viewInput input =
     let
         chars =
@@ -748,22 +577,22 @@ viewInput input =
         |> viewBoardRow
 
 
-guessDescription : Lang -> Guess -> List String
+guessDescription : Lang -> Game.Guess -> List String
 guessDescription lang =
     List.map
         (\letter ->
             translate lang
                 (case letter of
-                    Correct c ->
+                    Game.Correct c ->
                         I18n.HelpLetterCorrectlyPlaced { letter = charToText c }
 
-                    Misplaced c ->
+                    Game.Misplaced c ->
                         I18n.HelpLetterMisplaced { letter = charToText c }
 
-                    Unused c ->
+                    Game.Unused c ->
                         I18n.HelpLetterUnused { letter = charToText c }
 
-                    Handled c ->
+                    Game.Handled c ->
                         I18n.HelpLetterUnused { letter = charToText c }
                 )
         )
@@ -773,11 +602,11 @@ viewHelp : Store -> List (Html Msg)
 viewHelp { lang } =
     let
         demo =
-            [ Correct 'm'
-            , Misplaced 'e'
-            , Unused 't'
-            , Correct 'a'
-            , Unused 's'
+            [ Game.Correct 'm'
+            , Game.Misplaced 'e'
+            , Game.Unused 't'
+            , Game.Correct 'a'
+            , Game.Unused 's'
             ]
     in
     [ I18n.HelpGamePitch
@@ -1054,18 +883,18 @@ viewModal { lang } transationId content =
         ]
 
 
-viewError : Lang -> Error -> Html Msg
+viewError : Lang -> Game.Error -> Html Msg
 viewError lang error =
     div [ class "alert alert-danger m-3" ]
         [ case error of
-            DecodeError details ->
+            Game.DecodeError details ->
                 div []
                     [ I18n.paragraph lang I18n.DecodeError
                     , pre [ class "pb-3" ]
                         [ text details ]
                     ]
 
-            LoadError ->
+            Game.LoadError ->
                 I18n.htmlText lang I18n.LoadError
         ]
 
@@ -1074,32 +903,32 @@ view : Model -> Html Msg
 view ({ store, state } as model) =
     layout model
         (case state of
-            Idle ->
+            Game.Idle ->
                 [ I18n.htmlText store.lang I18n.GameLoading ]
 
-            Errored error ->
+            Game.Errored error ->
                 [ viewError store.lang error
                 , p [ class "text-center" ]
                     [ newGameButton store.lang ]
                 ]
 
-            Won word guesses ->
+            Game.Won word guesses ->
                 [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
                 , viewKeyboard store.lang guesses
                 ]
 
-            Lost word guesses ->
+            Game.Lost word guesses ->
                 [ word
                     |> String.toList
-                    |> List.map Correct
+                    |> List.map Game.Correct
                     |> (\a -> a :: guesses)
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard store.lang guesses
                 ]
 
-            Ongoing _ guesses input ->
+            Game.Ongoing _ guesses input ->
                 [ viewBoard (Just input) guesses
                 , viewKeyboard store.lang guesses
                 ]
@@ -1127,7 +956,7 @@ subscriptions { state } =
         [ Time.every 1000 NewTime
         , storeChanged (Store.fromJson >> StoreChanged)
         , case state of
-            Ongoing _ _ _ ->
+            Game.Ongoing _ _ _ ->
                 BE.onKeyDown
                     (Event.decodeKey
                         { onKeyPress = KeyPressed
