@@ -12,13 +12,14 @@ import Charts
 import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
-import Game exposing (Letter)
+import Game
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import I18n exposing (Lang(..), translate)
 import Icon
 import Json.Decode as Decode
+import Keyboard
 import List.Extra as LE
 import Log exposing (Log)
 import Markdown
@@ -51,10 +52,6 @@ type alias Model =
 type Modal
     = HelpModal
     | StatsModal
-
-
-type alias KeyState =
-    ( Char, Maybe Letter )
 
 
 type Msg
@@ -435,46 +432,17 @@ endGameButtons lang word =
         ]
 
 
-dispositions : Lang -> List (List Char)
-dispositions lang =
-    List.map String.toList
-        (case lang of
-            French ->
-                [ "azertyuiop", "qsdfghjklm", "⏎wxcvbn⌫" ]
-
-            English ->
-                [ "qwertyuiop", "asdfghjkl", "⏎zxcvbnm⌫" ]
-        )
-
-
-keyState : List Game.Guess -> Char -> KeyState
-keyState guesses char =
-    ( char
-    , if List.any (List.any (Game.letterIs Game.Correct char)) guesses then
-        Just (Game.Correct char)
-
-      else if List.any (List.any (Game.letterIs Game.Misplaced char)) guesses then
-        Just (Game.Misplaced char)
-
-      else if List.any (List.any (Game.letterIs Game.Unused char)) guesses then
-        Just (Game.Unused char)
-
-      else
-        Nothing
-    )
-
-
 viewKeyboard : Lang -> List Game.Guess -> Html Msg
 viewKeyboard lang guesses =
-    dispositions lang
+    Keyboard.dispositions lang
         |> List.map
             (div [ class "KeyboardRow" ]
-                << List.map (keyState guesses >> viewKeyState)
+                << List.map (Keyboard.keyState guesses >> viewKeyState)
             )
         |> footer [ class "Keyboard" ]
 
 
-viewKeyState : KeyState -> Html Msg
+viewKeyState : Keyboard.KeyState -> Html Msg
 viewKeyState ( char, letter ) =
     let
         baseClasses =

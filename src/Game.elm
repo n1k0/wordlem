@@ -1,4 +1,14 @@
-module Game exposing (..)
+module Game exposing
+    ( Error(..)
+    , Guess
+    , Letter(..)
+    , State(..)
+    , UserInput
+    , WordToFind
+    , checkGame
+    , letterIs
+    , validateGuess
+    )
 
 import I18n exposing (Lang, translate)
 import String.Extra as SE

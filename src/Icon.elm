@@ -1,4 +1,4 @@
-module Icon exposing (..)
+module Icon exposing (Name(..), icon)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
