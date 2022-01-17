@@ -1,4 +1,4 @@
-module Event exposing (..)
+module Event exposing (decodeKey)
 
 import Json.Decode as Decode exposing (Decoder)
 import String.Extra as SE

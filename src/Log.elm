@@ -1,4 +1,4 @@
-module Log exposing (..)
+module Log exposing (Log, decode, encode)
 
 import I18n exposing (Lang)
 import Json.Decode as Decode exposing (Decoder)

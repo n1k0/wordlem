@@ -1,4 +1,12 @@
-module Store exposing (..)
+module Store exposing
+    ( Store
+    , addLog
+    , decode
+    , default
+    , encode
+    , fromJson
+    , toJson
+    )
 
 import I18n exposing (Lang)
 import Json.Decode as Decode exposing (Decoder)

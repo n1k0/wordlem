@@ -1,4 +1,10 @@
-module Notif exposing (Notif(..), add, config, view, viewNotif)
+module Notif exposing
+    ( Notif(..)
+    , add
+    , config
+    , view
+    , viewNotif
+    )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
