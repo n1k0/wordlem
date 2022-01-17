@@ -6514,6 +6514,9 @@ type alias Process =
     var $author$project$I18n$Definition = {
         $: 'Definition'
     };
+    var $author$project$Icon$Definition = {
+        $: 'Definition'
+    };
     var $elm$html$Html$a = _VirtualDom_node('a');
     var $elm$html$Html$Attributes$href = function(url) {
         return A2($elm$html$Html$Attributes$stringProperty, 'href', _VirtualDom_noJavaScriptUri(url));
@@ -6528,9 +6531,27 @@ type alias Process =
     });
     var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
     var $elm$html$Html$i = _VirtualDom_node('i');
-    var $author$project$Main$icon = F2(function(name, attrs) {
+    var $author$project$Icon$nameToString = function(name) {
+        switch(name.$){
+            case 'PlayAgain':
+                return 'play-again';
+            case 'Definition':
+                return 'definition';
+            case 'Backspace':
+                return 'backspace';
+            case 'Enter':
+                return 'enter';
+            case 'Stats':
+                return 'stats';
+            case 'Help':
+                return 'help';
+            default:
+                return 'close';
+        }
+    };
+    var $author$project$Icon$icon = F2(function(name, attrs) {
         return A2($elm$html$Html$i, _Utils_ap(attrs, _List_fromArray([
-            $elm$html$Html$Attributes$class('icon icon-' + name),
+            $elm$html$Html$Attributes$class('icon icon-' + $author$project$Icon$nameToString(name)),
             A2($elm$html$Html$Attributes$attribute, 'aria-hidden', 'true')
         ])), _List_Nil);
     });
@@ -6544,7 +6565,7 @@ type alias Process =
                 else return 'https://en.wiktionary.org/wiki/' + word;
             }())
         ]), _List_fromArray([
-            A2($author$project$Main$icon, 'definition', _List_fromArray([
+            A2($author$project$Icon$icon, $author$project$Icon$Definition, _List_fromArray([
                 $elm$html$Html$Attributes$class('me-1')
             ])),
             A2($author$project$I18n$htmlText, lang, $author$project$I18n$Definition)
@@ -6555,6 +6576,9 @@ type alias Process =
         $: 'NewGame'
     };
     var $author$project$I18n$PlayAgain = {
+        $: 'PlayAgain'
+    };
+    var $author$project$Icon$PlayAgain = {
         $: 'PlayAgain'
     };
     var $elm$html$Html$button = _VirtualDom_node('button');
@@ -6576,7 +6600,7 @@ type alias Process =
             $elm$html$Html$Attributes$class('btn btn-lg btn-success'),
             $elm$html$Html$Events$onClick($author$project$Main$NewGame)
         ]), _List_fromArray([
-            A2($author$project$Main$icon, 'play-again', _List_fromArray([
+            A2($author$project$Icon$icon, $author$project$Icon$PlayAgain, _List_fromArray([
                 $elm$html$Html$Attributes$class('me-1')
             ])),
             A2($author$project$I18n$htmlText, lang, $author$project$I18n$PlayAgain)
@@ -6661,11 +6685,17 @@ type alias Process =
         ]));
     };
     var $author$project$Notif$view = A2($pablen$toasty$Toasty$view, $author$project$Notif$config, $author$project$Notif$viewNotif);
+    var $author$project$Icon$Help = {
+        $: 'Help'
+    };
     var $author$project$Main$OpenModal = function(a) {
         return {
             $: 'OpenModal',
             a: a
         };
+    };
+    var $author$project$Icon$Stats = {
+        $: 'Stats'
     };
     var $author$project$I18n$StatsButton = {
         $: 'StatsButton'
@@ -6735,7 +6765,7 @@ type alias Process =
                     btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
                     $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal))
                 ]), _List_fromArray([
-                    A2($author$project$Main$icon, 'stats', _List_fromArray([
+                    A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_fromArray([
                         $elm$html$Html$Attributes$class('me-1')
                     ])),
                     A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$StatsButton)
@@ -6747,7 +6777,7 @@ type alias Process =
                     btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
                     $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal))
                 ]), _List_fromArray([
-                    A2($author$project$Main$icon, 'help', _List_fromArray([
+                    A2($author$project$Icon$icon, $author$project$Icon$Help, _List_fromArray([
                         $elm$html$Html$Attributes$class('me-1')
                     ])),
                     A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$Help)
@@ -6913,6 +6943,9 @@ type alias Process =
             })))
         ]);
     };
+    var $author$project$Icon$Close = {
+        $: 'Close'
+    };
     var $elm$virtual_dom$VirtualDom$Custom = function(a) {
         return {
             $: 'Custom',
@@ -6966,7 +6999,7 @@ type alias Process =
                                 A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Close'),
                                 $elm$html$Html$Events$onClick($author$project$Main$CloseModal)
                             ]), _List_fromArray([
-                                A2($author$project$Main$icon, 'close', _List_Nil)
+                                A2($author$project$Icon$icon, $author$project$Icon$Close, _List_Nil)
                             ]))
                         ])),
                         A2($elm$html$Html$div, _List_fromArray([
@@ -12230,6 +12263,12 @@ type alias Process =
     var $author$project$Main$keyState = F2(function(guesses, _char) {
         return _Utils_Tuple2(_char, A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Correct, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Correct(_char)) : A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Misplaced, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Misplaced(_char)) : A2($elm$core$List$any, $elm$core$List$any(A2($author$project$Main$letterIs, $author$project$Main$Unused, _char)), guesses) ? $elm$core$Maybe$Just($author$project$Main$Unused(_char)) : $elm$core$Maybe$Nothing);
     });
+    var $author$project$Icon$Backspace = {
+        $: 'Backspace'
+    };
+    var $author$project$Icon$Enter = {
+        $: 'Enter'
+    };
     var $author$project$Main$viewKeyState = function(_v0) {
         var _char = _v0.a;
         var letter = _v0.b;
@@ -12262,9 +12301,9 @@ type alias Process =
             function() {
                 switch(_char.valueOf()){
                     case '⌫':
-                        return A2($author$project$Main$icon, 'backspace', _List_Nil);
+                        return A2($author$project$Icon$icon, $author$project$Icon$Backspace, _List_Nil);
                     case '⏎':
-                        return A2($author$project$Main$icon, 'enter', _List_Nil);
+                        return A2($author$project$Icon$icon, $author$project$Icon$Enter, _List_Nil);
                     default:
                         return $elm$html$Html$text($author$project$Main$charToText(_char));
                 }
