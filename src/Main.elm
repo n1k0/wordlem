@@ -18,6 +18,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import I18n exposing (Lang(..), translate)
+import Icon
 import Json.Decode as Decode
 import List.Extra as LE
 import Log exposing (Log)
@@ -571,7 +572,7 @@ newGameButton lang =
         [ class "btn btn-lg btn-success"
         , onClick NewGame
         ]
-        [ icon "play-again" [ class "me-1" ]
+        [ Icon.icon Icon.PlayAgain [ class "me-1" ]
         , I18n.htmlText lang I18n.PlayAgain
         ]
 
@@ -590,7 +591,7 @@ definitionLink lang word =
                     "https://en.wiktionary.org/wiki/" ++ word
             )
         ]
-        [ icon "definition" [ class "me-1" ]
+        [ Icon.icon Icon.Definition [ class "me-1" ]
         , I18n.htmlText lang I18n.Definition
         ]
 
@@ -677,10 +678,10 @@ viewKeyState ( char, letter ) =
         ]
         [ case char of
             '⌫' ->
-                icon "backspace" []
+                Icon.icon Icon.Backspace []
 
             '⏎' ->
-                icon "enter" []
+                Icon.icon Icon.Enter []
 
             _ ->
                 text (charToText char)
@@ -947,17 +948,6 @@ layout ({ store, modal, toasties } as model) content =
         ]
 
 
-icon : String -> List (Attribute Msg) -> Html Msg
-icon name attrs =
-    i
-        (attrs
-            ++ [ class <| "icon icon-" ++ name
-               , attribute "aria-hidden" "true"
-               ]
-        )
-        []
-
-
 viewHeader : Model -> Html Msg
 viewHeader { store, modal } =
     let
@@ -993,7 +983,7 @@ viewHeader { store, modal } =
                 , btnClass (modal == Just StatsModal)
                 , onClick (OpenModal StatsModal)
                 ]
-                [ icon "stats" [ class "me-1" ]
+                [ Icon.icon Icon.Stats [ class "me-1" ]
                 , I18n.htmlText store.lang I18n.StatsButton
                 ]
             , button
@@ -1003,7 +993,7 @@ viewHeader { store, modal } =
                 , btnClass (modal == Just HelpModal)
                 , onClick (OpenModal HelpModal)
                 ]
-                [ icon "help" [ class "me-1" ]
+                [ Icon.icon Icon.Help [ class "me-1" ]
                 , I18n.htmlText store.lang I18n.Help
                 ]
             ]
@@ -1052,7 +1042,7 @@ viewModal { lang } transationId content =
                             , attribute "aria-label" "Close"
                             , onClick CloseModal
                             ]
-                            [ icon "close" [] ]
+                            [ Icon.icon Icon.Close [] ]
                         ]
                     , div
                         [ class "modal-body no-scroll-chaining" ]
