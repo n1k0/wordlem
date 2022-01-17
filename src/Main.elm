@@ -118,21 +118,18 @@ maxAttempts =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        store =
-            Store.fromJson flags.rawStore
-
         ( model, cmds ) =
-            case store of
-                Ok store_ ->
-                    ( initialModel store_, Cmd.none )
+            case Store.fromJson flags.rawStore of
+                Ok store ->
+                    ( initialModel store, Cmd.none )
 
                 Err error ->
                     let
-                        newStore =
+                        store =
                             Store.default (I18n.parseLang flags.lang)
 
                         newModel =
-                            initialModel newStore
+                            initialModel store
                     in
                     ( { newModel
                         | state =
@@ -141,7 +138,7 @@ init flags =
                                 |> DecodeError
                                 |> Errored
                       }
-                    , encodeAndSaveStore newStore
+                    , encodeAndSaveStore store
                     )
     in
     ( model
@@ -153,7 +150,12 @@ initialModel : Store -> Model
 initialModel store =
     { store = store
     , state = Idle
-    , modal = Nothing
+    , modal =
+        if store.helpViewed then
+            Nothing
+
+        else
+            Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
     }
@@ -342,6 +344,21 @@ processStateNotif ( { store, state } as model, cmds ) =
             ( model, cmds )
 
 
+handleHelpViewed : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+handleHelpViewed ( { store } as model, cmds ) =
+    if not store.helpViewed then
+        let
+            newStore =
+                { store | helpViewed = True }
+        in
+        ( { model | store = newStore }
+        , Cmd.batch [ cmds, encodeAndSaveStore newStore ]
+        )
+
+    else
+        ( model, cmds )
+
+
 logResult : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 logResult ( { store, state, time } as model, cmds ) =
     let
@@ -417,9 +434,10 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( CloseModal, _ ) ->
-            ( { model | modal = Nothing }
-            , defocusMenuButtons
-            )
+            handleHelpViewed
+                ( { model | modal = Nothing }
+                , defocusMenuButtons
+                )
 
         ( KeyPressed char, Ongoing word guesses input ) ->
             ( { model | state = Ongoing word guesses (addChar char input) }
