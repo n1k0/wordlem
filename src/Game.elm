@@ -1,5 +1,6 @@
 module Game exposing
-    ( Error(..)
+    ( Board
+    , Error(..)
     , Guess
     , Letter(..)
     , State(..)
@@ -17,9 +18,9 @@ import String.Extra as SE
 type State
     = Idle
     | Errored Error
-    | Ongoing WordToFind (List Guess) UserInput
-    | Lost WordToFind (List Guess)
-    | Won WordToFind (List Guess)
+    | Ongoing WordToFind Board UserInput
+    | Lost WordToFind Board
+    | Won WordToFind Board
 
 
 type Error
@@ -34,6 +35,10 @@ type Letter
     | Handled Char
 
 
+type alias Board =
+    List Guess
+
+
 type alias Guess =
     List Letter
 
@@ -46,7 +51,7 @@ type alias WordToFind =
     String
 
 
-checkGame : Int -> WordToFind -> List Guess -> State
+checkGame : Int -> WordToFind -> Board -> State
 checkGame maxAttempts word guesses =
     if hasWon guesses then
         Won word guesses
@@ -58,7 +63,7 @@ checkGame maxAttempts word guesses =
         Ongoing word guesses ""
 
 
-hasWon : List Guess -> Bool
+hasWon : Board -> Bool
 hasWon guesses =
     case guesses of
         [] ->

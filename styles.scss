@@ -54,6 +54,11 @@ body {
   // Note: grid-template-columns is handled programmatically in Elm land
   display: grid;
   grid-gap: 5px;
+
+  &Example {
+    margin: 0 auto;
+    max-width: 300px;
+  }
 }
 
 .BoardTile {

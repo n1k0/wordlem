@@ -432,7 +432,7 @@ endGameButtons lang word =
         ]
 
 
-viewKeyboard : Lang -> List Game.Guess -> Html Msg
+viewKeyboard : Lang -> Game.Board -> Html Msg
 viewKeyboard lang guesses =
     Keyboard.dispositions lang
         |> List.map
@@ -485,7 +485,7 @@ viewKeyState ( char, letter ) =
         ]
 
 
-viewBoard : Maybe Game.UserInput -> List Game.Guess -> Html Msg
+viewBoard : Maybe Game.UserInput -> Game.Board -> Html Msg
 viewBoard input guesses =
     let
         remaining =
@@ -509,18 +509,13 @@ viewBoard input guesses =
           ]
             |> List.concat
             |> List.filterMap identity
-            |> viewBoardElement
-        ]
-
-
-viewBoardElement : List (Html Msg) -> Html Msg
-viewBoardElement =
-    div
-        [ class "Board"
-        , style "grid-template-rows"
-            (interpolate "repeat({0}, 1fr)"
-                [ String.fromInt maxAttempts ]
-            )
+            |> div
+                [ class "Board"
+                , style "grid-template-rows"
+                    (interpolate "repeat({0}, 1fr)"
+                        [ String.fromInt maxAttempts ]
+                    )
+                ]
         ]
 
 
@@ -584,7 +579,7 @@ viewHelp { lang } =
         }
         |> I18n.paragraph lang
     , I18n.paragraph lang I18n.HelpKeyboard
-    , div [ class "mb-3" ]
+    , div [ class "BoardRowExample mb-3" ]
         [ viewAttempt demo ]
     , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
