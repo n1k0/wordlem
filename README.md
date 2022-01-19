@@ -2,7 +2,7 @@
 
 A simplistic port of the popular [Wordle game](https://www.powerlanguage.co.uk/wordle/) in [Elm](https://elm-lang.org/). Allows playing in French.
 
-![image](https://user-images.githubusercontent.com/41547/149529293-3110bc54-96b0-46c2-af6b-b083adcd1c36.png)
+![image](https://n1k0.github.io/wordlem/screenshots/card.png)
 
 You can play it [here](https://n1k0.github.io/wordlem/).
 
