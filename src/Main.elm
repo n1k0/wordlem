@@ -9,6 +9,7 @@ import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
 import Charts
+import Client
 import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
@@ -16,6 +17,7 @@ import Game
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import I18n exposing (Id(..), Lang(..), translate)
 import Icon
 import Json.Decode as Decode
@@ -31,7 +33,6 @@ import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
 import Toasty
-import Words
 
 
 type alias Flags =
@@ -43,6 +44,7 @@ type alias Flags =
 type alias Model =
     { store : Store
     , state : Game.State
+    , words : List Game.WordToFind
     , modal : Maybe Modal
     , toasties : Toasty.Stack Notif
     , time : Posix
@@ -69,6 +71,7 @@ type Msg
     | SwitchLang Lang
     | SwitchLayout Keyboard.Layout
     | ToastyMsg (Toasty.Msg Notif)
+    | WordsReceived (Result Http.Error String)
 
 
 numberOfLetters : Int
@@ -108,7 +111,10 @@ init flags =
                     )
     in
     ( model
-    , Cmd.batch [ getRandomWord model.store.lang, cmds ]
+    , Cmd.batch
+        [ Client.getWords model.store.lang WordsReceived
+        , cmds
+        ]
     )
 
 
@@ -116,6 +122,7 @@ initialModel : Store -> Model
 initialModel store =
     { store = store
     , state = Game.Idle
+    , words = []
     , modal =
         if store.helpViewed then
             Nothing
@@ -141,21 +148,9 @@ initialModel store =
 --         Nothing
 
 
-getWords : Lang -> List Game.WordToFind
-getWords lang =
-    case lang of
-        English ->
-            Words.english
-                |> List.filter (String.length >> (==) numberOfLetters)
-
-        French ->
-            Words.french
-                |> List.filter (String.length >> (==) numberOfLetters)
-
-
-getRandomWord : Lang -> Cmd Msg
+getRandomWord : List Game.WordToFind -> Cmd Msg
 getRandomWord =
-    getWords >> randomWord >> Random.generate NewWord
+    randomWord >> Random.generate NewWord
 
 
 randomWord : List Game.WordToFind -> Random.Generator (Maybe Game.WordToFind)
@@ -289,7 +284,7 @@ update msg ({ store } as model) =
                     initialModel store
             in
             ( newModel
-            , getRandomWord store.lang
+            , getRandomWord model.words
             )
 
         ( NewTime time, _ ) ->
@@ -324,7 +319,7 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( Submit, Game.Ongoing word guesses input ) ->
-            case Game.validateGuess store.lang (getWords store.lang) word input of
+            case Game.validateGuess store.lang model.words word input of
                 Ok guess ->
                     ( { model | state = Game.checkGame maxAttempts word (guess :: guesses) }
                     , scrollToBottom "board-container"
@@ -352,7 +347,7 @@ update msg ({ store } as model) =
             ( newModel
             , Cmd.batch
                 [ encodeAndSaveStore newStore
-                , getRandomWord lang
+                , Client.getWords lang WordsReceived
                 ]
             )
 
@@ -367,6 +362,22 @@ update msg ({ store } as model) =
 
         ( ToastyMsg subMsg, _ ) ->
             Toasty.update Notif.config ToastyMsg subMsg model
+
+        ( WordsReceived (Ok rawWords), _ ) ->
+            let
+                words =
+                    rawWords
+                        |> String.lines
+                        |> List.filter (not << String.isEmpty)
+                        |> List.filter (String.length >> (==) numberOfLetters)
+            in
+            ( { model | words = words }
+            , getRandomWord words
+            )
+
+        ( WordsReceived (Err _), _ ) ->
+            ( model, Cmd.none )
+                |> Notif.add ToastyMsg (Notif.Warning "Load error")
 
 
 charToText : Char -> String
@@ -921,7 +932,7 @@ view ({ store, state } as model) =
     layout model
         (case state of
             Game.Idle ->
-                [ I18n.htmlText store.lang I18n.GameLoading ]
+                []
 
             Game.Errored error ->
                 [ viewError store.lang error

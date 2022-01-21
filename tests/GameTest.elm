@@ -5,7 +5,20 @@ import Game exposing (..)
 import I18n exposing (Lang(..))
 import Test exposing (..)
 import TestUtils exposing (asTest)
-import Words exposing (french)
+
+
+french =
+    [ "agaça"
+    , "envie"
+    , "épées"
+    , "évier"
+    , "génie"
+    , "ladre"
+    , "plaça"
+    , "titra"
+    , "traça"
+    , "voila"
+    ]
 
 
 suite : Test

@@ -14,19 +14,17 @@ async function getWords(url) {
   return contents
     .split("\n")
     .map((s) => s.trim())
-    .filter((s) => s.length >= MIN_LENGTH && s.length <= MAX_LENGTH);
+    .filter((s) => s.length >= MIN_LENGTH && s.length <= MAX_LENGTH)
+    .join("\n");
 }
 
 async function main() {
   try {
-    const elmTemplate = fs.readFileSync("src/Words.elm-tpl").toString();
-    const elmContents = elmTemplate
-      .replace("%english%", await getWords(urls.en))
-      .replace("%french%", await getWords(urls.fr));
-    fs.writeFileSync("src/Words.elm", elmContents);
-    console.log("Wrote src/Words.elm");
+    fs.writeFileSync("public/db/en.txt", await getWords(urls.en));
+    fs.writeFileSync("public/db/fr.txt", await getWords(urls.fr));
+    console.log("Wrote db files.");
   } catch (err) {
-    throw new Error(`Unable to generate Elm file: ${err}`);
+    throw new Error(`Unable to generate db file: ${err}`);
   }
 }
 

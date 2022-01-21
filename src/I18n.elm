@@ -3,6 +3,7 @@ module I18n exposing
     , Lang(..)
     , htmlText
     , langFromString
+    , langToCode
     , langToString
     , paragraph
     , parseLang
@@ -261,6 +262,16 @@ langToString lang =
 
         French ->
             "Français"
+
+
+langToCode : Lang -> String
+langToCode lang =
+    case lang of
+        English ->
+            "en"
+
+        French ->
+            "fr"
 
 
 langFromString : String -> Lang
