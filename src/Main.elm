@@ -719,21 +719,21 @@ viewLangStats lang langLogs =
                 , td [ class "w-100" ] [ progressBar percent ]
                 ]
 
-        card nodes =
-            div [ class "card py-0" ]
-                [ div [ class "card-body text-center" ] nodes ]
+        stat nodes =
+            div [ class "col-4 text-center mb-4" ]
+                nodes
     in
-    [ div [ class "card-group mb-3" ]
-        [ card
+    [ div [ class "row" ]
+        [ stat
             [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-            , small [] [ I18n.htmlText lang (I18n.StatsGamesPlayed { lang = lang }) ]
+            , small [] [ I18n.htmlText lang I18n.StatsGamesPlayed ]
             ]
-        , card
+        , stat
             [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
             , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
             ]
         , if guessAvg > 0 then
-            card
+            stat
                 [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
                 , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
                 ]

@@ -49,7 +49,7 @@ type Id
     | SettingsKeyboardLayout
     | StatsAverageGuesses
     | StatsButton
-    | StatsGamesPlayed { lang : Lang }
+    | StatsGamesPlayed
     | StatsGuessDistribution { lang : Lang }
     | StatsGuessEvolution { lang : Lang }
     | StatsGuessEvolutionHelp { lang : Lang, length : Int }
@@ -177,10 +177,10 @@ getSet id =
                 "Stats"
                 "Stats"
 
-        StatsGamesPlayed { lang } ->
-            set [ langToString lang ]
-                "games played in {0}"
-                "parties jouées en {0}"
+        StatsGamesPlayed ->
+            set []
+                "games played"
+                "parties jouées"
 
         StatsGuessDistribution { lang } ->
             set [ langToString lang ]
@@ -215,7 +215,7 @@ getSet id =
         StatsWinRate ->
             set []
                 "win rate"
-                "de parties gagnées"
+                "parties gagnées"
 
 
 set : List String -> String -> String -> Set
