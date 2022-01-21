@@ -73,7 +73,7 @@ type Msg
 
 numberOfLetters : Int
 numberOfLetters =
-    5
+    7
 
 
 maxAttempts : Int
@@ -146,9 +146,11 @@ getWords lang =
     case lang of
         English ->
             Words.english
+                |> List.filter (String.length >> (==) numberOfLetters)
 
         French ->
             Words.french
+                |> List.filter (String.length >> (==) numberOfLetters)
 
 
 getRandomWord : Lang -> Cmd Msg
@@ -522,7 +524,7 @@ viewBoard input guesses =
             |> List.concat
             |> List.filterMap identity
             |> div
-                [ class "Board"
+                [ class <| "Board Board-" ++ String.fromInt numberOfLetters
                 , style "grid-template-rows"
                     (interpolate "repeat({0}, 1fr)"
                         [ String.fromInt maxAttempts ]

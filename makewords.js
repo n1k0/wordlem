@@ -2,7 +2,7 @@ require("isomorphic-fetch");
 const fs = require("fs");
 
 const MIN_LENGTH = 5;
-const MAX_LENGTH = 6;
+const MAX_LENGTH = 7;
 const urls = {
   en: "https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt",
   fr: "https://chrplr.github.io/openlexicon/datasets-info/Liste-de-mots-francais-Gutenberg/liste.de.mots.francais.frgut.txt",

@@ -53,10 +53,20 @@ body {
   // Note: grid-template-columns is handled programmatically in Elm land
   display: grid;
   grid-gap: 5px;
+  width: 50vh;
   box-sizing: border-box;
-  width: 37vh;
   // scroll snapping is great: https://css-tricks.com/practical-css-scroll-snapping/
   scroll-snap-align: end;
+
+  &-5 {
+    max-width: 70%;
+  }
+  &-6 {
+    max-width: 80%;
+  }
+  &-7 {
+    max-width: 90%;
+  }
 }
 
 .BoardRow {
@@ -75,11 +85,16 @@ body {
   justify-content: center;
   align-items: center;
   font-weight: 500;
-  font-size: 1.5rem;
-  line-height: 1.5rem;
   user-select: none;
   padding: unset;
   cursor: unset;
+  font-size: 1.75rem;
+  line-height: 1.75rem;
+
+  @media screen and (max-height: 480px) {
+    font-size: 1.4rem;
+    line-height: 1.4rem;
+  }
 }
 
 .BoardTile::before {
@@ -123,11 +138,11 @@ body {
   width: calc(100% - 20px);
   margin: 4px 10px 0 10px;
   flex-grow: 1;
-}
 
-@media screen and (max-height: 480px) {
-  .EndGameButtons a, .EndGameButtons button {
-    font-size: 1rem;
+  @media screen and (max-height: 480px) {
+    a, button {
+      font-size: 1rem;
+    }
   }
 }
 
