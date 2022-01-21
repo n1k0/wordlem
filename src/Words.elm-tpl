@@ -1,0 +1,13 @@
+module Words exposing (english, french)
+
+
+english : List String
+english =
+    String.split ","
+        """%english%"""
+
+
+french : List String
+french =
+    String.split ","
+        """%french%"""
