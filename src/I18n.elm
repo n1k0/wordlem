@@ -48,6 +48,9 @@ type Id
     | PlayAgain
     | Settings
     | SettingsKeyboardLayout
+    | SettingsWordSize
+    | SettingsWordSizeRandom
+    | SettingsWordSizeInt { size : Int }
     | StatsAverageGuesses
     | StatsButton
     | StatsGamesPlayed
@@ -172,6 +175,21 @@ getSet id =
             set []
                 "Keyboard layout"
                 "Disposition du clavier"
+
+        SettingsWordSize ->
+            set []
+                "Word length"
+                "Longueur de mot"
+
+        SettingsWordSizeRandom ->
+            set []
+                "Random"
+                "Aléatoire"
+
+        SettingsWordSizeInt { size } ->
+            set [ String.fromInt size ]
+                "{0} letters"
+                "{0} lettres"
 
         StatsAverageGuesses ->
             set []

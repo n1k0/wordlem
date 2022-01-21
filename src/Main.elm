@@ -71,6 +71,7 @@ type Msg
     | Submit
     | SwitchLang Lang
     | SwitchLayout Keyboard.Layout
+    | SwitchWordSize (Maybe Int)
     | ToastyMsg (Toasty.Msg Notif)
     | WordsReceived (Result Http.Error String)
 
@@ -359,6 +360,25 @@ update msg ({ store } as model) =
             , encodeAndSaveStore newStore
             )
 
+        ( SwitchWordSize (Just wordSize), _ ) ->
+            let
+                newStore =
+                    store |> Store.updateSettings (\s -> { s | wordSize = Just wordSize })
+            in
+            ( { model | store = newStore, wordSize = wordSize }
+            , encodeAndSaveStore newStore
+            )
+
+        ( SwitchWordSize Nothing, _ ) ->
+            let
+                newStore =
+                    store |> Store.updateSettings (\s -> { s | wordSize = Nothing })
+            in
+            ( { model | store = newStore }
+              -- FIXME: get random new word size
+            , encodeAndSaveStore newStore
+            )
+
         ( ToastyMsg subMsg, _ ) ->
             Toasty.update Notif.config ToastyMsg subMsg model
 
@@ -643,21 +663,51 @@ progressBar percent =
 
 viewSettings : Store -> List (Html Msg)
 viewSettings { lang, settings } =
-    [ label []
-        [ I18n.SettingsKeyboardLayout |> I18n.htmlText lang
+    [ -- Keyboard layout setting
+      div [ class "mb-3" ]
+        [ label []
+            [ I18n.SettingsKeyboardLayout |> I18n.htmlText lang
+            ]
+        , [ Keyboard.Auto, Keyboard.Azerty, Keyboard.Qwerty ]
+            |> List.map
+                (\l ->
+                    option
+                        [ value (Keyboard.layoutToString l)
+                        , selected <| l == settings.layout
+                        ]
+                        [ l |> Keyboard.layoutToString |> String.toUpper |> text ]
+                )
+            |> select
+                [ class "form-select w-100 mt-1"
+                , onInput (Keyboard.layoutFromString >> SwitchLayout)
+                ]
         ]
-    , [ Keyboard.Auto, Keyboard.Azerty, Keyboard.Qwerty ]
+    , div [ class "mb-3" ]
+        [ label []
+            [ I18n.SettingsWordSize |> I18n.htmlText lang
+            ]
+        ]
+
+    -- Word size setting
+    , [ ( Nothing, I18n.SettingsWordSizeRandom )
+      , ( Just 5, I18n.SettingsWordSizeInt { size = 5 } )
+      , ( Just 6, I18n.SettingsWordSizeInt { size = 6 } )
+      , ( Just 7, I18n.SettingsWordSizeInt { size = 7 } )
+      ]
         |> List.map
-            (\l ->
+            (\( wordSize, i18n ) ->
                 option
-                    [ value (Keyboard.layoutToString l)
-                    , selected <| l == settings.layout
+                    [ selected <| wordSize == settings.wordSize
+                    , wordSize
+                        |> Maybe.map String.fromInt
+                        |> Maybe.withDefault ""
+                        |> value
                     ]
-                    [ l |> Keyboard.layoutToString |> String.toUpper |> text ]
+                    [ text (I18n.translate lang i18n) ]
             )
         |> select
             [ class "form-select w-100 mt-1"
-            , onInput (Keyboard.layoutFromString >> SwitchLayout)
+            , onInput (String.toInt >> SwitchWordSize)
             ]
     ]
 
