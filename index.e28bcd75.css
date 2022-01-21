@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?e6j28z');
-  src:  url('fonts/icomoon.eot?e6j28z#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?e6j28z') format('truetype'),
-    url('fonts/icomoon.woff?e6j28z') format('woff'),
-    url('fonts/icomoon.svg?e6j28z#icomoon') format('svg');
+  src:  url("icomoon.495751df.eot");
+  src:  url("icomoon.495751df.eot#iefix") format('embedded-opentype'),
+    url("icomoon.245bd99d.ttf") format('truetype'),
+    url("icomoon.6561edad.woff") format('woff'),
+    url("icomoon.f797451c.svg#icomoon") format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -28,24 +28,33 @@
 .icon-backspace:before {
   content: "\e903";
 }
+
 .icon-play-again:before {
   content: "\e902";
 }
+
 .icon-stats:before {
   content: "\e901";
 }
+
 .icon-enter:before {
   content: "\e96a";
 }
+
 .icon-settings:before {
   content: "\e994";
 }
+
 .icon-help:before {
   content: "\e900";
 }
+
 .icon-definition:before {
   content: "\f002";
 }
+
 .icon-close:before {
   content: "\f00d";
 }
+
+/*# sourceMappingURL=index.e28bcd75.css.map */
