@@ -789,7 +789,8 @@ viewHeader { store, modal } =
     in
     nav [ class "navbar sticky-top navbar-dark bg-dark" ]
         [ div [ class "Header container-fluid flex-nowrap" ]
-            [ span [ class "text-white fw-bold me-2" ] [ text "Wordlem" ]
+            [ div [ class "Logo text-white fw-bold me-2" ]
+                [ h1 [ class "visually-hidden" ] [ text "Wordlem" ] ]
             , button
                 [ type_ "button"
                 , id "btn-lang-en"
@@ -814,7 +815,8 @@ viewHeader { store, modal } =
                 , onClick (OpenModal StatsModal)
                 ]
                 [ Icon.icon Icon.Stats [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.StatsButton ]
+                , span [ class "d-none d-sm-inline text-truncate" ]
+                    [ I18n.htmlText store.lang I18n.StatsButton ]
                 ]
             , button
                 [ type_ "button"
@@ -824,7 +826,8 @@ viewHeader { store, modal } =
                 , onClick (OpenModal HelpModal)
                 ]
                 [ Icon.icon Icon.Help [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.Help ]
+                , span [ class "d-none d-sm-inline text-truncate" ]
+                    [ I18n.htmlText store.lang I18n.Help ]
                 ]
             , button
                 [ type_ "button"
@@ -834,7 +837,8 @@ viewHeader { store, modal } =
                 , onClick (OpenModal SettingsModal)
                 ]
                 [ Icon.icon Icon.Settings [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.Settings ]
+                , span [ class "d-none d-sm-inline text-truncate" ]
+                    [ I18n.htmlText store.lang I18n.Settings ]
                 ]
             ]
         ]

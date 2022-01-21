@@ -21,6 +21,15 @@ body {
   }
 }
 
+.Logo {
+  background: url(public/logo.svg) no-repeat;
+  background-size: contain;
+  color: transparent;
+  overflow: hidden;
+  width: 32px;
+  height: 32px;
+}
+
 .Game {
   width: 100%;
   max-width: 600px;
