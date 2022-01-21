@@ -76,7 +76,7 @@ type Msg
 
 numberOfLetters : Int
 numberOfLetters =
-    7
+    5
 
 
 maxAttempts : Int

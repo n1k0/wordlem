@@ -7,7 +7,7 @@
     "elm:build": "elm make src/Main.elm --optimize --output=build/app.js",
     "start:parcel": "parcel serve index.html --port 8000 --no-cache",
     "start:dev": "npm run start:parcel",
-    "start": "PARCEL_ELM_NO_DEBUG=1 npm run start:dev",
+    "start": "npm run build:init && PARCEL_ELM_NO_DEBUG=1 npm run start:dev",
     "test": "elm-test"
   },
   "devDependencies": {

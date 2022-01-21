@@ -11,11 +11,16 @@ const urls = {
 async function getWords(url) {
   const res = await fetch(url);
   const contents = await res.text();
-  return contents
+  const words = contents
     .split("\n")
-    .map((s) => s.trim())
-    .filter((s) => s.length >= MIN_LENGTH && s.length <= MAX_LENGTH)
-    .join("\n");
+    .map((s) =>
+      s
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""),
+    )
+    .filter((s) => !s.includes("-") && s.length >= MIN_LENGTH && s.length <= MAX_LENGTH);
+  return [...new Set(words)].join("\n");
 }
 
 async function main() {
