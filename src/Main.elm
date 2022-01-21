@@ -73,6 +73,7 @@ type Msg
     | SwitchLayout Keyboard.Layout
     | SwitchWordSize (Maybe Int)
     | ToastyMsg (Toasty.Msg Notif)
+    | UpdateWordSize Int
     | WordsReceived (Result Http.Error String)
 
 
@@ -111,7 +112,12 @@ init flags =
     in
     ( model
     , Cmd.batch
-        [ Client.getWords model.store.lang WordsReceived
+        [ case model.store.settings.wordSize of
+            Just _ ->
+                Client.getWords model.store.lang WordsReceived
+
+            Nothing ->
+                getRandomWordSize
         , cmds
         ]
     )
@@ -130,34 +136,28 @@ initialModel store =
             Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
-    , wordSize = 5
+    , wordSize = store.settings.wordSize |> Maybe.withDefault 5
     }
 
 
-
--- sampleOngoingState : GameState
--- sampleOngoingState =
---     -- this is useful to debug specific states
---     Ongoing "xxxxx"
---         ("voila"
---             |> String.toList
---             |> List.map Unused
---             |> List.repeat 5
---         )
---         "voila"
---         Nothing
+getRandomWordSize : Cmd Msg
+getRandomWordSize =
+    Random.int 5 7
+        |> Random.generate UpdateWordSize
 
 
-getRandomWord : List Game.WordToFind -> Cmd Msg
-getRandomWord =
-    randomWord >> Random.generate NewWord
+getRandomWord : Int -> List Game.WordToFind -> Cmd Msg
+getRandomWord wordSize words =
+    words
+        |> List.filter (String.length >> (==) wordSize)
+        |> randomWord
+        |> Random.generate NewWord
 
 
 randomWord : List Game.WordToFind -> Random.Generator (Maybe Game.WordToFind)
 randomWord words =
     Random.int 0 (List.length words - 1)
-        |> Random.andThen
-            (\int -> words |> LE.getAt int |> Random.constant)
+        |> Random.andThen (\int -> words |> LE.getAt int |> Random.constant)
 
 
 processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -284,7 +284,12 @@ update msg ({ store } as model) =
                     initialModel store
             in
             ( newModel
-            , getRandomWord model.words
+            , case store.settings.wordSize of
+                Just wordSize ->
+                    getRandomWord wordSize model.words
+
+                Nothing ->
+                    getRandomWordSize
             )
 
         ( NewTime time, _ ) ->
@@ -364,9 +369,15 @@ update msg ({ store } as model) =
             let
                 newStore =
                     store |> Store.updateSettings (\s -> { s | wordSize = Just wordSize })
+
+                newModel =
+                    initialModel newStore
             in
-            ( { model | store = newStore, wordSize = wordSize }
-            , encodeAndSaveStore newStore
+            ( { newModel | store = newStore, wordSize = wordSize }
+            , Cmd.batch
+                [ Client.getWords newStore.lang WordsReceived
+                , encodeAndSaveStore newStore
+                ]
             )
 
         ( SwitchWordSize Nothing, _ ) ->
@@ -375,12 +386,24 @@ update msg ({ store } as model) =
                     store |> Store.updateSettings (\s -> { s | wordSize = Nothing })
             in
             ( { model | store = newStore }
-              -- FIXME: get random new word size
-            , encodeAndSaveStore newStore
+            , Cmd.batch
+                [ -- FIXME: get random new word size
+                  getRandomWordSize
+                , encodeAndSaveStore newStore
+                ]
             )
 
         ( ToastyMsg subMsg, _ ) ->
             Toasty.update Notif.config ToastyMsg subMsg model
+
+        ( UpdateWordSize wordSize, _ ) ->
+            let
+                newModel =
+                    initialModel store
+            in
+            ( { newModel | wordSize = wordSize }
+            , Client.getWords store.lang WordsReceived
+            )
 
         ( WordsReceived (Ok rawWords), _ ) ->
             let
@@ -391,7 +414,7 @@ update msg ({ store } as model) =
                         |> List.filter (String.length >> (==) model.wordSize)
             in
             ( { model | words = words }
-            , getRandomWord words
+            , getRandomWord model.wordSize words
             )
 
         ( WordsReceived (Err _), _ ) ->
@@ -682,33 +705,33 @@ viewSettings { lang, settings } =
                 , onInput (Keyboard.layoutFromString >> SwitchLayout)
                 ]
         ]
+
+    -- Word size setting
     , div [ class "mb-3" ]
         [ label []
             [ I18n.SettingsWordSize |> I18n.htmlText lang
             ]
+        , [ ( Nothing, I18n.SettingsWordSizeRandom )
+          , ( Just 5, I18n.SettingsWordSizeInt { size = 5 } )
+          , ( Just 6, I18n.SettingsWordSizeInt { size = 6 } )
+          , ( Just 7, I18n.SettingsWordSizeInt { size = 7 } )
+          ]
+            |> List.map
+                (\( wordSize, i18n ) ->
+                    option
+                        [ selected <| wordSize == settings.wordSize
+                        , wordSize
+                            |> Maybe.map String.fromInt
+                            |> Maybe.withDefault ""
+                            |> value
+                        ]
+                        [ text (I18n.translate lang i18n) ]
+                )
+            |> select
+                [ class "form-select w-100 mt-1"
+                , onInput (String.toInt >> SwitchWordSize)
+                ]
         ]
-
-    -- Word size setting
-    , [ ( Nothing, I18n.SettingsWordSizeRandom )
-      , ( Just 5, I18n.SettingsWordSizeInt { size = 5 } )
-      , ( Just 6, I18n.SettingsWordSizeInt { size = 6 } )
-      , ( Just 7, I18n.SettingsWordSizeInt { size = 7 } )
-      ]
-        |> List.map
-            (\( wordSize, i18n ) ->
-                option
-                    [ selected <| wordSize == settings.wordSize
-                    , wordSize
-                        |> Maybe.map String.fromInt
-                        |> Maybe.withDefault ""
-                        |> value
-                    ]
-                    [ text (I18n.translate lang i18n) ]
-            )
-        |> select
-            [ class "form-select w-100 mt-1"
-            , onInput (String.toInt >> SwitchWordSize)
-            ]
     ]
 
 

@@ -28,7 +28,7 @@ decode : Decoder Settings
 decode =
     Decode.succeed Settings
         |> JDP.optional "layout" Keyboard.decodeLayout Keyboard.Auto
-        |> JDP.optional "wordSize" (Decode.maybe Decode.int) Nothing
+        |> JDP.optional "wordSize" (Decode.maybe Decode.int) (Just 5)
 
 
 encode : Settings -> Encode.Value

@@ -105,7 +105,7 @@ validateGuess lang words word input =
             , String.toList (normalize input)
             )
     in
-    if List.length inputChars /= String.length word then
+    if List.length inputChars < String.length word then
         I18n.NotEnoughLetters
             |> translate lang
             |> Err
