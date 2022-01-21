@@ -48,6 +48,7 @@ type alias Model =
     , modal : Maybe Modal
     , toasties : Toasty.Stack Notif
     , time : Posix
+    , wordSize : Int
     }
 
 
@@ -72,11 +73,6 @@ type Msg
     | SwitchLayout Keyboard.Layout
     | ToastyMsg (Toasty.Msg Notif)
     | WordsReceived (Result Http.Error String)
-
-
-numberOfLetters : Int
-numberOfLetters =
-    5
 
 
 maxAttempts : Int
@@ -131,6 +127,7 @@ initialModel store =
             Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
+    , wordSize = 6
     }
 
 
@@ -247,10 +244,10 @@ scrollToBottom id =
         |> Task.attempt (always NoOp)
 
 
-addChar : Char -> Game.UserInput -> Game.UserInput
-addChar char input =
+addChar : Int -> Char -> Game.UserInput -> Game.UserInput
+addChar wordSize char input =
     (input ++ String.fromChar char)
-        |> String.slice 0 numberOfLetters
+        |> String.slice 0 wordSize
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -271,7 +268,7 @@ update msg ({ store } as model) =
                 )
 
         ( KeyPressed char, Game.Ongoing word guesses input ) ->
-            ( { model | state = Game.Ongoing word guesses (addChar char input) }
+            ( { model | state = Game.Ongoing word guesses (addChar model.wordSize char input) }
             , scrollToBottom "board-container"
             )
 
@@ -369,7 +366,7 @@ update msg ({ store } as model) =
                     rawWords
                         |> String.lines
                         |> List.filter (not << String.isEmpty)
-                        |> List.filter (String.length >> (==) numberOfLetters)
+                        |> List.filter (String.length >> (==) model.wordSize)
             in
             ( { model | words = words }
             , getRandomWord words
@@ -385,8 +382,8 @@ charToText =
     Char.toUpper >> String.fromChar
 
 
-viewAttempt : Game.Guess -> Html Msg
-viewAttempt =
+viewAttempt : Int -> Game.Guess -> Html Msg
+viewAttempt wordSize =
     List.map
         (\letter ->
             case letter of
@@ -402,16 +399,16 @@ viewAttempt =
                 Game.Handled char ->
                     viewTile "btn-secondary" char
         )
-        >> viewBoardRow
+        >> viewBoardRow wordSize
 
 
-viewBoardRow : List (Html Msg) -> Html Msg
-viewBoardRow =
+viewBoardRow : Int -> List (Html Msg) -> Html Msg
+viewBoardRow wordSize =
     div
         [ class "BoardRow"
         , style "grid-template-columns"
             (interpolate "repeat({0}, 1fr)"
-                [ String.fromInt numberOfLetters ]
+                [ String.fromInt wordSize ]
             )
         ]
 
@@ -510,8 +507,8 @@ viewKeyState ( char, letter ) =
         ]
 
 
-viewBoard : Maybe Game.UserInput -> Game.Board -> Html Msg
-viewBoard input guesses =
+viewBoard : Int -> Maybe Game.UserInput -> Game.Board -> Html Msg
+viewBoard wordSize input guesses =
     let
         remaining =
             maxAttempts
@@ -521,21 +518,21 @@ viewBoard input guesses =
     div [ class "BoardContainer", id "board-container" ]
         [ [ guesses
                 |> List.reverse
-                |> List.map (viewAttempt >> Just)
-          , [ input |> Maybe.map viewInput ]
+                |> List.map (viewAttempt wordSize >> Just)
+          , [ input |> Maybe.map (viewInput wordSize) ]
           , List.range 0 remaining
                 |> List.map
                     (\_ ->
-                        List.repeat numberOfLetters '\u{00A0}'
+                        List.repeat wordSize '\u{00A0}'
                             |> String.fromList
-                            |> viewInput
+                            |> viewInput wordSize
                             |> Just
                     )
           ]
             |> List.concat
             |> List.filterMap identity
             |> div
-                [ class <| "Board Board-" ++ String.fromInt numberOfLetters
+                [ class <| "Board Board-" ++ String.fromInt wordSize
                 , style "grid-template-rows"
                     (interpolate "repeat({0}, 1fr)"
                         [ String.fromInt maxAttempts ]
@@ -551,18 +548,18 @@ viewTile classes char =
         [ text (charToText char) ]
 
 
-viewInput : Game.UserInput -> Html Msg
-viewInput input =
+viewInput : Int -> Game.UserInput -> Html Msg
+viewInput wordSize input =
     let
         chars =
             String.toList input
 
         spots =
-            chars ++ LE.initialize (numberOfLetters - List.length chars) (always '\u{00A0}')
+            chars ++ LE.initialize (wordSize - List.length chars) (always '\u{00A0}')
     in
     spots
         |> List.map (viewTile "btn-secondary")
-        |> viewBoardRow
+        |> viewBoardRow wordSize
 
 
 guessDescription : Lang -> Game.Guess -> List String
@@ -586,8 +583,8 @@ guessDescription lang =
         )
 
 
-viewHelp : Store -> List (Html Msg)
-viewHelp { lang } =
+viewHelp : Store -> Int -> List (Html Msg)
+viewHelp { lang } wordSize =
     let
         demo =
             [ Game.Correct 'm'
@@ -598,14 +595,14 @@ viewHelp { lang } =
             ]
     in
     [ I18n.HelpGamePitch
-        { nbLetters = numberOfLetters
+        { nbLetters = wordSize
         , lang = lang
         , maxGuesses = maxAttempts
         }
         |> I18n.paragraph lang
     , I18n.paragraph lang I18n.HelpKeyboard
     , div [ class "BoardRowExample mb-3" ]
-        [ viewAttempt demo ]
+        [ viewAttempt wordSize demo ]
     , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
@@ -774,7 +771,7 @@ layout ({ store, modal, toasties } as model) content =
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
-                viewModal store I18n.Help (viewHelp store)
+                viewModal store I18n.Help (viewHelp store model.wordSize)
 
             Just SettingsModal ->
                 viewModal store
@@ -928,7 +925,7 @@ viewError lang error =
 
 
 view : Model -> Html Msg
-view ({ store, state } as model) =
+view ({ wordSize, store, state } as model) =
     layout model
         (case state of
             Game.Idle ->
@@ -941,7 +938,7 @@ view ({ store, state } as model) =
                 ]
 
             Game.Won word guesses ->
-                [ viewBoard Nothing guesses
+                [ viewBoard wordSize Nothing guesses
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
@@ -951,13 +948,13 @@ view ({ store, state } as model) =
                     |> String.toList
                     |> List.map Game.Correct
                     |> (\a -> a :: guesses)
-                    |> viewBoard Nothing
+                    |> viewBoard wordSize Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
 
             Game.Ongoing _ guesses input ->
-                [ viewBoard (Just input) guesses
+                [ viewBoard wordSize (Just input) guesses
                 , viewKeyboard store guesses
                 ]
         )
