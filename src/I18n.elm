@@ -44,6 +44,7 @@ type Id
     | LoadError
     | NotEnoughLetters
     | PlayAgain
+    | Settings
     | StatsAverageGuesses
     | StatsButton
     | StatsGamesPlayed { lang : Lang }
@@ -153,6 +154,11 @@ getSet id =
             set []
                 "Play again"
                 "Rejouer"
+
+        Settings ->
+            set []
+                "Settings"
+                "Préférences"
 
         StatsAverageGuesses ->
             set []

@@ -12,6 +12,7 @@ type Name
     | Stats
     | Help
     | Close
+    | Settings
 
 
 icon : Name -> List (Attribute msg) -> Html msg
@@ -48,3 +49,6 @@ nameToString name =
 
         Close ->
             "close"
+
+        Settings ->
+            "settings"

@@ -16,7 +16,7 @@ import Game
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import I18n exposing (Lang(..), translate)
+import I18n exposing (Id(..), Lang(..), translate)
 import Icon
 import Json.Decode as Decode
 import Keyboard
@@ -51,6 +51,7 @@ type alias Model =
 
 type Modal
     = HelpModal
+    | SettingsModal
     | StatsModal
 
 
@@ -235,7 +236,7 @@ defocus domId =
 
 defocusMenuButtons : Cmd Msg
 defocusMenuButtons =
-    [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help" ]
+    [ "btn-lang-en", "btn-lang-fr", "btn-stats", "btn-help", "btn-settings" ]
         |> List.map defocus
         |> Cmd.batch
 
@@ -617,6 +618,14 @@ progressBar percent =
         ]
 
 
+viewSettings : Store -> List (Html Msg)
+viewSettings { lang } =
+    [ h2 []
+        [ I18n.Settings |> I18n.htmlText lang
+        ]
+    ]
+
+
 viewStats : Store -> List (Html Msg)
 viewStats { lang, logs } =
     case List.filter (.lang >> (==) lang) logs of
@@ -730,6 +739,11 @@ layout ({ store, modal, toasties } as model) content =
             Just HelpModal ->
                 viewModal store I18n.Help (viewHelp store)
 
+            Just SettingsModal ->
+                viewModal store
+                    I18n.Settings
+                    (viewSettings store)
+
             Just StatsModal ->
                 viewModal store
                     (I18n.StatsLang { lang = store.lang })
@@ -771,22 +785,32 @@ viewHeader { store, modal } =
             , button
                 [ type_ "button"
                 , id "btn-stats"
-                , class "HeaderButton btn btn-sm text-truncate"
+                , class "HeaderButton btn btn-sm d-flex align-items-center"
                 , btnClass (modal == Just StatsModal)
                 , onClick (OpenModal StatsModal)
                 ]
-                [ Icon.icon Icon.Stats [ class "me-1" ]
-                , I18n.htmlText store.lang I18n.StatsButton
+                [ Icon.icon Icon.Stats [ class "me-sm-1" ]
+                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.StatsButton ]
                 ]
             , button
                 [ type_ "button"
                 , id "btn-help"
-                , class "HeaderButton btn btn-sm text-truncate"
+                , class "HeaderButton btn btn-sm d-flex align-items-center"
                 , btnClass (modal == Just HelpModal)
                 , onClick (OpenModal HelpModal)
                 ]
-                [ Icon.icon Icon.Help [ class "me-1" ]
-                , I18n.htmlText store.lang I18n.Help
+                [ Icon.icon Icon.Help [ class "me-sm-1" ]
+                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.Help ]
+                ]
+            , button
+                [ type_ "button"
+                , id "btn-settings"
+                , class "HeaderButton btn btn-sm d-flex align-items-center"
+                , btnClass (modal == Just SettingsModal)
+                , onClick (OpenModal SettingsModal)
+                ]
+                [ Icon.icon Icon.Settings [ class "me-sm-1" ]
+                , span [ class "d-none d-sm-inline text-truncate" ] [ I18n.htmlText store.lang I18n.Settings ]
                 ]
             ]
         ]
