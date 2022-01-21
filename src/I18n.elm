@@ -29,6 +29,7 @@ type Id
     = AbsentFromDictionary { lang : Lang, word : String }
     | DecodeError
     | Definition
+    | ErrorCorruptedSession
     | ErrorDetail { error : String }
     | GameLoading
     | GameLost
@@ -76,6 +77,11 @@ getSet id =
             set []
                 "Definition"
                 "Définition"
+
+        ErrorCorruptedSession ->
+            set []
+                "Corrupted data, reinitialized"
+                "Données corrompues, réinitialisées"
 
         ErrorDetail { error } ->
             set [ error ]
@@ -144,8 +150,8 @@ getSet id =
 
         LoadError ->
             set []
-                "Unable to pick a word."
-                "Impossible de sélectionner un mot à trouver."
+                "Error loading dictionary"
+                "Impossible de charger le dictionnaire"
 
         NotEnoughLetters ->
             set []

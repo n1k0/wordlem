@@ -105,6 +105,8 @@ init flags =
                       }
                     , encodeAndSaveStore store
                     )
+                        |> Notif.add ToastyMsg
+                            (Notif.Warning (translate store.lang I18n.ErrorCorruptedSession))
     in
     ( model
     , Cmd.batch
@@ -127,7 +129,7 @@ initialModel store =
             Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
-    , wordSize = 6
+    , wordSize = 5
     }
 
 
@@ -374,7 +376,7 @@ update msg ({ store } as model) =
 
         ( WordsReceived (Err _), _ ) ->
             ( model, Cmd.none )
-                |> Notif.add ToastyMsg (Notif.Warning "Load error")
+                |> Notif.add ToastyMsg (Notif.Warning (translate store.lang I18n.LoadError))
 
 
 charToText : Char -> String
