@@ -67,6 +67,7 @@ type Msg
     | StoreChanged (Result Decode.Error Store)
     | Submit
     | SwitchLang Lang
+    | SwitchLayout Keyboard.Layout
     | ToastyMsg (Toasty.Msg Notif)
 
 
@@ -353,6 +354,15 @@ update msg ({ store } as model) =
                 ]
             )
 
+        ( SwitchLayout layout_, _ ) ->
+            let
+                newStore =
+                    store |> Store.updateSettings (\s -> { s | layout = layout_ })
+            in
+            ( { model | store = newStore }
+            , encodeAndSaveStore newStore
+            )
+
         ( ToastyMsg subMsg, _ ) ->
             Toasty.update Notif.config ToastyMsg subMsg model
 
@@ -433,9 +443,10 @@ endGameButtons lang word =
         ]
 
 
-viewKeyboard : Lang -> Game.Board -> Html Msg
-viewKeyboard lang guesses =
-    Keyboard.dispositions lang
+viewKeyboard : Store -> Game.Board -> Html Msg
+viewKeyboard { lang, settings } guesses =
+    settings.layout
+        |> Keyboard.disposition lang
         |> List.map
             (div [ class "KeyboardRow" ]
                 << List.map (Keyboard.keyState guesses >> viewKeyState)
@@ -619,10 +630,23 @@ progressBar percent =
 
 
 viewSettings : Store -> List (Html Msg)
-viewSettings { lang } =
-    [ h2 []
-        [ I18n.Settings |> I18n.htmlText lang
+viewSettings { lang, settings } =
+    [ label []
+        [ I18n.SettingsKeyboardLayout |> I18n.htmlText lang
         ]
+    , [ Keyboard.Auto, Keyboard.Azerty, Keyboard.Qwerty ]
+        |> List.map
+            (\l ->
+                option
+                    [ value (Keyboard.layoutToString l)
+                    , selected <| l == settings.layout
+                    ]
+                    [ l |> Keyboard.layoutToString |> String.toUpper |> text ]
+            )
+        |> select
+            [ class "form-select w-100 mt-1"
+            , onInput (Keyboard.layoutFromString >> SwitchLayout)
+            ]
     ]
 
 
@@ -902,7 +926,7 @@ view ({ store, state } as model) =
             Game.Won word guesses ->
                 [ viewBoard Nothing guesses
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang guesses
+                , viewKeyboard store guesses
                 ]
 
             Game.Lost word guesses ->
@@ -912,12 +936,12 @@ view ({ store, state } as model) =
                     |> (\a -> a :: guesses)
                     |> viewBoard Nothing
                 , endGameButtons store.lang word
-                , viewKeyboard store.lang guesses
+                , viewKeyboard store guesses
                 ]
 
             Game.Ongoing _ guesses input ->
                 [ viewBoard (Just input) guesses
-                , viewKeyboard store.lang guesses
+                , viewKeyboard store guesses
                 ]
         )
 

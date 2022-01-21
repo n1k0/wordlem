@@ -45,6 +45,7 @@ type Id
     | NotEnoughLetters
     | PlayAgain
     | Settings
+    | SettingsKeyboardLayout
     | StatsAverageGuesses
     | StatsButton
     | StatsGamesPlayed { lang : Lang }
@@ -159,6 +160,11 @@ getSet id =
             set []
                 "Settings"
                 "Préférences"
+
+        SettingsKeyboardLayout ->
+            set []
+                "Keyboard layout"
+                "Disposition du clavier"
 
         StatsAverageGuesses ->
             set []
