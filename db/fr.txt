@@ -23156,7 +23156,7 @@ isopet
 isopets
 isopode
 isotope
-ISPELL
+ispell
 issant
 issante
 issants
@@ -24276,7 +24276,7 @@ landais
 landau
 landaus
 lande
-Lander
+lander
 landes
 landier
 langage
@@ -26579,7 +26579,7 @@ martele
 martes
 martial
 martien
-Martini
+martini
 martre
 martres
 martyr
@@ -26938,7 +26938,7 @@ melas
 melasse
 melat
 melates
-Melba
+melba
 melee
 melees
 melena
@@ -27463,7 +27463,7 @@ minimes
 minimum
 minions
 minis
-Minitel
+minitel
 minium
 minoen
 minoens
@@ -28193,7 +28193,7 @@ mouvra
 mouvrai
 mouvras
 mouvrez
-Moviola
+moviola
 moxas
 moyee
 moyees
@@ -29066,7 +29066,7 @@ noctule
 nocuite
 nodule
 nodules
-Noels
+noels
 noeud
 noeuds
 noient
@@ -30031,7 +30031,7 @@ oringue
 orins
 oripeau
 orles
-Orlon
+orlon
 ormaie
 ormaies
 ormeau
@@ -31354,8 +31354,8 @@ pedale
 pedaler
 pedales
 pedalez
-Pedalo
-Pedalos
+pedalo
+pedalos
 pedant
 pedante
 pedants
@@ -36663,7 +36663,7 @@ rheteur
 rhetien
 rhinite
 rhizome
-Rhodia
+rhodia
 rhodie
 rhodiee
 rhodies
@@ -36672,7 +36672,7 @@ rhodium
 rhodoid
 rhombe
 rhombes
-Rhovyl
+rhovyl
 rhuma
 rhumai
 rhumais
@@ -36834,7 +36834,7 @@ riiez
 riions
 rikiki
 rillons
-Rilsan
+rilsan
 rimai
 rimais
 rimait
@@ -36861,8 +36861,8 @@ rimeuse
 rimez
 rimiez
 rimions
-Rimmel
-Rimmels
+rimmel
+rimmels
 rimons
 rinca
 rincage
@@ -36913,7 +36913,7 @@ ripez
 ripieno
 ripiez
 ripions
-Ripolin
+ripolin
 ripons
 riposta
 riposte
@@ -37211,8 +37211,8 @@ rondit
 rondo
 rondos
 ronds
-Roneo
-Roneos
+roneo
+roneos
 ronfla
 ronflai
 ronflas
@@ -38067,8 +38067,8 @@ sanas
 sanctus
 sandale
 sandjak
-Sandow
-Sandows
+sandow
+sandows
 sandre
 sandres
 sangla
@@ -38534,10 +38534,10 @@ score
 scores
 scorie
 scories
-Scotch
+scotch
 scotcha
 scotche
-Scotchs
+scotchs
 scotie
 scoties
 scoured
@@ -39260,7 +39260,7 @@ sixtes
 sizain
 sizains
 sizerin
-Skais
+skais
 skate
 skates
 skating
@@ -41284,8 +41284,8 @@ tcheque
 teckel
 teckels
 tecks
-Teflon
-Teflons
+teflon
+teflons
 teigne
 teignes
 teignez
@@ -41455,8 +41455,8 @@ tercets
 tercez
 terciez
 tercons
-Tergal
-Tergals
+tergal
+tergals
 terme
 termes
 termina
@@ -42717,7 +42717,7 @@ triple
 triplee
 tripler
 triples
-Triplex
+triplex
 triplez
 tripoli
 tripot
@@ -43733,7 +43733,7 @@ vecus
 vecusse
 vecut
 vecutes
-Vedas
+vedas
 vedette
 vedique
 vedisme
@@ -44065,8 +44065,8 @@ vesanie
 vesce
 vesces
 vesical
-Vespa
-Vespas
+vespa
+vespas
 vessa
 vessai
 vessais
@@ -44898,7 +44898,7 @@ wagage
 wagages
 wagon
 wagons
-Walkman
+walkman
 wallaby
 wallon
 wallons

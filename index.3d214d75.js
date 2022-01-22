@@ -3437,6 +3437,73 @@ type alias Process =
     var _Bitwise_shiftRightZfBy = F2(function(offset, a) {
         return a >>> offset;
     });
+    // CREATE
+    var _Regex_never = /.^/;
+    var _Regex_fromStringWith = F2(function(options, string) {
+        var flags = 'g';
+        if (options.multiline) flags += 'm';
+        if (options.caseInsensitive) flags += 'i';
+        try {
+            return $elm$core$Maybe$Just(new RegExp(string, flags));
+        } catch (error) {
+            return $elm$core$Maybe$Nothing;
+        }
+    });
+    // USE
+    var _Regex_contains = F2(function(re, string) {
+        return string.match(re) !== null;
+    });
+    var _Regex_findAtMost = F3(function(n, re, str) {
+        var out = [];
+        var number = 0;
+        var string = str;
+        var lastIndex = re.lastIndex;
+        var prevLastIndex = -1;
+        var result;
+        while((number++) < n && (result = re.exec(string))){
+            if (prevLastIndex == re.lastIndex) break;
+            var i = result.length - 1;
+            var subs = new Array(i);
+            while(i > 0){
+                var submatch = result[i];
+                subs[--i] = submatch ? $elm$core$Maybe$Just(submatch) : $elm$core$Maybe$Nothing;
+            }
+            out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+            prevLastIndex = re.lastIndex;
+        }
+        re.lastIndex = lastIndex;
+        return _List_fromArray(out);
+    });
+    var _Regex_replaceAtMost = F4(function(n, re, replacer, string) {
+        var count = 0;
+        function jsReplacer(match) {
+            if ((count++) >= n) return match;
+            var i = arguments.length - 3;
+            var submatches = new Array(i);
+            while(i > 0){
+                var submatch = arguments[i];
+                submatches[--i] = submatch ? $elm$core$Maybe$Just(submatch) : $elm$core$Maybe$Nothing;
+            }
+            return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+        }
+        return string.replace(re, jsReplacer);
+    });
+    var _Regex_splitAtMost = F3(function(n, re, str) {
+        var string = str;
+        var out = [];
+        var start = re.lastIndex;
+        var restoreLastIndex = re.lastIndex;
+        while(n--){
+            var result = re.exec(string);
+            if (!result) break;
+            out.push(string.slice(start, result.index));
+            start = re.lastIndex;
+        }
+        out.push(string.slice(start));
+        re.lastIndex = restoreLastIndex;
+        return _List_fromArray(out);
+    });
+    var _Regex_infinity = Infinity;
     function _Time_now(millisToPosix) {
         return _Scheduler_binding(function(callback) {
             callback(_Scheduler_succeed(millisToPosix(Date.now())));
@@ -3601,73 +3668,6 @@ type alias Process =
             }))));
         });
     }
-    // CREATE
-    var _Regex_never = /.^/;
-    var _Regex_fromStringWith = F2(function(options, string) {
-        var flags = 'g';
-        if (options.multiline) flags += 'm';
-        if (options.caseInsensitive) flags += 'i';
-        try {
-            return $elm$core$Maybe$Just(new RegExp(string, flags));
-        } catch (error) {
-            return $elm$core$Maybe$Nothing;
-        }
-    });
-    // USE
-    var _Regex_contains = F2(function(re, string) {
-        return string.match(re) !== null;
-    });
-    var _Regex_findAtMost = F3(function(n, re, str) {
-        var out = [];
-        var number = 0;
-        var string = str;
-        var lastIndex = re.lastIndex;
-        var prevLastIndex = -1;
-        var result;
-        while((number++) < n && (result = re.exec(string))){
-            if (prevLastIndex == re.lastIndex) break;
-            var i = result.length - 1;
-            var subs = new Array(i);
-            while(i > 0){
-                var submatch = result[i];
-                subs[--i] = submatch ? $elm$core$Maybe$Just(submatch) : $elm$core$Maybe$Nothing;
-            }
-            out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
-            prevLastIndex = re.lastIndex;
-        }
-        re.lastIndex = lastIndex;
-        return _List_fromArray(out);
-    });
-    var _Regex_replaceAtMost = F4(function(n, re, replacer, string) {
-        var count = 0;
-        function jsReplacer(match) {
-            if ((count++) >= n) return match;
-            var i = arguments.length - 3;
-            var submatches = new Array(i);
-            while(i > 0){
-                var submatch = arguments[i];
-                submatches[--i] = submatch ? $elm$core$Maybe$Just(submatch) : $elm$core$Maybe$Nothing;
-            }
-            return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
-        }
-        return string.replace(re, jsReplacer);
-    });
-    var _Regex_splitAtMost = F3(function(n, re, str) {
-        var string = str;
-        var out = [];
-        var start = re.lastIndex;
-        var restoreLastIndex = re.lastIndex;
-        while(n--){
-            var result = re.exec(string);
-            if (!result) break;
-            out.push(string.slice(start, result.index));
-            start = re.lastIndex;
-        }
-        out.push(string.slice(start));
-        re.lastIndex = restoreLastIndex;
-        return _List_fromArray(out);
-    });
-    var _Regex_infinity = Infinity;
     // VIRTUAL-DOM WIDGETS
     var _Markdown_toHtml = F3(function(options, factList, rawMarkdown) {
         return _VirtualDom_custom(factList, {
@@ -5026,165 +5026,7 @@ type alias Process =
             a: a
         };
     };
-    var $author$project$Main$ToastyMsg = function(a) {
-        return {
-            $: 'ToastyMsg',
-            a: a
-        };
-    };
-    var $author$project$Notif$Warning = function(a) {
-        return {
-            $: 'Warning',
-            a: a
-        };
-    };
-    var $pablen$toasty$Toasty$Temporary = {
-        $: 'Temporary'
-    };
-    var $pablen$toasty$Toasty$Entered = {
-        $: 'Entered'
-    };
-    var $pablen$toasty$Toasty$Stack = F2(function(a, b) {
-        return {
-            $: 'Stack',
-            a: a,
-            b: b
-        };
-    });
-    var $pablen$toasty$Toasty$TransitionOut = function(a) {
-        return {
-            $: 'TransitionOut',
-            a: a
-        };
-    };
     var $elm$core$Platform$Cmd$batch = _Platform_batch;
-    var $elm$random$Random$Generator = function(a) {
-        return {
-            $: 'Generator',
-            a: a
-        };
-    };
-    var $elm$core$Bitwise$and = _Bitwise_and;
-    var $elm$core$Basics$negate = function(n) {
-        return -n;
-    };
-    var $elm$random$Random$Seed = F2(function(a, b) {
-        return {
-            $: 'Seed',
-            a: a,
-            b: b
-        };
-    });
-    var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-    var $elm$random$Random$next = function(_v0) {
-        var state0 = _v0.a;
-        var incr = _v0.b;
-        return A2($elm$random$Random$Seed, state0 * 1664525 + incr >>> 0, incr);
-    };
-    var $elm$core$Bitwise$xor = _Bitwise_xor;
-    var $elm$random$Random$peel = function(_v0) {
-        var state = _v0.a;
-        var word = (state ^ state >>> (state >>> 28) + 4) * 277803737;
-        return (word >>> 22 ^ word) >>> 0;
-    };
-    var $elm$random$Random$int = F2(function(a, b) {
-        return $elm$random$Random$Generator(function(seed0) {
-            var _v0 = _Utils_cmp(a, b) < 0 ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
-            var lo = _v0.a;
-            var hi = _v0.b;
-            var range = hi - lo + 1;
-            if (!(range - 1 & range)) return _Utils_Tuple2(((range - 1 & $elm$random$Random$peel(seed0)) >>> 0) + lo, $elm$random$Random$next(seed0));
-            else {
-                var threshhold = (-range >>> 0) % range >>> 0;
-                var accountForBias = function(seed) {
-                    accountForBias: while(true){
-                        var x = $elm$random$Random$peel(seed);
-                        var seedN = $elm$random$Random$next(seed);
-                        if (_Utils_cmp(x, threshhold) < 0) {
-                            var $temp$seed = seedN;
-                            seed = $temp$seed;
-                            continue accountForBias;
-                        } else return _Utils_Tuple2(x % range + lo, seedN);
-                    }
-                };
-                return accountForBias(seed0);
-            }
-        });
-    });
-    var $elm$random$Random$maxInt = 2147483647;
-    var $elm$random$Random$minInt = -2147483648;
-    var $elm$random$Random$step = F2(function(_v0, seed) {
-        var generator = _v0.a;
-        return generator(seed);
-    });
-    var $pablen$toasty$Toasty$getNewId = function(seed) {
-        return A2($elm$random$Random$step, A2($elm$random$Random$int, $elm$random$Random$minInt, $elm$random$Random$maxInt), seed);
-    };
-    var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-    var $elm$core$Process$sleep = _Process_sleep;
-    var $pablen$toasty$Toasty$addToast_ = F5(function(removeBehaviour, _v0, tagger, toast, _v1) {
-        var cfg = _v0.a;
-        var model = _v1.a;
-        var cmd = _v1.b;
-        var _v2 = model.toasties;
-        var toasts = _v2.a;
-        var seed = _v2.b;
-        var _v3 = $pablen$toasty$Toasty$getNewId(seed);
-        var newId = _v3.a;
-        var newSeed = _v3.b;
-        var task = function() {
-            if (removeBehaviour.$ === 'Temporary') return A2($elm$core$Task$perform, function(_v5) {
-                return tagger($pablen$toasty$Toasty$TransitionOut(newId));
-            }, $elm$core$Process$sleep(cfg.delay));
-            else return $elm$core$Platform$Cmd$none;
-        }();
-        return _Utils_Tuple2(_Utils_update(model, {
-            toasties: A2($pablen$toasty$Toasty$Stack, _Utils_ap(toasts, _List_fromArray([
-                _Utils_Tuple3(newId, $pablen$toasty$Toasty$Entered, toast)
-            ])), newSeed)
-        }), $elm$core$Platform$Cmd$batch(_List_fromArray([
-            cmd,
-            task
-        ])));
-    });
-    var $pablen$toasty$Toasty$addToast = $pablen$toasty$Toasty$addToast_($pablen$toasty$Toasty$Temporary);
-    var $elm$json$Json$Encode$string = _Json_wrap;
-    var $elm$html$Html$Attributes$stringProperty = F2(function(key, string) {
-        return A2(_VirtualDom_property, key, $elm$json$Json$Encode$string(string));
-    });
-    var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-    var $pablen$toasty$Toasty$Config = function(a) {
-        return {
-            $: 'Config',
-            a: a
-        };
-    };
-    var $pablen$toasty$Toasty$config = $pablen$toasty$Toasty$Config({
-        containerAttrs: _List_Nil,
-        delay: 5000,
-        itemAttrs: _List_Nil,
-        transitionInAttrs: _List_Nil,
-        transitionOutAttrs: _List_Nil,
-        transitionOutDuration: 0
-    });
-    var $pablen$toasty$Toasty$containerAttrs = F2(function(attrs, _v0) {
-        var cfg = _v0.a;
-        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
-            containerAttrs: attrs
-        }));
-    });
-    var $pablen$toasty$Toasty$delay = F2(function(time, _v0) {
-        var cfg = _v0.a;
-        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
-            delay: time
-        }));
-    });
-    var $author$project$Notif$config = A2($pablen$toasty$Toasty$containerAttrs, _List_fromArray([
-        $elm$html$Html$Attributes$class('Notifs')
-    ]), A2($pablen$toasty$Toasty$delay, 2500, $pablen$toasty$Toasty$config));
-    var $author$project$Notif$add = function(msg) {
-        return A2($pablen$toasty$Toasty$addToast, $author$project$Notif$config, msg);
-    };
     var $author$project$Keyboard$Auto = {
         $: 'Auto'
     };
@@ -5203,6 +5045,7 @@ type alias Process =
     var $elm$core$Basics$composeR = F3(function(f, g, x) {
         return g(f(x));
     });
+    var $elm$json$Json$Encode$string = _Json_wrap;
     var $author$project$Main$saveStore = _Platform_outgoingPort('saveStore', $elm$json$Json$Encode$string);
     var $elm$json$Json$Encode$bool = _Json_wrap;
     var $elm$json$Json$Encode$int = _Json_wrap;
@@ -5390,6 +5233,26 @@ type alias Process =
     var $author$project$Game$Idle = {
         $: 'Idle'
     };
+    var $pablen$toasty$Toasty$Stack = F2(function(a, b) {
+        return {
+            $: 'Stack',
+            a: a,
+            b: b
+        };
+    });
+    var $elm$random$Random$Seed = F2(function(a, b) {
+        return {
+            $: 'Seed',
+            a: a,
+            b: b
+        };
+    });
+    var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+    var $elm$random$Random$next = function(_v0) {
+        var state0 = _v0.a;
+        var incr = _v0.b;
+        return A2($elm$random$Random$Seed, state0 * 1664525 + incr >>> 0, incr);
+    };
     var $elm$random$Random$initialSeed = function(x) {
         var _v0 = $elm$random$Random$next(A2($elm$random$Random$Seed, 0, 1013904223));
         var state1 = _v0.a;
@@ -5409,6 +5272,389 @@ type alias Process =
             words: _List_Nil
         };
     };
+    var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+    var $author$project$Main$ToastyMsg = function(a) {
+        return {
+            $: 'ToastyMsg',
+            a: a
+        };
+    };
+    var $author$project$Notif$Warning = function(a) {
+        return {
+            $: 'Warning',
+            a: a
+        };
+    };
+    var $pablen$toasty$Toasty$Temporary = {
+        $: 'Temporary'
+    };
+    var $pablen$toasty$Toasty$Entered = {
+        $: 'Entered'
+    };
+    var $pablen$toasty$Toasty$TransitionOut = function(a) {
+        return {
+            $: 'TransitionOut',
+            a: a
+        };
+    };
+    var $elm$random$Random$Generator = function(a) {
+        return {
+            $: 'Generator',
+            a: a
+        };
+    };
+    var $elm$core$Bitwise$and = _Bitwise_and;
+    var $elm$core$Basics$negate = function(n) {
+        return -n;
+    };
+    var $elm$core$Bitwise$xor = _Bitwise_xor;
+    var $elm$random$Random$peel = function(_v0) {
+        var state = _v0.a;
+        var word = (state ^ state >>> (state >>> 28) + 4) * 277803737;
+        return (word >>> 22 ^ word) >>> 0;
+    };
+    var $elm$random$Random$int = F2(function(a, b) {
+        return $elm$random$Random$Generator(function(seed0) {
+            var _v0 = _Utils_cmp(a, b) < 0 ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+            var lo = _v0.a;
+            var hi = _v0.b;
+            var range = hi - lo + 1;
+            if (!(range - 1 & range)) return _Utils_Tuple2(((range - 1 & $elm$random$Random$peel(seed0)) >>> 0) + lo, $elm$random$Random$next(seed0));
+            else {
+                var threshhold = (-range >>> 0) % range >>> 0;
+                var accountForBias = function(seed) {
+                    accountForBias: while(true){
+                        var x = $elm$random$Random$peel(seed);
+                        var seedN = $elm$random$Random$next(seed);
+                        if (_Utils_cmp(x, threshhold) < 0) {
+                            var $temp$seed = seedN;
+                            seed = $temp$seed;
+                            continue accountForBias;
+                        } else return _Utils_Tuple2(x % range + lo, seedN);
+                    }
+                };
+                return accountForBias(seed0);
+            }
+        });
+    });
+    var $elm$random$Random$maxInt = 2147483647;
+    var $elm$random$Random$minInt = -2147483648;
+    var $elm$random$Random$step = F2(function(_v0, seed) {
+        var generator = _v0.a;
+        return generator(seed);
+    });
+    var $pablen$toasty$Toasty$getNewId = function(seed) {
+        return A2($elm$random$Random$step, A2($elm$random$Random$int, $elm$random$Random$minInt, $elm$random$Random$maxInt), seed);
+    };
+    var $elm$core$Process$sleep = _Process_sleep;
+    var $pablen$toasty$Toasty$addToast_ = F5(function(removeBehaviour, _v0, tagger, toast, _v1) {
+        var cfg = _v0.a;
+        var model = _v1.a;
+        var cmd = _v1.b;
+        var _v2 = model.toasties;
+        var toasts = _v2.a;
+        var seed = _v2.b;
+        var _v3 = $pablen$toasty$Toasty$getNewId(seed);
+        var newId = _v3.a;
+        var newSeed = _v3.b;
+        var task = function() {
+            if (removeBehaviour.$ === 'Temporary') return A2($elm$core$Task$perform, function(_v5) {
+                return tagger($pablen$toasty$Toasty$TransitionOut(newId));
+            }, $elm$core$Process$sleep(cfg.delay));
+            else return $elm$core$Platform$Cmd$none;
+        }();
+        return _Utils_Tuple2(_Utils_update(model, {
+            toasties: A2($pablen$toasty$Toasty$Stack, _Utils_ap(toasts, _List_fromArray([
+                _Utils_Tuple3(newId, $pablen$toasty$Toasty$Entered, toast)
+            ])), newSeed)
+        }), $elm$core$Platform$Cmd$batch(_List_fromArray([
+            cmd,
+            task
+        ])));
+    });
+    var $pablen$toasty$Toasty$addToast = $pablen$toasty$Toasty$addToast_($pablen$toasty$Toasty$Temporary);
+    var $elm$html$Html$Attributes$stringProperty = F2(function(key, string) {
+        return A2(_VirtualDom_property, key, $elm$json$Json$Encode$string(string));
+    });
+    var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+    var $pablen$toasty$Toasty$Config = function(a) {
+        return {
+            $: 'Config',
+            a: a
+        };
+    };
+    var $pablen$toasty$Toasty$config = $pablen$toasty$Toasty$Config({
+        containerAttrs: _List_Nil,
+        delay: 5000,
+        itemAttrs: _List_Nil,
+        transitionInAttrs: _List_Nil,
+        transitionOutAttrs: _List_Nil,
+        transitionOutDuration: 0
+    });
+    var $pablen$toasty$Toasty$containerAttrs = F2(function(attrs, _v0) {
+        var cfg = _v0.a;
+        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
+            containerAttrs: attrs
+        }));
+    });
+    var $pablen$toasty$Toasty$delay = F2(function(time, _v0) {
+        var cfg = _v0.a;
+        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
+            delay: time
+        }));
+    });
+    var $author$project$Notif$config = A2($pablen$toasty$Toasty$containerAttrs, _List_fromArray([
+        $elm$html$Html$Attributes$class('Notifs')
+    ]), A2($pablen$toasty$Toasty$delay, 2500, $pablen$toasty$Toasty$config));
+    var $author$project$Notif$add = function(msg) {
+        return A2($pablen$toasty$Toasty$addToast, $author$project$Notif$config, msg);
+    };
+    var $author$project$I18n$Set = F2(function(english, french) {
+        return {
+            english: english,
+            french: french
+        };
+    });
+    var $elm$core$Maybe$andThen = F2(function(callback, maybeValue) {
+        if (maybeValue.$ === 'Just') {
+            var value = maybeValue.a;
+            return callback(value);
+        } else return $elm$core$Maybe$Nothing;
+    });
+    var $elm$core$Basics$composeL = F3(function(g, f, x) {
+        return g(f(x));
+    });
+    var $elm$core$String$dropRight = F2(function(n, string) {
+        return n < 1 ? string : A3($elm$core$String$slice, 0, -n, string);
+    });
+    var $elm$core$Array$bitMask = 4294967295 >>> 32 - $elm$core$Array$shiftStep;
+    var $elm$core$Basics$ge = _Utils_ge;
+    var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+    var $elm$core$Array$getHelp = F3(function(shift, index, tree) {
+        getHelp: while(true){
+            var pos = $elm$core$Array$bitMask & index >>> shift;
+            var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+            if (_v0.$ === 'SubTree') {
+                var subTree = _v0.a;
+                var $temp$shift = shift - $elm$core$Array$shiftStep, $temp$index = index, $temp$tree = subTree;
+                shift = $temp$shift;
+                index = $temp$index;
+                tree = $temp$tree;
+                continue getHelp;
+            } else {
+                var values = _v0.a;
+                return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+            }
+        }
+    });
+    var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+    var $elm$core$Array$tailIndex = function(len) {
+        return len >>> 5 << 5;
+    };
+    var $elm$core$Array$get = F2(function(index, _v0) {
+        var len = _v0.a;
+        var startShift = _v0.b;
+        var tree = _v0.c;
+        var tail = _v0.d;
+        return index < 0 || _Utils_cmp(index, len) > -1 ? $elm$core$Maybe$Nothing : _Utils_cmp(index, $elm$core$Array$tailIndex(len)) > -1 ? $elm$core$Maybe$Just(A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(A3($elm$core$Array$getHelp, startShift, index, tree));
+    });
+    var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(function(replacements, _v0) {
+        var match = _v0.match;
+        var ordinalString = A2($elm$core$Basics$composeL, $elm$core$String$dropLeft(1), $elm$core$String$dropRight(1))(match);
+        return A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$andThen, function(value) {
+            return A2($elm$core$Array$get, value, replacements);
+        }, $elm$core$String$toInt(ordinalString)));
+    });
+    var $elm$core$Array$fromListHelp = F3(function(list, nodeList, nodeListSize) {
+        fromListHelp: while(true){
+            var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+            var jsArray = _v0.a;
+            var remainingItems = _v0.b;
+            if (_Utils_cmp($elm$core$Elm$JsArray$length(jsArray), $elm$core$Array$branchFactor) < 0) return A2($elm$core$Array$builderToArray, true, {
+                nodeList: nodeList,
+                nodeListSize: nodeListSize,
+                tail: jsArray
+            });
+            else {
+                var $temp$list = remainingItems, $temp$nodeList = A2($elm$core$List$cons, $elm$core$Array$Leaf(jsArray), nodeList), $temp$nodeListSize = nodeListSize + 1;
+                list = $temp$list;
+                nodeList = $temp$nodeList;
+                nodeListSize = $temp$nodeListSize;
+                continue fromListHelp;
+            }
+        }
+    });
+    var $elm$core$Array$fromList = function(list) {
+        if (!list.b) return $elm$core$Array$empty;
+        else return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+    };
+    var $elm$regex$Regex$Match = F4(function(match, index, number, submatches) {
+        return {
+            index: index,
+            match: match,
+            number: number,
+            submatches: submatches
+        };
+    });
+    var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+    var $elm$regex$Regex$fromString = function(string) {
+        return A2($elm$regex$Regex$fromStringWith, {
+            caseInsensitive: false,
+            multiline: false
+        }, string);
+    };
+    var $elm$regex$Regex$never = _Regex_never;
+    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2($elm$core$Maybe$withDefault, $elm$regex$Regex$never, $elm$regex$Regex$fromString('\\{\\d+\\}'));
+    var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(function(string, args) {
+        var asArray = $elm$core$Array$fromList(args);
+        return A3($elm$regex$Regex$replace, $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex, $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray), string);
+    });
+    var $author$project$I18n$set = F3(function(params, english, french) {
+        return A2($author$project$I18n$Set, A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, english, params), A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, french, params));
+    });
+    var $elm$core$String$toUpper = _String_toUpper;
+    var $author$project$I18n$getSet = function(id) {
+        switch(id.$){
+            case 'AbsentFromDictionary':
+                var lang = id.a.lang;
+                var word = id.a.word;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$toUpper(word)
+                ]), 'Not in {0} dictionary: {1}', 'Absent du dictionnaire {0}\u00A0: {1}');
+            case 'DecodeError':
+                return A3($author$project$I18n$set, _List_Nil, 'Unable to restore previously saved data.', 'Impossible de restaurer les données précedemment sauvegardées.');
+            case 'Definition':
+                return A3($author$project$I18n$set, _List_Nil, 'Definition', 'Définition');
+            case 'ErrorCorruptedSession':
+                return A3($author$project$I18n$set, _List_Nil, 'Corrupted data, reinitialized', 'Données corrompues, réinitialisées');
+            case 'ErrorDetail':
+                var error = id.a.error;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    error
+                ]), 'Erreur: {0}', 'Erreur\u00A0: {0}');
+            case 'GameLoading':
+                return A3($author$project$I18n$set, _List_Nil, 'Loading game…', 'Chargement du jeu…');
+            case 'GameLost':
+                return A3($author$project$I18n$set, _List_Nil, 'Ok that was hard.', 'Pas facile, hein\u00A0?');
+            case 'GameWin':
+                return A3($author$project$I18n$set, _List_Nil, 'Well done!', 'Bien joué\u00A0!');
+            case 'Help':
+                return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
+            case 'HelpGamePitch':
+                var nbLetters = id.a.nbLetters;
+                var lang = id.a.lang;
+                var maxGuesses = id.a.maxGuesses;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $elm$core$String$fromInt(nbLetters),
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$fromInt(maxGuesses)
+                ]), 'Guess a {0} letters {1} word in {2} guesses or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.');
+            case 'HelpInThisExample':
+                return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
+            case 'HelpInspiredBy':
+                var wordleUrl = id.a.wordleUrl;
+                var githubUrl = id.a.githubUrl;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    wordleUrl,
+                    githubUrl
+                ]), 'Inspired by [Wordle]({0}) - [Source code]({1}).', 'Inspiré de [Wordle]({0}) - [Code source]({1}).');
+            case 'HelpKeyboard':
+                return A3($author$project$I18n$set, _List_Nil, 'Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.');
+            case 'HelpKeyboardLetter':
+                return A3($author$project$I18n$set, _List_Nil, 'The keyboard at the bottom highlight letters which have been played already.', 'Le clavier en bas de page met en relief les lettres qui ont déjà été joué.');
+            case 'HelpLetterCorrectlyPlaced':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is at the correct spot', '{0} est à la bonne position');
+            case 'HelpLetterMisplaced':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is misplaced', '{0} est mal positionnée');
+            case 'HelpLetterUnused':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is unused', '{0} n\'est pas utilisée');
+            case 'LoadError':
+                return A3($author$project$I18n$set, _List_Nil, 'Error loading dictionary', 'Impossible de charger le dictionnaire');
+            case 'NewGameLang':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Now playing in {0}', 'On joue en {0}');
+            case 'NotEnoughLetters':
+                return A3($author$project$I18n$set, _List_Nil, 'Not enough letters', 'Mot trop court');
+            case 'PlayAgain':
+                return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
+            case 'Settings':
+                return A3($author$project$I18n$set, _List_Nil, 'Settings', 'Préférences');
+            case 'SettingsKeyboardLayout':
+                return A3($author$project$I18n$set, _List_Nil, 'Keyboard layout', 'Disposition du clavier');
+            case 'SettingsWordSize':
+                return A3($author$project$I18n$set, _List_Nil, 'Word length', 'Longueur de mot');
+            case 'SettingsWordSizeRandom':
+                return A3($author$project$I18n$set, _List_Nil, 'Random', 'Aléatoire');
+            case 'SettingsWordSizeInt':
+                var size = id.a.size;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $elm$core$String$fromInt(size)
+                ]), '{0} letters', '{0} lettres');
+            case 'StatsAverageGuesses':
+                return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
+            case 'StatsButton':
+                return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
+            case 'StatsGamesPlayed':
+                return A3($author$project$I18n$set, _List_Nil, 'games played', 'parties jouées');
+            case 'StatsGuessDistribution':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Guess distribution ({0})', 'Distribution des scores ({0})');
+            case 'StatsGuessEvolution':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Guess evolution ({0})', 'Évolution des scores ({0})');
+            case 'StatsGuessEvolutionHelp':
+                var lang = id.a.lang;
+                var length = id.a.length;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$fromInt(length)
+                ]), 'Chart based on latest {1} played games in {0}. A 0 bar means lost game.', 'Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue.');
+            case 'StatsLang':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Statistics ({0})', 'Statistiques ({0})');
+            case 'StatsMissingData':
+                return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
+            case 'StatsLangDataMissing':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'You haven\'t played in {0} yet, so I can\'t render any stats.', 'Vous n\'avez pas encore joué en {0}, je ne peux pas afficher de statistiques.');
+            default:
+                return A3($author$project$I18n$set, _List_Nil, 'win rate', 'parties gagnées');
+        }
+    };
+    var $author$project$I18n$translate = F2(function(lang, id) {
+        if (lang.$ === 'English') return (function($) {
+            return $.english;
+        })($author$project$I18n$getSet(id));
+        else return (function($) {
+            return $.french;
+        })($author$project$I18n$getSet(id));
+    });
+    var $author$project$Main$notifyWarning = F2(function(i18nId, _v0) {
+        var model = _v0.a;
+        var cmds = _v0.b;
+        return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(A2($author$project$I18n$translate, model.store.lang, i18nId)), _Utils_Tuple2(model, cmds));
+    });
     var $author$project$I18n$parseLang = function(string) {
         return A2($elm$core$String$startsWith, 'fr', string) ? $author$project$I18n$French : $author$project$I18n$English;
     };
@@ -6079,242 +6325,6 @@ type alias Process =
         if (_v1.$ === 'Just') return A2($author$project$Client$getWords, lang, $author$project$Main$WordsReceived);
         else return $author$project$Main$getRandomWordSize;
     };
-    var $author$project$I18n$Set = F2(function(english, french) {
-        return {
-            english: english,
-            french: french
-        };
-    });
-    var $elm$core$Maybe$andThen = F2(function(callback, maybeValue) {
-        if (maybeValue.$ === 'Just') {
-            var value = maybeValue.a;
-            return callback(value);
-        } else return $elm$core$Maybe$Nothing;
-    });
-    var $elm$core$Basics$composeL = F3(function(g, f, x) {
-        return g(f(x));
-    });
-    var $elm$core$String$dropRight = F2(function(n, string) {
-        return n < 1 ? string : A3($elm$core$String$slice, 0, -n, string);
-    });
-    var $elm$core$Array$bitMask = 4294967295 >>> 32 - $elm$core$Array$shiftStep;
-    var $elm$core$Basics$ge = _Utils_ge;
-    var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-    var $elm$core$Array$getHelp = F3(function(shift, index, tree) {
-        getHelp: while(true){
-            var pos = $elm$core$Array$bitMask & index >>> shift;
-            var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-            if (_v0.$ === 'SubTree') {
-                var subTree = _v0.a;
-                var $temp$shift = shift - $elm$core$Array$shiftStep, $temp$index = index, $temp$tree = subTree;
-                shift = $temp$shift;
-                index = $temp$index;
-                tree = $temp$tree;
-                continue getHelp;
-            } else {
-                var values = _v0.a;
-                return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-            }
-        }
-    });
-    var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-    var $elm$core$Array$tailIndex = function(len) {
-        return len >>> 5 << 5;
-    };
-    var $elm$core$Array$get = F2(function(index, _v0) {
-        var len = _v0.a;
-        var startShift = _v0.b;
-        var tree = _v0.c;
-        var tail = _v0.d;
-        return index < 0 || _Utils_cmp(index, len) > -1 ? $elm$core$Maybe$Nothing : _Utils_cmp(index, $elm$core$Array$tailIndex(len)) > -1 ? $elm$core$Maybe$Just(A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(A3($elm$core$Array$getHelp, startShift, index, tree));
-    });
-    var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(function(replacements, _v0) {
-        var match = _v0.match;
-        var ordinalString = A2($elm$core$Basics$composeL, $elm$core$String$dropLeft(1), $elm$core$String$dropRight(1))(match);
-        return A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$andThen, function(value) {
-            return A2($elm$core$Array$get, value, replacements);
-        }, $elm$core$String$toInt(ordinalString)));
-    });
-    var $elm$core$Array$fromListHelp = F3(function(list, nodeList, nodeListSize) {
-        fromListHelp: while(true){
-            var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
-            var jsArray = _v0.a;
-            var remainingItems = _v0.b;
-            if (_Utils_cmp($elm$core$Elm$JsArray$length(jsArray), $elm$core$Array$branchFactor) < 0) return A2($elm$core$Array$builderToArray, true, {
-                nodeList: nodeList,
-                nodeListSize: nodeListSize,
-                tail: jsArray
-            });
-            else {
-                var $temp$list = remainingItems, $temp$nodeList = A2($elm$core$List$cons, $elm$core$Array$Leaf(jsArray), nodeList), $temp$nodeListSize = nodeListSize + 1;
-                list = $temp$list;
-                nodeList = $temp$nodeList;
-                nodeListSize = $temp$nodeListSize;
-                continue fromListHelp;
-            }
-        }
-    });
-    var $elm$core$Array$fromList = function(list) {
-        if (!list.b) return $elm$core$Array$empty;
-        else return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
-    };
-    var $elm$regex$Regex$Match = F4(function(match, index, number, submatches) {
-        return {
-            index: index,
-            match: match,
-            number: number,
-            submatches: submatches
-        };
-    });
-    var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-    var $elm$regex$Regex$fromString = function(string) {
-        return A2($elm$regex$Regex$fromStringWith, {
-            caseInsensitive: false,
-            multiline: false
-        }, string);
-    };
-    var $elm$regex$Regex$never = _Regex_never;
-    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2($elm$core$Maybe$withDefault, $elm$regex$Regex$never, $elm$regex$Regex$fromString('\\{\\d+\\}'));
-    var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(function(string, args) {
-        var asArray = $elm$core$Array$fromList(args);
-        return A3($elm$regex$Regex$replace, $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex, $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray), string);
-    });
-    var $author$project$I18n$set = F3(function(params, english, french) {
-        return A2($author$project$I18n$Set, A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, english, params), A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, french, params));
-    });
-    var $elm$core$String$toUpper = _String_toUpper;
-    var $author$project$I18n$getSet = function(id) {
-        switch(id.$){
-            case 'AbsentFromDictionary':
-                var lang = id.a.lang;
-                var word = id.a.word;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$toUpper(word)
-                ]), 'Not in {0} dictionary: {1}', 'Absent du dictionnaire {0}\u00A0: {1}');
-            case 'DecodeError':
-                return A3($author$project$I18n$set, _List_Nil, 'Unable to restore previously saved data.', 'Impossible de restaurer les données précedemment sauvegardées.');
-            case 'Definition':
-                return A3($author$project$I18n$set, _List_Nil, 'Definition', 'Définition');
-            case 'ErrorCorruptedSession':
-                return A3($author$project$I18n$set, _List_Nil, 'Corrupted data, reinitialized', 'Données corrompues, réinitialisées');
-            case 'ErrorDetail':
-                var error = id.a.error;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    error
-                ]), 'Erreur: {0}', 'Erreur\u00A0: {0}');
-            case 'GameLoading':
-                return A3($author$project$I18n$set, _List_Nil, 'Loading game…', 'Chargement du jeu…');
-            case 'GameLost':
-                return A3($author$project$I18n$set, _List_Nil, 'Ok that was hard.', 'Pas facile, hein\u00A0?');
-            case 'GameWin':
-                return A3($author$project$I18n$set, _List_Nil, 'Well done!', 'Bien joué\u00A0!');
-            case 'Help':
-                return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
-            case 'HelpGamePitch':
-                var nbLetters = id.a.nbLetters;
-                var lang = id.a.lang;
-                var maxGuesses = id.a.maxGuesses;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $elm$core$String$fromInt(nbLetters),
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$fromInt(maxGuesses)
-                ]), 'Guess a {0} letters {1} word in {2} guesses or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.');
-            case 'HelpInThisExample':
-                return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
-            case 'HelpInspiredBy':
-                var wordleUrl = id.a.wordleUrl;
-                var githubUrl = id.a.githubUrl;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    wordleUrl,
-                    githubUrl
-                ]), 'Inspired by [Wordle]({0}) - [Source code]({1}).', 'Inspiré de [Wordle]({0}) - [Code source]({1}).');
-            case 'HelpKeyboard':
-                return A3($author$project$I18n$set, _List_Nil, 'Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.');
-            case 'HelpKeyboardLetter':
-                return A3($author$project$I18n$set, _List_Nil, 'The keyboard at the bottom highlight letters which have been played already.', 'Le clavier en bas de page met en relief les lettres qui ont déjà été joué.');
-            case 'HelpLetterCorrectlyPlaced':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is at the correct spot', '{0} est à la bonne position');
-            case 'HelpLetterMisplaced':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is misplaced', '{0} est mal positionnée');
-            case 'HelpLetterUnused':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is unused', '{0} n\'est pas utilisée');
-            case 'LoadError':
-                return A3($author$project$I18n$set, _List_Nil, 'Error loading dictionary', 'Impossible de charger le dictionnaire');
-            case 'NotEnoughLetters':
-                return A3($author$project$I18n$set, _List_Nil, 'Not enough letters', 'Mot trop court');
-            case 'PlayAgain':
-                return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
-            case 'Settings':
-                return A3($author$project$I18n$set, _List_Nil, 'Settings', 'Préférences');
-            case 'SettingsKeyboardLayout':
-                return A3($author$project$I18n$set, _List_Nil, 'Keyboard layout', 'Disposition du clavier');
-            case 'SettingsWordSize':
-                return A3($author$project$I18n$set, _List_Nil, 'Word length', 'Longueur de mot');
-            case 'SettingsWordSizeRandom':
-                return A3($author$project$I18n$set, _List_Nil, 'Random', 'Aléatoire');
-            case 'SettingsWordSizeInt':
-                var size = id.a.size;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $elm$core$String$fromInt(size)
-                ]), '{0} letters', '{0} lettres');
-            case 'StatsAverageGuesses':
-                return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
-            case 'StatsButton':
-                return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
-            case 'StatsGamesPlayed':
-                return A3($author$project$I18n$set, _List_Nil, 'games played', 'parties jouées');
-            case 'StatsGuessDistribution':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Guess distribution ({0})', 'Distribution des scores ({0})');
-            case 'StatsGuessEvolution':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Guess evolution ({0})', 'Évolution des scores ({0})');
-            case 'StatsGuessEvolutionHelp':
-                var lang = id.a.lang;
-                var length = id.a.length;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$fromInt(length)
-                ]), 'Chart based on latest {1} played games in {0}. A 0 bar means lost game.', 'Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue.');
-            case 'StatsLang':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Statistics ({0})', 'Statistiques ({0})');
-            case 'StatsMissingData':
-                return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
-            case 'StatsLangDataMissing':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'You haven\'t played in {0} yet, so I can\'t render any stats.', 'Vous n\'avez pas encore joué en {0}, je ne peux pas afficher de statistiques.');
-            default:
-                return A3($author$project$I18n$set, _List_Nil, 'win rate', 'parties gagnées');
-        }
-    };
-    var $author$project$I18n$translate = F2(function(lang, id) {
-        if (lang.$ === 'English') return (function($) {
-            return $.english;
-        })($author$project$I18n$getSet(id));
-        else return (function($) {
-            return $.french;
-        })($author$project$I18n$getSet(id));
-    });
     var $author$project$Main$init = function(flags) {
         var _v0 = function() {
             var _v1 = $author$project$Store$fromJson(flags.rawStore);
@@ -6325,7 +6335,7 @@ type alias Process =
                 var error = _v1.a;
                 var store = $author$project$Store$default($author$project$I18n$parseLang(flags.lang));
                 var newModel = $author$project$Main$initialModel(store);
-                return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(A2($author$project$I18n$translate, store.lang, $author$project$I18n$ErrorCorruptedSession)), _Utils_Tuple2(_Utils_update(newModel, {
+                return A2($author$project$Main$notifyWarning, $author$project$I18n$ErrorCorruptedSession, _Utils_Tuple2(_Utils_update(newModel, {
                     state: $author$project$Game$Errored($author$project$Game$DecodeError($elm$json$Json$Decode$errorToString(error)))
                 }), $author$project$Main$encodeAndSaveStore(store)));
             }
@@ -6706,6 +6716,12 @@ type alias Process =
     var $author$project$I18n$LoadError = {
         $: 'LoadError'
     };
+    var $author$project$I18n$NewGameLang = function(a) {
+        return {
+            $: 'NewGameLang',
+            a: a
+        };
+    };
     var $author$project$Game$Ongoing = F3(function(a, b, c) {
         return {
             $: 'Ongoing',
@@ -6916,6 +6932,17 @@ type alias Process =
         } else return _Utils_Tuple2(model, cmds);
     };
     var $author$project$Main$maxAttempts = 6;
+    var $author$project$Notif$Success = function(a) {
+        return {
+            $: 'Success',
+            a: a
+        };
+    };
+    var $author$project$Main$notifySuccess = F2(function(i18nId, _v0) {
+        var model = _v0.a;
+        var cmds = _v0.b;
+        return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Success(A2($author$project$I18n$translate, model.store.lang, i18nId)), _Utils_Tuple2(model, cmds));
+    });
     var $author$project$I18n$GameLost = {
         $: 'GameLost'
     };
@@ -6928,12 +6955,11 @@ type alias Process =
             a: a
         };
     };
-    var $author$project$Notif$Success = function(a) {
-        return {
-            $: 'Success',
-            a: a
-        };
-    };
+    var $author$project$Main$notifyInfo = F2(function(i18nId, _v0) {
+        var model = _v0.a;
+        var cmds = _v0.b;
+        return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Info(A2($author$project$I18n$translate, model.store.lang, i18nId)), _Utils_Tuple2(model, cmds));
+    });
     var $author$project$Main$processStateNotif = function(_v0) {
         var model = _v0.a;
         var store = model.store;
@@ -6941,9 +6967,9 @@ type alias Process =
         var cmds = _v0.b;
         switch(state.$){
             case 'Won':
-                return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Success(A2($author$project$I18n$translate, store.lang, $author$project$I18n$GameWin)), _Utils_Tuple2(model, cmds));
+                return A2($author$project$Main$notifySuccess, $author$project$I18n$GameWin, _Utils_Tuple2(model, cmds));
             case 'Lost':
-                return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Info(A2($author$project$I18n$translate, store.lang, $author$project$I18n$GameLost)), _Utils_Tuple2(model, cmds));
+                return A2($author$project$Main$notifyInfo, $author$project$I18n$GameLost, _Utils_Tuple2(model, cmds));
             default:
                 return _Utils_Tuple2(model, cmds);
         }
@@ -7090,10 +7116,10 @@ type alias Process =
         var _v0 = _Utils_Tuple2($elm$core$String$toList(normalize(word)), $elm$core$String$toList(normalize(input)));
         var wordChars = _v0.a;
         var inputChars = _v0.b;
-        return _Utils_cmp($elm$core$List$length(inputChars), $elm$core$String$length(word)) < 0 ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$NotEnoughLetters)) : !A2($elm$core$List$member, normalize(input), A2($elm$core$List$map, normalize, words)) ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$AbsentFromDictionary({
+        return _Utils_cmp($elm$core$List$length(inputChars), $elm$core$String$length(word)) < 0 ? $elm$core$Result$Err($author$project$I18n$NotEnoughLetters) : !A2($elm$core$List$member, normalize(input), words) ? $elm$core$Result$Err($author$project$I18n$AbsentFromDictionary({
             lang: lang,
             word: input
-        }))) : $elm$core$Result$Ok(A2($author$project$Game$handleMisplacedDuplicates, wordChars, A2($author$project$Game$handleCorrectDuplicates, wordChars, A3($elm$core$List$map2, $author$project$Game$mapChars(wordChars), inputChars, wordChars))));
+        })) : $elm$core$Result$Ok(A2($author$project$Game$handleMisplacedDuplicates, wordChars, A2($author$project$Game$handleCorrectDuplicates, wordChars, A3($elm$core$List$map2, $author$project$Game$mapChars(wordChars), inputChars, wordChars))));
     });
     var $author$project$Main$update = F2(function(msg, model) {
         var store = model.store;
@@ -7185,7 +7211,7 @@ type alias Process =
                         }), $author$project$Main$scrollToBottom('board-container'))));
                     } else {
                         var error = _v13.a;
-                        return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(error), _Utils_Tuple2(_Utils_update(model, {
+                        return A2($author$project$Main$notifyWarning, error, _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, word, guesses, input)
                         }), $elm$core$Platform$Cmd$none));
                     }
@@ -7199,10 +7225,12 @@ type alias Process =
                     lang: lang
                 });
                 var newModel = $author$project$Main$initialModel(newStore);
-                return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$batch(_List_fromArray([
+                return A2($author$project$Main$notifySuccess, $author$project$I18n$NewGameLang({
+                    lang: store.lang
+                }), _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$batch(_List_fromArray([
                     $author$project$Main$encodeAndSaveStore(newStore),
                     A2($author$project$Client$getWords, lang, $author$project$Main$WordsReceived)
-                ])));
+                ]))));
             case 'SwitchLayout':
                 var layout_ = _v0.a.a;
                 var newStore = A2($author$project$Store$updateSettings, function(s) {
@@ -7259,7 +7287,7 @@ type alias Process =
                     return _Utils_Tuple2(_Utils_update(model, {
                         words: words
                     }), A2($author$project$Main$getRandomWord, model.wordSize, words));
-                } else return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(A2($author$project$I18n$translate, store.lang, $author$project$I18n$LoadError)), _Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+                } else return A2($author$project$Main$notifyWarning, $author$project$I18n$LoadError, _Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
         }
         return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
     });
