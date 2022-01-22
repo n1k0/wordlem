@@ -345,7 +345,7 @@ update msg ({ store } as model) =
                 , Client.getWords lang WordsReceived
                 ]
             )
-                |> notifySuccess (I18n.NewGameLang { lang = store.lang })
+                |> notifySuccess (I18n.NewGameLang { lang = newStore.lang })
 
         ( SwitchLayout layout_, _ ) ->
             let
