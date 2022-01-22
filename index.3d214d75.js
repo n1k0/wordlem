@@ -7131,10 +7131,8 @@ type alias Process =
                 var newModel = $author$project$Main$initialModel(store);
                 return _Utils_Tuple2(newModel, function() {
                     var _v7 = store.settings.wordSize;
-                    if (_v7.$ === 'Just') {
-                        var wordSize = _v7.a;
-                        return A2($author$project$Main$getRandomWord, wordSize, model.words);
-                    } else return $author$project$Main$getRandomWordSize;
+                    if (_v7.$ === 'Just') return A2($author$project$Client$getWords, store.lang, $author$project$Main$WordsReceived);
+                    else return $author$project$Main$getRandomWordSize;
                 }());
             case 'NewTime':
                 var time = _v0.a.a;
@@ -7219,16 +7217,16 @@ type alias Process =
                 }), $author$project$Main$encodeAndSaveStore(newStore));
             case 'SwitchWordSize':
                 if (_v0.a.a.$ === 'Just') {
-                    var wordSize1 = _v0.a.a.a;
+                    var wordSize = _v0.a.a.a;
                     var newStore = A2($author$project$Store$updateSettings, function(s) {
                         return _Utils_update(s, {
-                            wordSize: $elm$core$Maybe$Just(wordSize1)
+                            wordSize: $elm$core$Maybe$Just(wordSize)
                         });
                     }, store);
                     var newModel = $author$project$Main$initialModel(newStore);
                     return _Utils_Tuple2(_Utils_update(newModel, {
                         store: newStore,
-                        wordSize: wordSize1
+                        wordSize: wordSize
                     }), $elm$core$Platform$Cmd$batch(_List_fromArray([
                         A2($author$project$Client$getWords, newStore.lang, $author$project$Main$WordsReceived),
                         $author$project$Main$encodeAndSaveStore(newStore)
@@ -7251,10 +7249,10 @@ type alias Process =
                 var subMsg = _v0.a.a;
                 return A4($pablen$toasty$Toasty$update, $author$project$Notif$config, $author$project$Main$ToastyMsg, subMsg, model);
             case 'UpdateWordSize':
-                var wordSize1 = _v0.a.a;
+                var wordSize = _v0.a.a;
                 var newModel = $author$project$Main$initialModel(store);
                 return _Utils_Tuple2(_Utils_update(newModel, {
-                    wordSize: wordSize1
+                    wordSize: wordSize
                 }), A2($author$project$Client$getWords, store.lang, $author$project$Main$WordsReceived));
             default:
                 if (_v0.a.a.$ === 'Ok') {
