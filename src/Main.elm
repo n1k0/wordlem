@@ -865,58 +865,54 @@ viewHeader { store, modal } =
                 ]
     in
     nav [ class "navbar sticky-top navbar-dark bg-dark" ]
-        [ div [ class "Header container-fluid flex-nowrap" ]
+        [ div [ class "Header container-fluid flex-nowrap py-sm-1" ]
             [ div [ class "Logo text-white fw-bold me-2" ]
                 [ h1 [ class "visually-hidden" ] [ text "Wordlem" ] ]
-            , button
-                [ type_ "button"
-                , id "btn-lang-en"
-                , class "HeaderButton btn btn-sm text-truncate"
-                , btnClass (store.lang == English)
-                , onClick (SwitchLang English)
+            , div [ class "d-flex flex-fill justify-content-center text-center" ]
+                [ button
+                    [ type_ "button"
+                    , id "btn-lang-en"
+                    , class "HeaderButton btn btn-sm text-truncate"
+                    , btnClass (store.lang == English)
+                    , onClick (SwitchLang English)
+                    ]
+                    [ text "English" ]
+                , button
+                    [ type_ "button"
+                    , id "btn-lang-fr"
+                    , class "HeaderButton btn btn-sm text-truncate"
+                    , btnClass (store.lang == French)
+                    , onClick (SwitchLang French)
+                    ]
+                    [ text "Français" ]
                 ]
-                [ text "English" ]
-            , button
-                [ type_ "button"
-                , id "btn-lang-fr"
-                , class "HeaderButton btn btn-sm text-truncate"
-                , btnClass (store.lang == French)
-                , onClick (SwitchLang French)
-                ]
-                [ text "Français" ]
             , button
                 [ type_ "button"
                 , id "btn-stats"
                 , class "HeaderButton btn btn-sm d-flex align-items-center"
                 , btnClass (modal == Just StatsModal)
                 , onClick (OpenModal StatsModal)
+                , attribute "aria-label" <| I18n.translate store.lang I18n.StatsButton
                 ]
-                [ Icon.icon Icon.Stats [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ]
-                    [ I18n.htmlText store.lang I18n.StatsButton ]
-                ]
+                [ Icon.icon Icon.Stats [] ]
             , button
                 [ type_ "button"
                 , id "btn-help"
                 , class "HeaderButton btn btn-sm d-flex align-items-center"
                 , btnClass (modal == Just HelpModal)
                 , onClick (OpenModal HelpModal)
+                , attribute "aria-label" <| I18n.translate store.lang I18n.Help
                 ]
-                [ Icon.icon Icon.Help [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ]
-                    [ I18n.htmlText store.lang I18n.Help ]
-                ]
+                [ Icon.icon Icon.Help [] ]
             , button
                 [ type_ "button"
                 , id "btn-settings"
                 , class "HeaderButton btn btn-sm d-flex align-items-center"
                 , btnClass (modal == Just SettingsModal)
                 , onClick (OpenModal SettingsModal)
+                , attribute "aria-label" <| I18n.translate store.lang I18n.Settings
                 ]
-                [ Icon.icon Icon.Settings [ class "me-sm-1" ]
-                , span [ class "d-none d-sm-inline text-truncate" ]
-                    [ I18n.htmlText store.lang I18n.Settings ]
-                ]
+                [ Icon.icon Icon.Settings [] ]
             ]
         ]
 
