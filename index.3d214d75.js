@@ -7482,7 +7482,6 @@ type alias Process =
     var $elm$html$Html$h1 = _VirtualDom_node('h1');
     var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
     var $elm$html$Html$nav = _VirtualDom_node('nav');
-    var $elm$html$Html$span = _VirtualDom_node('span');
     var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
     var $author$project$Main$viewHeader = function(_v0) {
         var store = _v0.store;
@@ -7497,7 +7496,7 @@ type alias Process =
             $elm$html$Html$Attributes$class('navbar sticky-top navbar-dark bg-dark')
         ]), _List_fromArray([
             A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('Header container-fluid flex-nowrap')
+                $elm$html$Html$Attributes$class('Header container-fluid flex-nowrap py-sm-1')
             ]), _List_fromArray([
                 A2($elm$html$Html$div, _List_fromArray([
                     $elm$html$Html$Attributes$class('Logo text-white fw-bold me-2')
@@ -7508,71 +7507,57 @@ type alias Process =
                         $elm$html$Html$text('Wordlem')
                     ]))
                 ])),
-                A2($elm$html$Html$button, _List_fromArray([
-                    $elm$html$Html$Attributes$type_('button'),
-                    $elm$html$Html$Attributes$id('btn-lang-en'),
-                    $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-                    btnClass(_Utils_eq(store.lang, $author$project$I18n$English)),
-                    $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$English))
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('d-flex flex-fill justify-content-center text-center')
                 ]), _List_fromArray([
-                    $elm$html$Html$text('English')
-                ])),
-                A2($elm$html$Html$button, _List_fromArray([
-                    $elm$html$Html$Attributes$type_('button'),
-                    $elm$html$Html$Attributes$id('btn-lang-fr'),
-                    $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-                    btnClass(_Utils_eq(store.lang, $author$project$I18n$French)),
-                    $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$French))
-                ]), _List_fromArray([
-                    $elm$html$Html$text('Français')
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-lang-en'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
+                        btnClass(_Utils_eq(store.lang, $author$project$I18n$English)),
+                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$English))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text('English')
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-lang-fr'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
+                        btnClass(_Utils_eq(store.lang, $author$project$I18n$French)),
+                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$French))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text('Français')
+                    ]))
                 ])),
                 A2($elm$html$Html$button, _List_fromArray([
                     $elm$html$Html$Attributes$type_('button'),
                     $elm$html$Html$Attributes$id('btn-stats'),
                     $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
                     btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal))
+                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal)),
+                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$StatsButton))
                 ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_fromArray([
-                        $elm$html$Html$Attributes$class('me-sm-1')
-                    ])),
-                    A2($elm$html$Html$span, _List_fromArray([
-                        $elm$html$Html$Attributes$class('d-none d-sm-inline text-truncate')
-                    ]), _List_fromArray([
-                        A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$StatsButton)
-                    ]))
+                    A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_Nil)
                 ])),
                 A2($elm$html$Html$button, _List_fromArray([
                     $elm$html$Html$Attributes$type_('button'),
                     $elm$html$Html$Attributes$id('btn-help'),
                     $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
                     btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal))
+                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal)),
+                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Help))
                 ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Help, _List_fromArray([
-                        $elm$html$Html$Attributes$class('me-sm-1')
-                    ])),
-                    A2($elm$html$Html$span, _List_fromArray([
-                        $elm$html$Html$Attributes$class('d-none d-sm-inline text-truncate')
-                    ]), _List_fromArray([
-                        A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$Help)
-                    ]))
+                    A2($author$project$Icon$icon, $author$project$Icon$Help, _List_Nil)
                 ])),
                 A2($elm$html$Html$button, _List_fromArray([
                     $elm$html$Html$Attributes$type_('button'),
                     $elm$html$Html$Attributes$id('btn-settings'),
                     $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
                     btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$SettingsModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal))
+                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal)),
+                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Settings))
                 ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_fromArray([
-                        $elm$html$Html$Attributes$class('me-sm-1')
-                    ])),
-                    A2($elm$html$Html$span, _List_fromArray([
-                        $elm$html$Html$Attributes$class('d-none d-sm-inline text-truncate')
-                    ]), _List_fromArray([
-                        A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$Settings)
-                    ]))
+                    A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_Nil)
                 ]))
             ]))
         ]));

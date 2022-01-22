@@ -10410,7 +10410,10 @@ body {
 }
 @media screen and (min-width: 600px) {
   .HeaderButton {
-    font-size: 1em;
+    font-size: 1.2em;
+  }
+  .HeaderButton .icon {
+    font-size: 1.2em;
   }
 }
 .Logo {
@@ -10420,6 +10423,12 @@ body {
   overflow: hidden;
   width: 32px;
   height: 32px;
+}
+@media screen and (min-width: 600px) {
+  .Logo {
+    width: 40px;
+    height: 40px;
+  }
 }
 .Game {
   width: 100%;
