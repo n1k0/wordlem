@@ -111,15 +111,7 @@ init flags =
                             (Notif.Warning (translate store.lang I18n.ErrorCorruptedSession))
     in
     ( model
-    , Cmd.batch
-        [ case model.store.settings.wordSize of
-            Just _ ->
-                Client.getWords model.store.lang WordsReceived
-
-            Nothing ->
-                getRandomWordSize
-        , cmds
-        ]
+    , Cmd.batch [ startNewGame model.store, cmds ]
     )
 
 
@@ -138,6 +130,16 @@ initialModel store =
     , time = Time.millisToPosix 0
     , wordSize = store.settings.wordSize |> Maybe.withDefault 5
     }
+
+
+startNewGame : Store -> Cmd Msg
+startNewGame { lang, settings } =
+    case settings.wordSize of
+        Just _ ->
+            Client.getWords lang WordsReceived
+
+        Nothing ->
+            getRandomWordSize
 
 
 getRandomWordSize : Cmd Msg
@@ -279,17 +281,8 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( NewGame, _ ) ->
-            let
-                newModel =
-                    initialModel store
-            in
-            ( newModel
-            , case store.settings.wordSize of
-                Just _ ->
-                    Client.getWords store.lang WordsReceived
-
-                Nothing ->
-                    getRandomWordSize
+            ( initialModel store
+            , startNewGame store
             )
 
         ( NewTime time, _ ) ->
@@ -387,8 +380,7 @@ update msg ({ store } as model) =
             in
             ( { model | store = newStore }
             , Cmd.batch
-                [ -- FIXME: get random new word size
-                  getRandomWordSize
+                [ getRandomWordSize
                 , encodeAndSaveStore newStore
                 ]
             )
