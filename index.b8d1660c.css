@@ -10430,6 +10430,14 @@ body {
     height: 40px;
   }
 }
+.Loader {
+  height: 100%;
+  font-size: 1.5rem;
+}
+.Loader .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
 .Game {
   width: 100%;
   max-width: 600px;

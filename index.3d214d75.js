@@ -13232,6 +13232,20 @@ type alias Process =
             $elm$html$Html$Attributes$class('KeyboardRow')
         ])), $elm$core$List$map(A2($elm$core$Basics$composeR, $author$project$Keyboard$keyState(guesses), $author$project$Main$viewKeyState))), A2($author$project$Keyboard$disposition, lang, settings.layout)));
     });
+    var $elm$html$Html$span = _VirtualDom_node('span');
+    var $author$project$Main$viewLoader = A2($elm$html$Html$div, _List_fromArray([
+        $elm$html$Html$Attributes$class('Loader d-flex justify-content-center align-items-center')
+    ]), _List_fromArray([
+        A2($elm$html$Html$div, _List_fromArray([
+            $elm$html$Html$Attributes$class('spinner-border')
+        ]), _List_fromArray([
+            A2($elm$html$Html$span, _List_fromArray([
+                $elm$html$Html$Attributes$class('visually-hidden')
+            ]), _List_fromArray([
+                $elm$html$Html$text('Loading…')
+            ]))
+        ]))
+    ]));
     var $author$project$Main$view = function(model) {
         var wordSize = model.wordSize;
         var store = model.store;
@@ -13239,7 +13253,10 @@ type alias Process =
         return A2($author$project$Main$layout, model, function() {
             switch(state.$){
                 case 'Idle':
-                    return _List_Nil;
+                    return _List_fromArray([
+                        $author$project$Main$viewLoader,
+                        A2($author$project$Main$viewKeyboard, store, _List_Nil)
+                    ]);
                 case 'Errored':
                     var error = state.a;
                     return _List_fromArray([
