@@ -15,7 +15,10 @@ async function getWords(path) {
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase(),
     )
-    .filter((s) => !s.includes("-") && s.length >= MIN_LENGTH && s.length <= MAX_LENGTH);
+    .filter(
+      (s) =>
+        !s.includes("-") && !s.includes(" ") && s.length >= MIN_LENGTH && s.length <= MAX_LENGTH,
+    );
   return [...new Set(words)].join("\n");
 }
 
