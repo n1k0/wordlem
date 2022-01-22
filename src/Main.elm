@@ -1002,12 +1002,23 @@ viewError lang error =
         ]
 
 
+viewLoader : Html Msg
+viewLoader =
+    div [ class "Loader d-flex justify-content-center align-items-center" ]
+        [ div [ class "spinner-border" ]
+            [ span [ class "visually-hidden" ] [ text "Loading…" ]
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view ({ wordSize, store, state } as model) =
     layout model
         (case state of
             Game.Idle ->
-                []
+                [ viewLoader
+                , viewKeyboard store []
+                ]
 
             Game.Errored error ->
                 [ viewError store.lang error
