@@ -10441,9 +10441,18 @@ body {
 .Board {
   display: grid;
   grid-gap: 5px;
+  width: 50vh;
   box-sizing: border-box;
-  width: 37vh;
   scroll-snap-align: end;
+}
+.Board-5 {
+  max-width: 70%;
+}
+.Board-6 {
+  max-width: 80%;
+}
+.Board-7 {
+  max-width: 90%;
 }
 .BoardRow {
   display: grid;
@@ -10458,11 +10467,17 @@ body {
   justify-content: center;
   align-items: center;
   font-weight: 500;
-  font-size: 1.5rem;
-  line-height: 1.5rem;
   user-select: none;
   padding: unset;
   cursor: unset;
+  font-size: 1.75rem;
+  line-height: 1.75rem;
+}
+@media screen and (max-height: 480px) {
+  .BoardTile {
+    font-size: 1.4rem;
+    line-height: 1.4rem;
+  }
 }
 .BoardTile::before {
   content: "";

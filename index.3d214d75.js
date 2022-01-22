@@ -3467,6 +3467,140 @@ type alias Process =
             callback(_Scheduler_succeed(name));
         });
     }
+    // SEND REQUEST
+    var _Http_toTask = F3(function(router, toTask, request) {
+        return _Scheduler_binding(function(callback) {
+            function done(response) {
+                callback(toTask(request.expect.a(response)));
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.addEventListener('error', function() {
+                done($elm$http$Http$NetworkError_);
+            });
+            xhr.addEventListener('timeout', function() {
+                done($elm$http$Http$Timeout_);
+            });
+            xhr.addEventListener('load', function() {
+                done(_Http_toResponse(request.expect.b, xhr));
+            });
+            $elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
+            try {
+                xhr.open(request.method, request.url, true);
+            } catch (e) {
+                return done($elm$http$Http$BadUrl_(request.url));
+            }
+            _Http_configureRequest(xhr, request);
+            request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
+            xhr.send(request.body.b);
+            return function() {
+                xhr.c = true;
+                xhr.abort();
+            };
+        });
+    });
+    // CONFIGURE
+    function _Http_configureRequest(xhr, request) {
+        for(var headers = request.headers; headers.b; headers = headers.b)xhr.setRequestHeader(headers.a.a, headers.a.b);
+        xhr.timeout = request.timeout.a || 0;
+        xhr.responseType = request.expect.d;
+        xhr.withCredentials = request.allowCookiesFromOtherDomains;
+    }
+    // RESPONSES
+    function _Http_toResponse(toBody, xhr) {
+        return A2(200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_, _Http_toMetadata(xhr), toBody(xhr.response));
+    }
+    // METADATA
+    function _Http_toMetadata(xhr) {
+        return {
+            url: xhr.responseURL,
+            statusCode: xhr.status,
+            statusText: xhr.statusText,
+            headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
+        };
+    }
+    // HEADERS
+    function _Http_parseHeaders(rawHeaders) {
+        if (!rawHeaders) return $elm$core$Dict$empty;
+        var headers = $elm$core$Dict$empty;
+        var headerPairs = rawHeaders.split('\r\n');
+        for(var i = headerPairs.length; i--;){
+            var headerPair = headerPairs[i];
+            var index = headerPair.indexOf(': ');
+            if (index > 0) {
+                var key = headerPair.substring(0, index);
+                var value = headerPair.substring(index + 2);
+                headers = A3($elm$core$Dict$update, key, function(oldValue) {
+                    return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue) ? value + ', ' + oldValue.a : value);
+                }, headers);
+            }
+        }
+        return headers;
+    }
+    // EXPECT
+    var _Http_expect = F3(function(type, toBody, toValue) {
+        return {
+            $: 0,
+            d: type,
+            b: toBody,
+            a: toValue
+        };
+    });
+    var _Http_mapExpect = F2(function(func, expect) {
+        return {
+            $: 0,
+            d: expect.d,
+            b: expect.b,
+            a: function(x) {
+                return func(expect.a(x));
+            }
+        };
+    });
+    function _Http_toDataView(arrayBuffer) {
+        return new DataView(arrayBuffer);
+    }
+    // BODY and PARTS
+    var _Http_emptyBody = {
+        $: 0
+    };
+    var _Http_pair = F2(function(a, b) {
+        return {
+            $: 0,
+            a: a,
+            b: b
+        };
+    });
+    function _Http_toFormData(parts) {
+        for(var formData = new FormData(); parts.b; parts = parts.b){
+            var part = parts.a;
+            formData.append(part.a, part.b);
+        }
+        return formData;
+    }
+    var _Http_bytesToBlob = F2(function(mime, bytes) {
+        return new Blob([
+            bytes
+        ], {
+            type: mime
+        });
+    });
+    // PROGRESS
+    function _Http_track(router, xhr, tracker) {
+        // TODO check out lengthComputable on loadstart event
+        xhr.upload.addEventListener('progress', function(event) {
+            if (xhr.c) return;
+            _Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
+                sent: event.loaded,
+                size: event.total
+            }))));
+        });
+        xhr.addEventListener('progress', function(event) {
+            if (xhr.c) return;
+            _Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
+                received: event.loaded,
+                size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+            }))));
+        });
+    }
     // CREATE
     var _Regex_never = /.^/;
     var _Regex_fromStringWith = F2(function(options, string) {
@@ -4883,18 +5017,186 @@ type alias Process =
             a: a
         };
     };
+    var $author$project$I18n$ErrorCorruptedSession = {
+        $: 'ErrorCorruptedSession'
+    };
     var $author$project$Game$Errored = function(a) {
         return {
             $: 'Errored',
             a: a
         };
     };
+    var $author$project$Main$ToastyMsg = function(a) {
+        return {
+            $: 'ToastyMsg',
+            a: a
+        };
+    };
+    var $author$project$Notif$Warning = function(a) {
+        return {
+            $: 'Warning',
+            a: a
+        };
+    };
+    var $author$project$Main$WordsReceived = function(a) {
+        return {
+            $: 'WordsReceived',
+            a: a
+        };
+    };
+    var $pablen$toasty$Toasty$Temporary = {
+        $: 'Temporary'
+    };
+    var $pablen$toasty$Toasty$Entered = {
+        $: 'Entered'
+    };
+    var $pablen$toasty$Toasty$Stack = F2(function(a, b) {
+        return {
+            $: 'Stack',
+            a: a,
+            b: b
+        };
+    });
+    var $pablen$toasty$Toasty$TransitionOut = function(a) {
+        return {
+            $: 'TransitionOut',
+            a: a
+        };
+    };
     var $elm$core$Platform$Cmd$batch = _Platform_batch;
+    var $elm$random$Random$Generator = function(a) {
+        return {
+            $: 'Generator',
+            a: a
+        };
+    };
+    var $elm$core$Bitwise$and = _Bitwise_and;
+    var $elm$core$Basics$negate = function(n) {
+        return -n;
+    };
+    var $elm$random$Random$Seed = F2(function(a, b) {
+        return {
+            $: 'Seed',
+            a: a,
+            b: b
+        };
+    });
+    var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+    var $elm$random$Random$next = function(_v0) {
+        var state0 = _v0.a;
+        var incr = _v0.b;
+        return A2($elm$random$Random$Seed, state0 * 1664525 + incr >>> 0, incr);
+    };
+    var $elm$core$Bitwise$xor = _Bitwise_xor;
+    var $elm$random$Random$peel = function(_v0) {
+        var state = _v0.a;
+        var word = (state ^ state >>> (state >>> 28) + 4) * 277803737;
+        return (word >>> 22 ^ word) >>> 0;
+    };
+    var $elm$random$Random$int = F2(function(a, b) {
+        return $elm$random$Random$Generator(function(seed0) {
+            var _v0 = _Utils_cmp(a, b) < 0 ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+            var lo = _v0.a;
+            var hi = _v0.b;
+            var range = hi - lo + 1;
+            if (!(range - 1 & range)) return _Utils_Tuple2(((range - 1 & $elm$random$Random$peel(seed0)) >>> 0) + lo, $elm$random$Random$next(seed0));
+            else {
+                var threshhold = (-range >>> 0) % range >>> 0;
+                var accountForBias = function(seed) {
+                    accountForBias: while(true){
+                        var x = $elm$random$Random$peel(seed);
+                        var seedN = $elm$random$Random$next(seed);
+                        if (_Utils_cmp(x, threshhold) < 0) {
+                            var $temp$seed = seedN;
+                            seed = $temp$seed;
+                            continue accountForBias;
+                        } else return _Utils_Tuple2(x % range + lo, seedN);
+                    }
+                };
+                return accountForBias(seed0);
+            }
+        });
+    });
+    var $elm$random$Random$maxInt = 2147483647;
+    var $elm$random$Random$minInt = -2147483648;
+    var $elm$random$Random$step = F2(function(_v0, seed) {
+        var generator = _v0.a;
+        return generator(seed);
+    });
+    var $pablen$toasty$Toasty$getNewId = function(seed) {
+        return A2($elm$random$Random$step, A2($elm$random$Random$int, $elm$random$Random$minInt, $elm$random$Random$maxInt), seed);
+    };
+    var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+    var $elm$core$Process$sleep = _Process_sleep;
+    var $pablen$toasty$Toasty$addToast_ = F5(function(removeBehaviour, _v0, tagger, toast, _v1) {
+        var cfg = _v0.a;
+        var model = _v1.a;
+        var cmd = _v1.b;
+        var _v2 = model.toasties;
+        var toasts = _v2.a;
+        var seed = _v2.b;
+        var _v3 = $pablen$toasty$Toasty$getNewId(seed);
+        var newId = _v3.a;
+        var newSeed = _v3.b;
+        var task = function() {
+            if (removeBehaviour.$ === 'Temporary') return A2($elm$core$Task$perform, function(_v5) {
+                return tagger($pablen$toasty$Toasty$TransitionOut(newId));
+            }, $elm$core$Process$sleep(cfg.delay));
+            else return $elm$core$Platform$Cmd$none;
+        }();
+        return _Utils_Tuple2(_Utils_update(model, {
+            toasties: A2($pablen$toasty$Toasty$Stack, _Utils_ap(toasts, _List_fromArray([
+                _Utils_Tuple3(newId, $pablen$toasty$Toasty$Entered, toast)
+            ])), newSeed)
+        }), $elm$core$Platform$Cmd$batch(_List_fromArray([
+            cmd,
+            task
+        ])));
+    });
+    var $pablen$toasty$Toasty$addToast = $pablen$toasty$Toasty$addToast_($pablen$toasty$Toasty$Temporary);
+    var $elm$json$Json$Encode$string = _Json_wrap;
+    var $elm$html$Html$Attributes$stringProperty = F2(function(key, string) {
+        return A2(_VirtualDom_property, key, $elm$json$Json$Encode$string(string));
+    });
+    var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+    var $pablen$toasty$Toasty$Config = function(a) {
+        return {
+            $: 'Config',
+            a: a
+        };
+    };
+    var $pablen$toasty$Toasty$config = $pablen$toasty$Toasty$Config({
+        containerAttrs: _List_Nil,
+        delay: 5000,
+        itemAttrs: _List_Nil,
+        transitionInAttrs: _List_Nil,
+        transitionOutAttrs: _List_Nil,
+        transitionOutDuration: 0
+    });
+    var $pablen$toasty$Toasty$containerAttrs = F2(function(attrs, _v0) {
+        var cfg = _v0.a;
+        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
+            containerAttrs: attrs
+        }));
+    });
+    var $pablen$toasty$Toasty$delay = F2(function(time, _v0) {
+        var cfg = _v0.a;
+        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
+            delay: time
+        }));
+    });
+    var $author$project$Notif$config = A2($pablen$toasty$Toasty$containerAttrs, _List_fromArray([
+        $elm$html$Html$Attributes$class('Notifs')
+    ]), A2($pablen$toasty$Toasty$delay, 2500, $pablen$toasty$Toasty$config));
+    var $author$project$Notif$add = function(msg) {
+        return A2($pablen$toasty$Toasty$addToast, $author$project$Notif$config, msg);
+    };
     var $author$project$Keyboard$Auto = {
         $: 'Auto'
     };
     var $author$project$Settings$default = {
-        layout: $author$project$Keyboard$Auto
+        layout: $author$project$Keyboard$Auto,
+        wordSize: $elm$core$Maybe$Just(5)
     };
     var $author$project$Store$default = function(lang) {
         return {
@@ -4907,7 +5209,6 @@ type alias Process =
     var $elm$core$Basics$composeR = F3(function(f, g, x) {
         return g(f(x));
     });
-    var $elm$json$Json$Encode$string = _Json_wrap;
     var $author$project$Main$saveStore = _Platform_outgoingPort('saveStore', $elm$json$Json$Encode$string);
     var $elm$json$Json$Encode$bool = _Json_wrap;
     var $elm$json$Json$Encode$int = _Json_wrap;
@@ -4948,9 +5249,23 @@ type alias Process =
     var $author$project$Keyboard$encodeLayout = function(layout) {
         return $elm$json$Json$Encode$string($author$project$Keyboard$layoutToString(layout));
     };
+    var $elm$core$Maybe$map = F2(function(f, maybe) {
+        if (maybe.$ === 'Just') {
+            var value = maybe.a;
+            return $elm$core$Maybe$Just(f(value));
+        } else return $elm$core$Maybe$Nothing;
+    });
+    var $elm$json$Json$Encode$null = _Json_encodeNull;
+    var $elm$core$Maybe$withDefault = F2(function(_default, maybe) {
+        if (maybe.$ === 'Just') {
+            var value = maybe.a;
+            return value;
+        } else return _default;
+    });
     var $author$project$Settings$encode = function(v) {
         return $elm$json$Json$Encode$object(_List_fromArray([
-            _Utils_Tuple2('layout', $author$project$Keyboard$encodeLayout(v.layout))
+            _Utils_Tuple2('layout', $author$project$Keyboard$encodeLayout(v.layout)),
+            _Utils_Tuple2('wordSize', A2($elm$core$Maybe$withDefault, $elm$json$Json$Encode$null, A2($elm$core$Maybe$map, $elm$json$Json$Encode$int, v.wordSize)))
         ]));
     };
     var $elm$json$Json$Encode$list = F2(function(func, entries) {
@@ -5005,11 +5320,12 @@ type alias Process =
     var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
     var $elm$json$Json$Decode$string = _Json_decodeString;
     var $author$project$Log$decode = A6($elm$json$Json$Decode$map5, $author$project$Log$Log, A2($elm$json$Json$Decode$field, 'time', A2($elm$json$Json$Decode$map, $elm$time$Time$millisToPosix, $elm$json$Json$Decode$int)), A2($elm$json$Json$Decode$field, 'lang', A2($elm$json$Json$Decode$map, $author$project$I18n$langFromString, $elm$json$Json$Decode$string)), A2($elm$json$Json$Decode$field, 'word', $elm$json$Json$Decode$string), A2($elm$json$Json$Decode$field, 'victory', $elm$json$Json$Decode$bool), A2($elm$json$Json$Decode$field, 'guesses', $elm$json$Json$Decode$int));
-    var $author$project$Settings$Settings = function(layout) {
+    var $author$project$Settings$Settings = F2(function(layout, wordSize) {
         return {
-            layout: layout
+            layout: layout,
+            wordSize: wordSize
         };
-    };
+    });
     var $author$project$Keyboard$Azerty = {
         $: 'Azerty'
     };
@@ -5027,15 +5343,19 @@ type alias Process =
         }
     };
     var $author$project$Keyboard$decodeLayout = A2($elm$json$Json$Decode$map, $author$project$Keyboard$layoutFromString, $elm$json$Json$Decode$string);
-    var $author$project$Settings$decode = A2($elm$json$Json$Decode$map, $author$project$Settings$Settings, A2($elm$json$Json$Decode$field, 'layout', $author$project$Keyboard$decodeLayout));
-    var $elm$json$Json$Decode$list = _Json_decodeList;
+    var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+    var $elm$json$Json$Decode$maybe = function(decoder) {
+        return $elm$json$Json$Decode$oneOf(_List_fromArray([
+            A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+            $elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+        ]));
+    };
     var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
     var $elm$json$Json$Decode$at = F2(function(fields, decoder) {
         return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
     });
     var $elm$json$Json$Decode$decodeValue = _Json_run;
     var $elm$json$Json$Decode$null = _Json_decodeNull;
-    var $elm$json$Json$Decode$oneOf = _Json_oneOf;
     var $elm$json$Json$Decode$value = _Json_decodeValue;
     var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder = F3(function(path, valDecoder, fallback) {
         var nullOr = function(decoder) {
@@ -5062,15 +5382,17 @@ type alias Process =
             key
         ]), valDecoder, fallback), decoder);
     });
+    var $author$project$Settings$decode = A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'wordSize', $elm$json$Json$Decode$maybe($elm$json$Json$Decode$int), $elm$core$Maybe$Just(5), A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'layout', $author$project$Keyboard$decodeLayout, $author$project$Keyboard$Auto, $elm$json$Json$Decode$succeed($author$project$Settings$Settings)));
+    var $elm$json$Json$Decode$list = _Json_decodeList;
     var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(function(key, valDecoder, decoder) {
         return A2($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom, A2($elm$json$Json$Decode$field, key, valDecoder), decoder);
     });
     var $author$project$Store$decode = A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'settings', $author$project$Settings$decode, $author$project$Settings$default, A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'helpViewed', $elm$json$Json$Decode$bool, false, A3($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required, 'logs', $elm$json$Json$Decode$list($author$project$Log$decode), A3($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required, 'lang', A2($elm$json$Json$Decode$map, $author$project$I18n$langFromString, $elm$json$Json$Decode$string), $elm$json$Json$Decode$succeed($author$project$Store$Store)))));
     var $elm$json$Json$Decode$decodeString = _Json_runOnString;
     var $author$project$Store$fromJson = $elm$json$Json$Decode$decodeString($author$project$Store$decode);
-    var $author$project$Main$NewWord = function(a) {
+    var $author$project$Main$UpdateWordSize = function(a) {
         return {
-            $: 'NewWord',
+            $: 'UpdateWordSize',
             a: a
         };
     };
@@ -5079,19 +5401,6 @@ type alias Process =
             $: 'Generate',
             a: a
         };
-    };
-    var $elm$random$Random$Seed = F2(function(a, b) {
-        return {
-            $: 'Seed',
-            a: a,
-            b: b
-        };
-    });
-    var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-    var $elm$random$Random$next = function(_v0) {
-        var state0 = _v0.a;
-        var incr = _v0.b;
-        return A2($elm$random$Random$Seed, state0 * 1664525 + incr >>> 0, incr);
     };
     var $elm$random$Random$initialSeed = function(x) {
         var _v0 = $elm$random$Random$next(A2($elm$random$Random$Seed, 0, 1013904223));
@@ -5124,10 +5433,6 @@ type alias Process =
     var $elm$random$Random$init = A2($elm$core$Task$andThen, function(time) {
         return $elm$core$Task$succeed($elm$random$Random$initialSeed($elm$time$Time$posixToMillis(time)));
     }, $elm$time$Time$now);
-    var $elm$random$Random$step = F2(function(_v0, seed) {
-        var generator = _v0.a;
-        return generator(seed);
-    });
     var $elm$random$Random$onEffects = F3(function(router, commands, seed) {
         if (!commands.b) return $elm$core$Task$succeed(seed);
         else {
@@ -5144,12 +5449,6 @@ type alias Process =
     var $elm$random$Random$onSelfMsg = F3(function(_v0, _v1, seed) {
         return $elm$core$Task$succeed(seed);
     });
-    var $elm$random$Random$Generator = function(a) {
-        return {
-            $: 'Generator',
-            a: a
-        };
-    };
     var $elm$random$Random$map = F2(function(func, _v0) {
         var genA = _v0.a;
         return $elm$random$Random$Generator(function(seed0) {
@@ -5168,269 +5467,54 @@ type alias Process =
     var $elm$random$Random$generate = F2(function(tagger, generator) {
         return $elm$random$Random$command($elm$random$Random$Generate(A2($elm$random$Random$map, tagger, generator)));
     });
-    var $author$project$Words$english = A2($elm$core$String$split, ',', 'which,there,their,about,would,these,other,words,could,write,first,water,after,where,right,think,three,years,place,sound,great,again,still,every,small,found,those,never,under,might,while,house,world,below,asked,going,large,until,along,shall,being,often,earth,began,since,study,night,light,above,paper,parts,young,story,point,times,heard,whole,white,given,means,music,miles,thing,today,later,using,money,lines,order,group,among,learn,known,space,table,early,trees,short,hands,state,black,shown,stood,front,voice,kinds,makes,comes,close,power,lived,vowel,taken,built,heart,ready,quite,class,bring,round,horse,shows,piece,green,stand,birds,start,river,tried,least,field,whose,girls,leave,added,color,third,hours,moved,plant,doing,names,forms,heavy,ideas,cried,check,floor,begin,woman,alone,plane,spell,watch,carry,wrote,clear,named,books,child,glass,human,takes,party,build,seems,blood,sides,seven,mouth,solve,north,value,death,maybe,happy,tells,gives,looks,shape,lives,steps,areas,sense,speak,force,ocean,speed,women,metal,south,grass,scale,cells,lower,sleep,wrong,pages,ships,needs,rocks,eight,major,level,total,ahead,reach,stars,store,sight,terms,catch,works,board,cover,songs,equal,stone,waves,guess,dance,spoke,break,cause,radio,weeks,lands,basic,liked,trade,fresh,final,fight,meant,drive,spent,local,waxes,knows,train,bread,homes,teeth,coast,thick,brown,clean,quiet,sugar,facts,steel,forth,rules,notes,units,peace,month,verbs,seeds,helps,sharp,visit,woods,chief,walls,cross,wings,grown,cases,foods,crops,fruit,stick,wants,stage,sheep,nouns,plain,drink,bones,apart,turns,moves,touch,angle,based,range,marks,tired,older,farms,spend,shoes,goods,chair,twice,cents,empty,alike,style,broke,pairs,count,enjoy,score,shore,roots,paint,heads,shook,serve,angry,crowd,wheel,quick,dress,share,alive,noise,solid,cloth,signs,hills,types,drawn,worth,truck,piano,upper,loved,usual,faces,drove,cabin,boats,towns,proud,court,model,prime,fifty,plans,yards,prove,tools,price,sheet,smell,boxes,raise,match,truth,roads,threw,enemy,lunch,chart,scene,graph,doubt,guide,winds,block,grain,smoke,mixed,games,wagon,sweet,topic,extra,plate,title,knife,fence,falls,cloud,wheat,plays,enter,broad,steam,atoms,press,lying,basis,clock,taste,grows,thank,storm,agree,brain,track,smile,funny,beach,stock,hurry,saved,sorry,giant,trail,offer,ought,rough,daily,avoid,keeps,throw,allow,cream,laugh,edges,teach,frame,bells,dream,magic,occur,ended,chord,false,skill,holes,dozen,brave,apple,climb,outer,pitch,ruler,holds,fixed,costs,calls,blank,staff,labor,eaten,youth,tones,honor,globe,gases,doors,poles,loose,apply,tears,exact,brush,chest,layer,whale,minor,faith,tests,judge,items,worry,waste,hoped,strip,begun,aside,lakes,bound,depth,candy,event,worse,aware,shell,rooms,ranch,image,snake,aloud,dried,likes,motor,pound,knees,refer,fully,chain,shirt,flour,drops,spite,orbit,banks,shoot,curve,tribe,tight,blind,slept,shade,claim,flies,theme,queen,fifth,union,hence,straw,entry,issue,birth,feels,anger,brief,rhyme,glory,guard,flows,flesh,owned,trick,yours,sizes,noted,width,burst,route,lungs,uncle,bears,royal,kings,forty,trial,cards,brass,opera,chose,owner,vapor,beats,mouse,tough,wires,meter,tower,finds,inner,stuck,arrow,poems,label,swing,solar,truly,tense,beans,split,rises,weigh,hotel,stems,pride,swung,grade,digit,badly,boots,pilot,sales,swept,lucky,prize,stove,tubes,acres,wound,steep,slide,trunk,error,porch,slave,exist,faced,mines,marry,juice,raced,waved,goose,trust,fewer,favor,mills,views,joint,eager,spots,blend,rings,adult,index,nails,horns,balls,flame,rates,drill,trace,skins,waxed,seats,stuff,ratio,minds,dirty,silly,coins,hello,trips,leads,rifle,hopes,bases,shine,bench,moral,fires,meals,shake,shops,cycle,movie,slope,canoe,teams,folks,fired,bands,thumb,shout,canal,habit,reply,ruled,fever,crust,shelf,walks,midst,crack,print,tales,coach,stiff,flood,verse,awake,rocky,march,fault,swift,faint,civil,ghost,feast,blade,limit,germs,reads,ducks,dairy,worst,gifts,lists,stops,rapid,brick,claws,beads,beast,skirt,cakes,lions,frogs,tries,nerve,grand,armed,treat,honey,moist,legal,penny,crown,shock,taxes,sixty,altar,pulls,sport,drums,talks,dying,dates,drank,blows,lever,wages,proof,drugs,tanks,sings,tails,pause,herds,arose,hated,clues,novel,shame,burnt,races,flash,weary,heels,token,coats,spare,shiny,alarm,dimes,sixth,clerk,mercy,sunny,guest,float,shone,pipes,worms,bills,sweat,suits,smart,upset,rains,sandy,rainy,parks,sadly,fancy,rider,unity,bunch,rolls,crash,craft,newly,gates,hatch,paths,funds,wider,grace,grave,tides,admit,shift,sails,pupil,tiger,angel,cruel,agent,drama,urged,patch,nests,vital,sword,blame,weeds,screw,vocal,bacon,chalk,cargo,crazy,acted,goats,arise,witch,loves,queer,dwell,backs,ropes,shots,merry,phone,cheek,peaks,ideal,beard,eagle,creek,cries,ashes,stall,yield,mayor,opens,input,fleet,tooth,cubic,wives,burns,poets,apron,spear,organ,cliff,stamp,paste,rural,baked,chase,slice,slant,knock,noisy,sorts,stays,wiped,blown,piled,clubs,cheer,widow,twist,tenth,hides,comma,sweep,spoon,stern,crept,maple,deeds,rides,muddy,crime,jelly,ridge,drift,dusty,devil,tempo,humor,sends,steal,tents,waist,roses,reign,noble,cheap,dense,linen,geese,woven,posts,hired,wrath,salad,bowed,tires,shark,belts,grasp,blast,polar,fungi,tends,pearl,loads,jokes,veins,frost,hears,loses,hosts,diver,phase,toads,alert,tasks,seams,coral,focus,naked,puppy,jumps,spoil,quart,macro,fears,flung,spark,vivid,brook,steer,spray,decay,ports,socks,urban,goals,grant,minus,films,tunes,shaft,firms,skies,bride,wreck,flock,stare,hobby,bonds,dared,faded,thief,crude,pants,flute,votes,tonal,radar,wells,skull,hairs,argue,wears,dolls,voted,caves,cared,broom,scent,panel,fairy,olive,bends,prism,lamps,cable,peach,ruins,rally,schwa,lambs,sells,cools,draft,charm,limbs,brake,gazed,cubes,delay,beams,fetch,ranks,array,harsh,camel,vines,picks,naval,purse,rigid,crawl,toast,soils,sauce,basin,ponds,twins,wrist,fluid,pools,brand,stalk,robot,reeds,hoofs,buses,sheer,grief,bloom,dwelt,melts,risen,flags,knelt,fiber,roofs,freed,armor,piles,aimed,algae,twigs,lemon,ditch,drunk,rests,chill,slain,panic,cords,tuned,crisp,ledge,dived,swamp,clung,stole,molds,yarns,liver,gauge,breed,stool,gulls,awoke,gross,diary,rails,belly,trend,flask,stake,fried,draws,actor,handy,bowls,haste,scope,deals,knots,moons,essay,thump,hangs,bliss,dealt,gains,bombs,clown,palms,cones,roast,tidal,bored,chant,acids,dough,camps,swore,lover,hooks,males,cocoa,punch,award,reins,ninth,noses,links,drain,fills,nylon,lunar,pulse,flown,elbow,fatal,sites,moths,meats,foxes,mined,attic,fiery,mount,usage,swear,snowy,rusty,scare,traps,relax,react,valid,robin,cease,gills,prior,safer,polio,loyal,swell,salty,marsh,vague,weave,mound,seals,mules,virus,scout,acute,windy,stout,folds,seize,hilly,joins,pluck,stack,lords,dunes,burro,hawks,trout,feeds,scarf,halls,coals,towel,souls,elect,buggy,pumps,loans,spins,files,oxide,pains,photo,rival,flats,syrup,rodeo,sands,moose,pints,curly,comic,cloak,onion,clams,scrap,didst,couch,codes,fails,ounce,lodge,greet,gypsy,utter,paved,zones,fours,alley,tiles,bless,crest,elder,kills,yeast,erect,bugle,medal,roles,hound,snail,alter,ankle,relay,loops,zeros,bites,modes,debts,realm,glove,rayon,swims,poked,stray,lifts,maker,lumps,graze,dread,barns,docks,masts,pours,wharf,curse,plump,robes,seeks,cedar,curls,jolly,myths,cages,gloom,locks,pedal,beets,crows,anode,slash,creep,rowed,chips,fists,wines,cares,valve,newer,motel,ivory,necks,clamp,barge,blues,alien,frown,strap,crews,shack,gonna,saves,stump,ferry,idols,cooks,juicy,glare,carts,alloy,bulbs,lawns,lasts,fuels,oddly,crane,filed,weird,shawl,slips,troop,bolts,suite,sleek,quilt,tramp,blaze,atlas,odors,scrub,crabs,probe,logic,adobe,exile,rebel,grind,sting,spine,cling,desks,grove,leaps,prose,lofty,agony,snare,tusks,bulls,moods,humid,finer,dimly,plank,china,pines,guilt,sacks,brace,quote,lathe,gaily,fonts,scalp,adopt,foggy,ferns,grams,clump,perch,tumor,teens,crank,fable,hedge,genes,sober,boast,tract,cigar,unite,owing,thigh,haiku,swish,dikes,wedge,booth,eased,frail,cough,tombs,darts,forts,choir,pouch,pinch,hairy,buyer,torch,vigor,waltz,heats,herbs,users,flint,click,madam,bleak,blunt,aided,lacks,masks,waded,risks,nurse,chaos,sewed,cured,ample,lease,steak,sinks,merit,bluff,bathe,gleam,bonus,colts,shear,gland,silky,skate,birch,anvil,sleds,groan,maids,meets,speck,hymns,hints,drown,bosom,slick,quest,coils,spied,snows,stead,snack,plows,blond,tamed,thorn,waits,glued,banjo,tease,arena,bulky,carve,stunt,warms,shady,razor,folly,leafy,notch,fools,otter,pears,flush,genus,ached,fives,flaps,spout,smote,fumes,adapt,cuffs,tasty,stoop,clips,disks,sniff,lanes,brisk,imply,demon,super,furry,raged,growl,texts,hardy,stung,typed,hates,wiser,timid,serum,beaks,rotor,casts,baths,glide,plots,trait,resin,slums,lyric,puffs,decks,brood,mourn,aloft,abuse,whirl,edged,ovary,quack,heaps,slang,await,civic,saint,bevel,sonar,aunts,packs,froze,tonic,corps,swarm,frank,repay,gaunt,wired,niece,cello,needy,chuck,stony,media,surge,hurts,repel,husky,dated,hunts,mists,exert,dries,mates,sworn,baker,spice,oasis,boils,spurs,doves,sneak,paces,colon,siege,strum,drier,cacao,humus,bales,piped,nasty,rinse,boxer,shrub,amuse,tacks,cited,slung,delta,laden,larva,rents,yells,spool,spill,crush,jewel,snaps,stain,kicks,tying,slits,rated,eerie,smash,plums,zebra,earns,bushy,scary,squad,tutor,silks,slabs,bumps,evils,fangs,snout,peril,pivot,yacht,lobby,jeans,grins,viola,liner,comet,scars,chops,raids,eater,slate,skips,soles,misty,urine,knobs,sleet,holly,pests,forks,grill,trays,pails,borne,tenor,wares,carol,woody,canon,wakes,kitty,miner,polls,shaky,nasal,scorn,chess,taxis,crate,shyly,tulip,forge,nymph,budge,lowly,abide,depot,oases,asses,sheds,fudge,pills,rivet,thine,groom,lanky,boost,broth,heave,gravy,beech,timed,quail,inert,gears,chick,hinge,trash,clash,sighs,renew,bough,dwarf,slows,quill,shave,spore,sixes,chunk,madly,paced,braid,fuzzy,motto,spies,slack,mucus,magma,awful,discs,erase,posed,asset,cider,taper,theft,churn,satin,slots,taxed,bully,sloth,shale,tread,raked,curds,manor,aisle,bulge,loins,stair,tapes,leans,bunks,squat,towed,lance,panes,sakes,heirs,caste,dummy,pores,fauna,crook,poise,epoch,risky,warns,fling,berry,grape,flank,drags,squid,pelts,icing,irony,irons,barks,whoop,choke,diets,whips,tally,dozed,twine,kites,bikes,ticks,riots,roars,vault,looms,scold,blink,dandy,pupae,sieve,spike,ducts,lends,pizza,brink,widen,plumb,pagan,feats,bison,soggy,scoop,argon,nudge,skiff,amber,sexes,rouse,salts,hitch,exalt,leash,dined,chute,snort,gusts,melon,cheat,reefs,llama,lasso,debut,quota,oaths,prone,mixes,rafts,dives,stale,inlet,flick,pinto,brows,untie,batch,greed,chore,stirs,blush,onset,barbs,volts,beige,swoop,paddy,laced,shove,jerky,poppy,leaks,fares,dodge,godly,squaw,affix,brute,nicer,undue,snarl,merge,doses,showy,daddy,roost,vases,swirl,petty,colds,curry,cobra,genie,flare,messy,cores,soaks,ripen,whine,amino,plaid,spiny,mowed,baton,peers,vowed,pious,swans,exits,afoot,plugs,idiom,chili,rites,serfs,cleft,berth,grubs,annex,dizzy,hasty,latch,wasps,mirth,baron,plead,aloof,aging,pixel,bared,mummy,hotly,auger,buddy,chaps,badge,stark,fairs,gully,mumps,emery,filly,ovens,drone,gauze,idiot,fussy,annoy,shank,gouge,bleed,elves,roped,unfit,baggy,mower,scant,grabs,fleas,lousy,album,sawed,cooky,murky,infer,burly,waged,dingy,brine,kneel,creak,vanes,smoky,spurt,combs,easel,laces,humps,rumor,aroma,horde,swiss,leapt,opium,slime,afire,pansy,mares,soaps,husks,snips,hazel,lined,cafes,naive,wraps,sized,piers,beset,agile,tongs,steed,fraud,booty,valor,downy,witty,mossy,psalm,scuba,tours,polka,milky,gaudy,shrug,tufts,wilds,laser,truss,hares,creed,lilac,siren,tarry,bribe,swine,muted,flips,cures,sinew,boxed,hoops,gasps,hoods,niche,yucca,glows,sewer,whack,fuses,gowns,droop,bucks,pangs,mails,whisk,haven,clasp,sling,stint,urges,champ,piety,chirp,pleat,posse,sunup,menus,howls,quake,knack,plaza,fiend,caked,bangs,erupt,poker,olden,cramp,voter,poses,manly,slump,fined,grips,gaped,purge,hiked,maize,fluff,strut,sloop,prowl,roach,cocks,bland,dials,plume,slaps,soups,dully,wills,foams,solos,skier,eaves,totem,fused,latex,veils,mused,mains,myrrh,racks,galls,gnats,bouts,sisal,shuts,hoses,dryly,hover,gloss,seeps,denim,putty,guppy,leaky,dusky,filth,oboes,spans,fowls,adorn,glaze,haunt,dares,obeys,bakes,abyss,smelt,gangs,aches,trawl,claps,undid,spicy,hoist,fades,vicar,acorn,pussy,gruff,musty,tarts,snuff,hunch,truce,tweed,dryer,loser,sheaf,moles,lapse,tawny,vexed,autos,wager,domes,sheen,clang,spade,sowed,broil,slyly,studs,grunt,donor,slugs,aspen,homer,croak,tithe,halts,avert,havoc,hogan,glint,ruddy,jeeps,flaky,ladle,taunt,snore,fines,props,prune,pesos,radii,pokes,tiled,daisy,heron,villa,farce,binds,cites,fixes,jerks,livid,waked,inked,booms,chews,licks,hyena,scoff,lusty,sonic,smith,usher,tucks,vigil,molts,sects,spars,dumps,scaly,wisps,sores,mince,panda,flier,axles,plied,booby,patio,rabbi,petal,polyp,tints,grate,troll,tolls,relic,phony,bleat,flaws,flake,snags,aptly,drawl,ulcer,soapy,bossy,monks,crags,caged,twang,diner,taped,cadet,grids,spawn,guile,noose,mores,girth,slimy,aides,spasm,burrs,alibi,lymph,saucy,muggy,liter,joked,goofy,exams,enact,stork,lured,toxic,omens,nears,covet,wrung,forum,venom,moody,alder,sassy,flair,guild,prays,wrens,hauls,stave,tilts,pecks,stomp,gales,tempt,capes,mesas,omits,tepee,harry,wring,evoke,limes,cluck,lunge,highs,canes,giddy,lithe,verge,khaki,queue,loath,foyer,outdo,fared,deter,crumb,astir,spire,jumpy,extol,buoys,stubs,lucid,thong,afore,whiff,maxim,hulls,clogs,slats,jiffy,arbor,cinch,igloo,goody,gazes,dowel,calms,bitch,scowl,gulps,coded,waver,mason,lobes,ebony,flail,isles,clods,dazed,adept,oozed,sedan,clays,warts,ketch,skunk,manes,adore,sneer,mango,fiord,flora,roomy,minks,thaws,watts,freer,exult,plush,paled,twain,clink,scamp,pawed,grope,bravo,gable,stink,sever,waned,rarer,regal,wards,fawns,babes,unify,amend,oaken,glade,visor,hefty,nines,throb,pecan,butts,pence,sills,jails,flyer,saber,nomad,miter,beeps,domed,gulfs,curbs,heath,moors,aorta,larks,tangy,wryly,cheep,rages,evade,lures,freak,vogue,tunic,slams,knits,dumpy,mania,spits,firth,hikes,trots,nosed,clank,dogma,bloat,balsa,graft,middy,stile,keyed,finch,sperm,chaff,wiles,amigo,copra,amiss,eying,twirl,lurch,popes,chins,smock,tines,guise,grits,junks,shoal,cache,tapir,atoll,deity,toils,spree,mocks,scans,shorn,revel,raven,hoary,reels,scuff,mimic,weedy,corny,truer,rouge,ember,floes,torso,wipes,edict,sulky,recur,groin,baste,kinks,surer,piggy,moldy,franc,liars,inept,gusty,facet,jetty,equip,leper,slink,soars,cater,dowry,sided,yearn,decoy,taboo,ovals,heals,pleas,beret,spilt,gayly,rover,endow,pygmy,carat,abbey,vents,waken,chimp,fumed,sodas,vinyl,clout,wades,mites,smirk,bores,bunny,surly,frock,foray,purer,milks,query,mired,blare,froth,gruel,navel,paler,puffy,casks,grime,derby,mamma,gavel,teddy,vomit,moans,allot,defer,wield,viper,louse,erred,hewed,abhor,wrest,waxen,adage,ardor,stabs,pored,rondo,loped,fishy,bible,hires,foals,feuds,jambs,thuds,jeers,knead,quirk,rugby,expel,greys,rigor,ester,lyres,aback,glues,lotus,lurid,rungs,hutch,thyme,valet,tommy,yokes,epics,trill,pikes,ozone,caper,chime,frees,famed,leech,smite,neigh,erode,robed,hoard,salve,conic,gawky,craze,jacks,gloat,mushy,rumps,fetus,wince,pinks,shalt,toots,glens,cooed,rusts,stews,shred,parka,chugs,winks,clots,shrew,booed,filmy,juror,dents,gummy,grays,hooky,butte,dogie,poled,reams,fifes,spank,gayer,tepid,spook,taint,flirt,rogue,spiky,opals,miser,cocky,coyly,balmy,slosh,brawl,aphid,faked,hydra,brags,chide,yanks,allay,video,altos,eases,meted,chasm,longs,excel,taffy,impel,savor,koala,quays,dawns,proxy,clove,duets,dregs,tardy,briar,grimy,ultra,meaty,halve,wails,suede,mauve,envoy,arson,coves,gooey,brews,sofas,chums,amaze,zooms,abbot,halos,scour,suing,cribs,sagas,enema,wordy,harps,coupe,molar,flops,weeps,mints,ashen,felts,askew,munch,mewed,divan,vices,jumbo,blobs,blots,spunk,acrid,topaz,cubed,clans,flees,slurs,gnaws,welds,fords,emits,agate,pumas,mends,darks,dukes,plies,canny,hoots,oozes,lamed,fouls,clefs,nicks,mated,skims,brunt,tuber,tinge,fates,ditty,thins,frets,eider,bayou,mulch,fasts,amass,damps,morns,friar,palsy,vista,croon,conch,udder,tacos,skits,mikes,quits,preen,aster,adder,elegy,pulpy,scows,baled,hovel,lavas,crave,optic,welts,busts,knave,razed,shins,totes,scoot,dears,crock,mutes,trims,skein,doted,shuns,veers,fakes,yoked,wooed,hacks,sprig,wands,lulls,seers,snobs,nooks,pined,perky,mooed,frill,dines,booze,tripe,prong,drips,odder,levee,antic,sidle,pithy,corks,yelps,joker,fleck,buffs,scram,tiers,bogey,doled,irate,vales,coped,hails,elude,bulks,aired,vying,stags,strew,cocci,pacts,scabs,silos,dusts,yodel,terse,jaded,baser,jibes,foils,sways,forgo,slays,preys,treks,quell,peeks,assay,lurks,eject,boars,trite,belch,gnash,wanes,lutes,whims,dosed,chewy,snipe,umbra,teems,dozes,kelps,upped,brawn,doped,shush,rinds,slush,moron,voile,woken,fjord,sheik,jests,kayak,slews,toted,saner,drape,patty,raves,sulfa,grist,skied,vixen,civet,vouch,tiara,homey,moped,runts,serge,kinky,rills,corns,brats,pries,amble,fries,loons,tsars,datum,musky,pigmy,gnome,ravel,ovule,icily,liken,lemur,frays,silts,sifts,plods,ramps,tress,earls,dudes,waive,karat,jolts,peons,beers,horny,pales,wreak,lairs,lynch,stank,swoon,idler,abort,blitz,ensue,atone,bingo,roves,kilts,scald,adios,cynic,dulls,memos,elfin,dales,peels,peals,bares,sinus,crone,sable,hinds,shirk,enrol,wilts,roams,duped,cysts,mitts,safes,spats,coops,filet,knell,refit,covey,punks,kilns,fitly,abate,talcs,heeds,duels,wanly,ruffs,gauss,lapel,jaunt,whelp,cleat,gauzy,dirge,edits,wormy,moats,smear,prods,bowel,frisk,vests,bayed,rasps,tames,delve,embed,befit,wafer,ceded,novas,feign,spews,larch,huffs,doles,mamas,hulks,pried,brims,irked,aspic,swipe,mealy,skimp,bluer,slake,dowdy,penis,brays,pupas,egret,flunk,phlox,gripe,peony,douse,blurs,darns,slunk,lefts,chats,inane,vials,stilt,rinks,woofs,wowed,bongs,frond,ingot,evict,singe,shyer,flied,slops,dolts,drool,dells,whelk,hippy,feted,ether,cocos,hives,jibed,mazes,trios,sirup,squab,laths,leers,pasta,rifts,lopes,alias,whirs,diced,slags,lodes,foxed,idled,prows,plait,malts,chafe,cower,toyed,chefs,keels,sties,racer,etude,sucks,sulks,micas,czars,copse,ailed,abler,rabid,golds,croup,snaky,visas,palls,mopes,boned,wispy,raved,swaps,junky,doily,pawns,tamer,poach,baits,damns,gumbo,daunt,prank,hunks,buxom,heres,honks,stows,unbar,idles,routs,sages,goads,remit,copes,deign,culls,girds,haves,lucks,stunk,dodos,shams,snubs,icons,usurp,dooms,hells,soled,comas,paves,maths,perks,limps,wombs,blurb,daubs,cokes,sours,stuns,cased,musts,coeds,cowed,aping,zoned,rummy,fetes,skulk,quaff,rajah,deans,reaps,galas,tills,roved,kudos,toned,pared,scull,vexes,punts,snoop,bails,dames,hazes,lores,marts,voids,ameba,rakes,adzes,harms,rears,satyr,swill,hexes,colic,leeks,hurls,yowls,ivies,plops,musks,papaw,jells,bused,cruet,bided,filch,zests,rooks,laxly,rends,loams,basks,sires,carps,pokey,flits,muses,bawls,shuck,viler,lisps,peeps,sorer,lolls,prude,diked,floss,flogs,scums,dopes,bogie,pinky,leafs,tubas,scads,lowed,yeses,biked,qualm,evens,caned,gawks,whits,wooly,gluts,romps,bests,dunce,crony,joist,tunas,boner,malls,parch,avers,crams,pares,dally,bigot,kales,flays,leach,gushy,pooch,huger,slyer,golfs,mires,flues,loafs,arced,acnes,neons,fiefs,dints,dazes,pouts,cored,yules,lilts,beefs,mutts,fells,cowls,spuds,lames,jawed,dupes,deads,bylaw,noons,nifty,clued,vireo,gapes,metes,cuter,maims,droll,cupid,mauls,sedge,papas,wheys,eking,loots,hilts,meows,beaus,dices,peppy,riper,fogey,gists,yogas,gilts,skews,cedes,zeals,alums,okays,elope,grump,wafts,soots,blimp,hefts,mulls,hosed,cress,doffs,ruder,pixie,waifs,ousts,pucks,biers,gulch,suets,hobos,lints,brans,teals,garbs,pewee,helms,turfs,quips,wends,banes,napes,icier,swats,bagel,hexed,ogres,goner,gilds,pyres,lards,bides,paged,talon,flout,medic,veals,putts,dirks,dotes,tippy,blurt,piths,acing,barer,whets,gaits,wools,dunks,heros,swabs,dirts,jutes,hemps,surfs,okapi,chows,shoos,dusks,parry,decal,furls,cilia,sears,novae,murks,warps,slues,lamer,saris,weans,purrs,dills,togas,newts,meany,bunts,razes,goons,wicks,ruses,vends,geode,drake,judos,lofts,pulps,lauds,mucks,vises,mocha,oiled,roman,ethyl,gotta,fugue,smack,gourd,bumpy,radix,fatty,borax,cubit,cacti,gamma,focal,avail,papal,golly,elite,versa,billy,adieu,annum,howdy,rhino,norms,bobby,axiom,setup,yolks,terns,mixer,genre,knoll,abode,junta,gorge,combo,alpha,overt,kinda,spelt,prick,nobly,ephod,audio,modal,veldt,warty,fluke,bonny,bream,rosin,bolls,doers,downs,beady,motif,humph,fella,mould,crepe,kerns,aloha,glyph,azure,riser,blest,locus,lumpy,beryl,wanna,brier,tuner,rowdy,mural,timer,canst,krill,quoth,lemme,triad,tenon,amply,deeps,padre,leant,pacer,octal,dolly,trans,sumac,foamy,lolly,giver,quipu,codex,manna,unwed,vodka,ferny,salon,duple,boron,revue,crier,alack,inter,dilly,whist,cults,spake,reset,loess,decor,mover,verve,ethic,gamut,lingo,dunno,align,sissy,incur,reedy,avant,piper,waxer,calyx,basil,coons,seine,piney,lemma,trams,winch,whirr,saith,ionic,heady,harem,tummy,sally,shied,dross,farad,saver,tilde,jingo,bower,serif,facto,belle,inset,bogus,caved,forte,sooty,bongo,toves,credo,basal,yella,aglow,glean,gusto,hymen,ethos,terra,brash,scrip,swash,aleph,tinny,itchy,wanta,trice,jowls,gongs,garde,boric,twill,sower,henry,awash,libel,spurn,sabre,rebut,penal,obese,sonny,quirt,mebbe,tacit,greek,xenon,hullo,pique,roger,negro,hadst,gecko,beget,uncut,aloes,louis,quint,clunk,raped,salvo,diode,matey,hertz,xylem,kiosk,apace,cawed,peter,wench,cohos,sorta,gamba,bytes,tango,nutty,axial,aleck,natal,clomp,gored,siree,bandy,gunny,runic,whizz,rupee,fated,wiper,bards,briny,staid,hocks,ochre,yummy,gents,soupy,roper,swath,cameo,edger,spate,gimme,ebbed,breve,theta,deems,dykes,servo,telly,tabby,tares,blocs,welch,ghoul,vitae,cumin,dinky,bronc,tabor,teeny,comer,borer,sired,privy,mammy,deary,gyros,sprit,conga,quire,thugs,furor,bloke,runes,bawdy,cadre,toxin,annul,egged,anion,nodes,picky,stein,jello,audit,echos,fagot,letup,eyrie,fount,caped,axons,amuck,banal,riled,petit,umber,miler,fibre,agave,bated,bilge,vitro,feint,pudgy,mater,manic,umped,pesky,strep,slurp,pylon,puree,caret,temps,newel,yawns,seedy,treed,coups,rangy,brads,mangy,loner,circa,tibia,afoul,mommy,titer,carne,kooky,motes,amity,suave,hippo,curvy,samba,newsy,anise,imams,tulle,aways,liven,hallo,wales,opted,canto,idyll,bodes,curio,wrack,hiker,chive,yokel,dotty,demur,cusps,specs,quads,laity,toner,decry,writs,saute,clack,aught,logos,tipsy,natty,ducal,bidet,bulgy,metre,lusts,unary,goeth,baler,sited,shies,hasps,brung,holed,swank,looky,melee,huffy,loamy,pimps,titan,binge,shunt,femur,libra,seder,honed,annas,coypu,shims,zowie,jihad,savvy,nadir,basso,monic,maned,mousy,omega,laver,prima,picas,folio,mecca,reals,troth,testy,balky,crimp,chink,abets,splat,abaci,vaunt,cutie,pasty,moray,levis,ratty,islet,joust,motet,viral,nukes,grads,comfy,voila,woozy,blued,whomp,sward,metro,skeet,chine,aerie,bowie,tubby,emirs,coati,unzip,slobs,trike,funky,ducat,dewey,skoal,wadis,oomph,taker,minim,getup,stoic,synod,runty,flyby,braze,inlay,venue,louts,peaty,orlon,humpy,radon,beaut,raspy,unfed,crick,nappy,vizor,yipes,rebus,divot,kiwis,vetch,squib,sitar,kiddo,dyers,cotta,matzo,lager,zebus,crass,dacha,kneed,dicta,fakir,knurl,runny,unpin,julep,globs,nudes,sushi,tacky,stoke,kaput,butch,hulas,croft,achoo,genii,nodal,outgo,spiel,viols,fetid,cagey,fudgy,epoxy,leggy,hanky,lapis,felon,beefy,coots,melba,caddy,segue,betel,frizz,drear,kooks,turbo,hoagy,moult,helix,zonal,arias,nosey,paean,lacey,banns,swain,fryer,retch,tenet,gigas,whiny,ogled,rumen,begot,cruse,abuts,riven,balks,sines,sigma,abase,ennui,gores,unset,augur,sated,odium,latin,dings,moire,scion,henna,kraut,dicks,lifer,prigs,bebop,gages,gazer,fanny,gibes,aural,tempi,hooch,rapes,snuck,harts,techs,emend,ninny,guava,scarp,liege,tufty,sepia,tomes,carob,emcee,prams,poser,verso,hubba,joule,baize,blips,scrim,cubby,clave,winos,rearm,liens,lumen,chump,nanny,trump,fichu,chomp,homos,purty,maser,woosh,patsy,shill,rusks,avast,swami,boded,ahhhh,lobed,natch,shish,tansy,snoot,payer,altho,sappy,laxer,hubby,aegis,riles,ditto,jazzy,dingo,quasi,septa,peaky,lorry,heerd,bitty,payee,seamy,apses,imbue,belie,chary,spoof,phyla,clime,babel,wacky,sumps,skids,khans,crypt,inure,nonce,outen,faire,hooey,anole,kazoo,calve,limbo,argot,ducky,faker,vibes,gassy,unlit,nervy,femme,biter,fiche,boors,gaffe,saxes,recap,synch,facie,dicey,ouija,hewer,legit,gurus,edify,tweak,caron,typos,rerun,polly,surds,hamza,nulls,hater,lefty,mogul,mafia,debug,pates,blabs,splay,talus,porno,moola,nixed,kilos,snide,horsy,gesso,jaggy,trove,nixes,creel,pater,iotas,cadge,skyed,hokum,furze,ankhs,curie,nutsy,hilum,remix,angst,burls,jimmy,veiny,tryst,codon,befog,gamed,flume,axman,doozy,lubes,rheas,bozos,butyl,kelly,mynah,jocks,donut,avian,wurst,chock,quash,quals,hayed,bombe,cushy,spacy,puked,leery,thews,prink,amens,tesla,intro,fiver,frump,capos,opine,coder,namer,jowly,pukes,haled,chard,duffs,bruin,reuse,whang,toons,frats,silty,telex,cutup,nisei,neato,decaf,softy,bimbo,adlib,loony,shoed,agues,peeve,noway,gamey,sarge,reran,epact,potty,coned,upend,narco,ikats,whorl,jinks,tizzy,weepy,posit,marge,vegan,clops,numbs,reeks,rubes,rower,biped,tiffs,hocus,hammy,bunco,fixit,tykes,chaws,yucky,hokey,resew,maven,adman,scuzz,slogs,souse,nacho,mimed,melds,boffo,debit,pinup,vagus,gulag,randy,bosun,educe,faxes,auras,pesto,antsy,betas,fizzy,dorky,snits,moxie,thane,mylar,nobby,gamin,gouty,esses,goyim,paned,druid,jades,rehab,gofer,tzars,octet,homed,socko,dorks,eared,anted,elide,fazes,oxbow,dowse,situs,macaw,scone,drily,hyper,salsa,mooch,gated,unjam,lipid,mitre,venal,knish,ritzy,divas,torus,mange,dimer,recut,meson,wined,fends,phage,fiats,caulk,cavil,panty,roans,bilks,hones,botch,estop,sully,sooth,gelds,ahold,raper,pager,fixer,infix,hicks,tuxes,plebe,twits,abash,twixt,wacko,primp,nabla,girts,miffs,emote,xerox,rebid,shahs,rutty,grout,grift,deify,biddy,kopek,semis,bries,acmes,piton,hussy,torts,disco,whore,boozy,gibed,vamps,amour,soppy,gonzo,durst,wader,tutus,perms,catty,glitz,brigs,nerds,barmy,gizmo,owlet,sayer,molls,shard,whops,comps,corer,colas,matte,droid,ploys,vapid,cairn,deism,mixup,yikes,prosy,raker,flubs,whish,reify,craps,shags,clone,hazed,macho,recto,refix,drams,biker,aquas,porky,doyen,exude,goofs,divvy,noels,jived,hulky,cager,harpy,oldie,vivas,admix,codas,zilch,deist,orcas,retro,pilaf,parse,rants,zingy,toddy,chiff,micro,veeps,girly,nexus,demos,bibbs,antes,lulus,gnarl,zippy,ivied,epees,wimps,tromp,grail,yoyos,poufs,hales,roust,cabal,rawer,pampa,mosey,kefir,burgs,unmet,cuspy,boobs,boons,hypes,dynes,nards,lanai,yogis,sepal,quark,toked,prate,ayins,hawed,swigs,vitas,toker,doper,bossa,linty,foist,mondo,stash,kayos,twerp,zesty,capon,wimpy,rewed,fungo,tarot,frosh,kabob,pinko,redid,mimeo,heist,tarps,lamas,sutra,dinar,whams,busty,spays,mambo,nabob,preps,odour,cabby,conks,sluff,dados,houri,swart,balms,gutsy,faxed,egads,pushy,retry,agora,drubs,daffy,chits,mufti,karma,lotto,toffs,burps,deuce,zings,kappa,clads,doggy,duper,scams,ogler,mimes,throe,zetas,waled,promo,blats,muffs,oinks,viand,coset,finks,faddy,minis,snafu,sauna,usury,muxes,craws,stats,condo,coxes,loopy,dorms,ascot,dippy,execs,dopey,envoi,umpty,gismo,fazed,strop,jives,slims,batik,pings,sonly,leggo,pekoe,prawn,luaus,campy,oodle,prexy,proms,touts,ogles,tweet,toady,naiad,hider,nuked,fatso,sluts,obits,narcs,tyros,delis,wooer,hyped,poset,byway,texas,scrod,avows,futon,torte,tuple,carom,kebab,tamps,jilts,duals,artsy,repro,modem,toped,psych,sicko,klutz,tarns,coxed,drays,cloys,anded,piker,aimer,suras,limos,flack,hapax,dutch,mucky,shire,klieg,staph,layup,tokes,axing,toper,duvet,cowry,profs,blahs,addle,sudsy,batty,coifs,suety,gabby,hafta,pitas,gouda,deice,taupe,topes,duchy,nitro,carny,limey,orals,hirer,taxer,roils,ruble,elate,dolor,wryer,snots,quais,coked,gimel,gorse,minas,goest,agape,manta,jings,iliac,admen,offen,cills,offal,lotta,bolas,thwap,alway,boggy,donna,locos,belay,gluey,bitsy,mimsy,hilar,outta,vroom,fetal,raths,renal,dyads,crocs,vires,culpa,kivas,feist,teats,thats,yawls,whens,abaca,ohhhh,aphis,fusty,eclat,perdu,mayst,exeat,molly,supra,wetly,plasm,buffa,semen,pukka,tagua,paras,stoat,secco,carte,haute,molal,shads,forma,ovoid,pions,modus,bueno,rheum,scurf,parer,ephah,doest,sprue,flams,molto,dieth,choos,miked,bronx,goopy,bally,plumy,moony,morts,yourn,bipod,spume,algal,ambit,mucho,spued,dozer,harum,groat,skint,laude,thrum,pappy,oncet,rimed,gigue,limed,plein,redly,humpf,lites,seest,grebe,absit,thanx,pshaw,yawps,plats,payed,areal,tilth,youse,gwine,thees,watsa,lento,spitz,yawed,gipsy,sprat,cornu,amahs,blowy,wahoo,lubra,mecum,whooo,coqui,sabra,edema,mrads,dicot,astro,kited,ouzel,didos,grata,bonne,axmen,klunk,summa,laves,purls,yawny,teary,masse,largo,bazar,pssst,sylph,lulab,toque,fugit,plunk,ortho,lucre,cooch,whipt,folky,tyres,wheee,corky,injun,solon,didot,kerfs,rayed,wassa,chile,begat,nippy,litre,magna,rebox,hydro,milch,brent,gyves,lazed,feued,mavis,inapt,baulk,casus,scrum,wised,fossa,dower,kyrie,bhoys,scuse,feuar,ohmic,juste,ukase,beaux,tusky,orate,musta,lardy,intra,quiff,epsom,neath,ocher,tared,homme,mezzo,corms,psoas,beaky,terry,infra,spivs,tuans,belli,bergs,anima,weirs,mahua,scops,manse,titre,curia,kebob,cycad,talky,fucks,tapis,amide,dolce,sloes,jakes,russe,blash,tutti,pruta,panga,blebs,tench,swarf,herem,missy,merse,pawky,limen,vivre,chert,unsee,tiros,brack,foots,welsh,fosse,knops,ileum,noire,firma,podgy,laird,thunk,shute,rowan,shoji,poesy,uncap,fames,glees,costa,turps,fores,solum,imago,byres,fondu,coney,polis,dictu,kraal,sherd,mumbo,wroth,chars,unbox,vacuo,slued,weest,hades,wiled,syncs,muser,excon,hoars,sibyl,passe,joeys,lotsa,lepta,shays,bocks,endue,darer,nones,ileus,plash,busby,wheal,buffo,yobbo,biles,poxes,rooty,licit,terce,bromo,hayey,dweeb,imbed,saran,bruit,punky,softs,biffs,loppy,agars,aquae,livre,biome,bunds,shews,diems,ginny,degum,polos,desex,unman,dungy,vitam,wedgy,glebe,apers,ridgy,roids,wifey,vapes,whoas,bunko,yolky,ulnas,reeky,bodge,brant,davit,deque,liker,jenny,tacts,fulls,treap,ligne,acked,refry,vower,aargh,churl,momma,gaols,whump,arras,marls,tiler,grogs,memes,midis,tided,haler,duces,twiny,poste,unrig,prise,drabs,quids,facer,spier,baric,geoid,remap,trier,gunks,steno,stoma,airer,ovate,torah,apian,smuts,pocks,yurts,exurb,defog,nuder,bosky,nimbi,mothy,joyed,labia,pards,jammy,bigly,faxer,hoppy,nurbs,cotes,dishy,vised,celeb,pismo,casas,withs,dodgy,scudi,mungs,muons,ureas,ioctl,unhip,krone,sager,verst,expat,gronk,uvula,shawm,bilgy,braes,cento,webby,lippy,gamic,lordy,mazed,tings,shoat,faery,wirer,diazo,carer,rater,greps,rente,zloty,viers,unapt,poops,fecal,kepis,taxon,eyers,wonts,spina,stoae,yenta,pooey,buret,japan,bedew,hafts,selfs,oared,herby,pryer,oakum,dinks,titty,sepoy,penes,fusee,winey,gimps,nihil,rille,giber,ousel,umiak,cuppy,hames,shits,azine,glads,tacet,bumph,coyer,honky,gamer,gooky,waspy,sedgy,bents,varia,djinn,junco,pubic,wilco,lazes,idyls,lupus,rives,snood,schmo,spazz,finis,noter,pavan,orbed,bates,pipet,baddy,goers,shako,stets,sebum,seeth,lobar,raver,ajuga,riced,velds,dribs,ville,dhows,unsew,halma,krona,limby,jiffs,treys,bauds,pffft,mimer,plebs,caner,jiber,cuppa,washy,chuff,unarm,yukky,styes,waker,flaks,maces,rimes,gimpy,guano,liras,kapok,scuds,bwana,oring,aider,prier,klugy,monte,golem,velar,firer,pieta,umbel,campo,unpeg,fovea,abeam,boson,asker,goths,vocab,vined,trows,tikis,loper,indie,boffs,spang,grapy,tater,ichor,kilty,lochs,supes,degas,flics,torsi,beths,weber,resaw,lawny,coven,mujik,relet,therm,heigh,shnor,trued,zayin,liest,barfs,bassi,qophs,roily,flabs,punny,okras,hanks,dipso,nerfs,fauns,calla,pseud,lurer,magus,obeah,atria,twink,palmy,pocky,pends,recta,plonk,slaws,keens,nicad,pones,inker,whews,groks,mosts,trews,ulnar,gyppy,cocas,expos,eruct,oiler,vacua,dreck,dater,arums,tubal,voxel,dixit,beery,assai,lades,actin,ghoti,buzzy,meads,grody,ribby,clews,creme,email,pyxie,kulak,bocci,rived,duddy,hoper,lapin,wonks,petri,phial,fugal,holon,boomy,duomo,musos,shier,hayer,porgy,hived,litho,fisty,stagy,luvya,maria,smogs,asana,yogic,slomo,fawny,amine,wefts,gonad,twirp,brava,plyer,fermi,loges,niter,revet,unate,gyved,totty,zappy,honer,giros,dicer,calks,luxes,monad,cruft,quoin,fumer,amped,shlep,vinca,yahoo,vulva,zooey,dryad,nixie,moper,iambs,lunes,nudie,limns,weals,nohow,miaow,gouts,mynas,mazer,kikes,oxeye,stoup,jujus,debar,pubes,taels,defun,rands,blear,paver,goosy,sprog,oleos,toffy,pawer,maced,crits,kluge,tubed,sahib,ganef,scats,sputa,vaned,acned,taxol,plink,oweth,tribs,resay,boule,thous,haply,glans,maxis,bezel,antis,porks,quoit,alkyd,glary,beamy,hexad,bonks,tecum,kerbs,filar,frier,redux,abuzz,fader,shoer,couth,trues,guyed,goony,booky,fuzes,hurly,genet,hodad,calix,filer,pawls,iodic,utero,henge,unsay,liers,piing,weald,sexed,folic,poxed,cunts,anile,kiths,becks,tatty,plena,rebar,abled,toyer,attar,teaks,aioli,awing,anent,feces,redip,wists,prats,mesne,muter,smurf,owest,bahts,lossy,ftped,hunky,hoers,slier,sicks,fatly,delft,hiver,himbo,pengo,busks,loxes,zonks,ilium,aport,ikons,mulct,reeve,civvy,canna,barfy,kaiak,scudo,knout,gaper,bhang,pease,uteri,lases,paten,rasae,axels,stoas,ombre,styli,gunky,hazer,kenaf,ahoys,ammos,weeny,urger,kudzu,paren,bolos,fetor,nitty,techy,lieth,somas,darky,villi,gluon,janes,cants,farts,socle,jinns,ruing,slily,ricer,hadda,wowee,rices,nerts,cauls,swive,lilty,micks,arity,pasha,finif,oinky,gutty,tetra,wises,wolds,balds,picot,whats,shiki,bungs,snarf,legos,dungs,stogy,berms,tangs,vails,roods,morel,sware,elans,latus,gules,razer,doxie,buena,overs,gutta,zincs,nates,kirks,tikes,donee,jerry,mohel,ceder,doges,unmap,folia,rawly,snark,topoi,ceils,immix,yores,diest,bubba,pomps,forky,turdy,lawzy,poohs,worts,gloms,beano,muley,barky,tunny,auric,funks,gaffs,cordy,curdy,lisle,toric,soyas,reman,mungy,carpy,apish,oaten,gappy,aurae,bract,rooky,axled,burry,sizer,proem,turfy,impro,mashy,miens,nonny,olios,grook,sates,agley,corgi,dashy,doser,dildo,apsos,xored,laker,playa,selah,malty,dulse,frigs,demit,whoso,rials,sawer,spics,bedim,snugs,fanin,azoic,icers,suers,wizen,koine,topos,shirr,rifer,feral,laded,lased,turds,swede,easts,cozen,unhit,pally,aitch,sedum,coper,ruche,geeks,swags,etext,algin,offed,ninja,holer,doter,toter,besot,dicut,macer,peens,pewit,redox,poler,yecch,fluky,doeth,twats,cruds,bebug,bider,stele,hexer,wests,gluer,pilau,abaft,whelm,lacer,inode,tabus,gator,cuing,refly,luted,cukes,bairn,bight,arses,crump,loggy,blini,spoor,toyon,harks,wazoo,fenny,naves,keyer,tufas,morph,rajas,typal,spiff,oxlip,unban,mussy,finny,rimer,login,molas,cirri,huzza,agone,unsex,unwon,peats,toile,zombi,dewed,nooky,alkyl,ixnay,dovey,holey,cuber,amyls,podia,chino,apnea,prims,lycra,johns,primo,fatwa,egger,hempy,snook,hying,fuzed,barms,crink,moots,yerba,rhumb,unarc,direr,munge,eland,nares,wrier,noddy,atilt,jukes,ender,thens,unfix,doggo,zooks,diddy,shmoo,brusk,prest,curer,pasts,kelpy,bocce,kicky,taros,lings,dicky,nerdy,abend,stela,biggy,laved,baldy,pubis,gooks,wonky,stied,hypos,assed,spumy,osier,roble,rumba,biffy,pupal');
-    var $author$project$Words$french = A2($elm$core$String$split, ',', 'abats,abbes,abces,abeti,abima,abime,aboie,abois,aboli,abord,abots,about,aboya,aboye,abris,abusa,abuse,acces,accot,accru,accus,acera,acere,achat,acide,acier,acini,acmes,acnes,acons,acore,acres,actai,actas,actat,actee,acter,actes,actez,actif,adage,adent,adieu,admet,admis,admit,adnee,adnes,adora,adore,adret,adula,adule,aedes,aequo,aerai,aeras,aerat,aeree,aerer,aeres,aerez,affin,affut,agaca,agace,agami,agape,agate,agave,agees,agent,aghas,agile,agios,agira,agita,agite,agnat,agora,agrea,agree,agres,aguis,ahana,ahane,ahans,ahuri,aiche,aidai,aidas,aidat,aidee,aider,aides,aidez,aient,aieul,aieux,aigle,aigre,aigri,aigue,aigus,ailee,ailes,ailla,aille,aimai,aimas,aimat,aimee,aimer,aimes,aimez,ainee,aines,ainsi,aioli,airai,airas,airat,airer,aires,airez,aisee,aises,aisys,ajonc,ajour,ajout,album,aldin,aldol,aleas,alene,aleph,alesa,alese,alfas,algie,algol,algue,alias,alibi,alios,alise,alita,alite,alize,allai,allas,allat,allee,aller,alles,allez,allia,allie,almee,aloes,alors,alose,alpax,alpes,alpha,alpin,altos,aluna,alune,aluni,aluns,alvin,alyte,amant,amati,ambla,amble,ambon,ambra,ambre,amena,amene,amere,amers,amibe,amict,amide,amies,amine,amont,amour,amphi,ample,ampli,amuie,amuis,amura,amure,amusa,amuse,amyle,anale,anaux,anche,ancra,ancre,andin,aneth,anges,angle,angon,angor,anier,anima,anime,anion,anisa,anise,annal,annee,anode,anons,ansee,anses,antan,antes,antre,aorte,aouta,aoute,aphte,apiol,apion,aplat,apnee,apode,appas,appat,appel,appui,apres,aptes,apura,apure,arabe,arasa,arase,arbre,arche,arcon,ardue,ardus,arecs,arene,arete,argas,argon,argot,argua,argue,argus,arias,aride,arien,arisa,arise,armai,armas,armat,armee,armer,armes,armet,armez,armon,arome,arqua,arque,arret,arsin,artel,arums,aryen,aryle,asile,aspes,aspic,asque,assai,asses,assez,assis,assit,aster,astis,astre,atele,athee,atlas,atoll,atome,atone,atour,atout,aubes,aubin,aucun,audio,audit,auges,auget,aulne,aunes,aurai,auras,aurez,aussi,autel,autos,autre,avais,avait,avala,avale,avals,avant,avare,avens,avenu,avera,avere,avers,aveux,avide,aviez,avili,avina,avine,avion,avisa,avise,aviso,aviva,avive,avoir,avons,avoua,avoue,avril,axais,axait,axant,axees,axent,axera,axiez,axile,axone,axons,ayant,ayons,azote,azura,azure,azurs,azyme,babas,babil,babys,bacha,bache,bacla,bacle,bacon,bacul,badge,badin,baffa,baffe,bafra,bafre,bagad,bagne,bagou,bagua,bague,bahut,baies,bains,baisa,baise,balai,bales,balla,balle,balsa,balte,banal,banco,bancs,banda,bande,bangs,banjo,banna,banne,banni,barba,barbe,barbu,barda,barde,bards,barge,baril,barns,baron,barra,barre,barri,barye,basai,basal,basas,basat,basee,baser,bases,basez,basic,basin,basse,baste,batai,batas,batat,batee,bater,bates,batez,batie,batik,batir,batis,batit,baton,batte,battu,bauds,bauge,baume,bavai,bavas,bavat,baver,baves,bavez,bayai,bayas,bayat,bayer,bayes,bayez,bayou,bazar,beais,beait,beant,beate,beats,beauf,beaux,bebes,becha,beche,becot,becta,becte,bedon,beent,beera,begue,begum,beiez,beige,bekes,belai,belas,belat,belee,beler,beles,belez,belge,belle,belon,bemol,benef,benet,benie,benin,benir,benis,benit,benne,beons,bequa,beque,berca,berce,beret,berge,berme,berna,berne,beryl,besef,betas,betel,betes,beton,bette,beurs,bevue,biais,bibis,bible,bicha,biche,bicot,bides,bidet,bidon,biefs,biens,biere,biffa,biffe,bigla,bigle,bigot,bigre,bigue,bijou,bilai,bilan,bilas,bilat,bilee,biler,biles,bilez,bille,bills,binai,binas,binat,binee,biner,bines,binez,bingo,bique,birbe,bisai,bisas,bisat,bisee,biser,bises,biset,bisez,bison,bisou,bissa,bisse,bitai,bitas,bitat,bitee,biter,bites,bitez,bitos,bitta,bitte,bizut,black,blair,blama,blame,blanc,blaps,blasa,blase,bleds,bleme,blemi,blesa,blese,blets,bleue,bleui,bleus,blocs,blond,blues,bluet,bluff,bluta,blute,bobos,bocal,boche,bocks,boete,boeuf,bogie,bogue,boira,boire,boisa,boise,boita,boite,boive,boldo,bolee,bolet,bomba,bombe,bomes,bonda,bonde,bondi,bonds,bonis,bonne,bonte,bonus,bonze,booms,boots,boras,borax,borda,borde,bords,bores,borna,borne,borts,bosco,bossa,bosse,bossu,botes,botta,botte,boucs,bouda,boude,bouee,boues,bouge,bouif,boula,boule,boume,bourg,bouse,bouta,boute,bouts,bovin,boxai,boxas,boxat,boxee,boxer,boxes,boxez,boyau,brada,brade,braie,brais,brait,brama,brame,brans,brasa,brase,brava,brave,bravo,braya,braye,break,brefs,brela,brele,breme,breve,brick,brida,bride,bries,brifa,brife,brima,brime,brins,brios,brisa,brise,brocs,broda,brode,broie,brome,brook,broum,brous,brout,broya,broye,bruie,bruir,bruis,bruit,brula,brule,bruma,brume,brune,bruni,bruns,brute,bruts,bubon,bucha,buche,buees,buggy,bugle,buire,bulbe,bulle,bumes,bures,burin,buron,buscs,buses,busse,buste,butai,butas,butat,butee,buter,butes,butez,butin,butor,butta,butte,buvee,buvez,caban,cabas,cabla,cable,cabot,cabra,cabre,cabri,cabus,cacao,cacas,cacha,cache,caddy,cades,cadet,cadis,cadra,cadre,caduc,cafes,cafre,cafta,cafte,cages,caget,cagna,cagne,cagot,cahot,caids,caieu,cairn,cajou,cajun,cakes,calai,calao,calas,calat,calee,caler,cales,calez,calfs,calin,calma,calme,calmi,calos,calot,calta,calte,calva,camee,cames,campa,campe,camps,camus,canai,canal,canas,canat,candi,caner,canes,canez,canif,canin,canna,canne,canoe,canon,canot,canut,caoua,capea,capee,capes,capon,capot,cappa,capre,capta,capte,caqua,caque,carat,carda,carde,carex,cargo,caria,carie,caris,carma,carme,carne,carpe,carra,carre,carry,carte,casai,casas,casat,casee,caser,cases,casez,cassa,casse,caste,catch,catin,catis,cauri,causa,cause,cavai,cavas,cavat,cavee,caver,caves,cavet,cavez,ceans,cedai,cedas,cedat,cedee,ceder,cedes,cedex,cedez,cedre,ceins,ceint,celai,celas,celat,celee,celer,celes,celez,cella,celle,celte,celui,cenes,cense,cents,cepes,cerat,cerce,cerfs,cerna,cerne,cesar,cessa,cesse,ceste,cette,chahs,chair,chais,chale,champ,chant,chaos,chape,chars,chats,chaud,chaut,chaux,chefs,cheik,chene,chenu,chera,chere,cheri,chers,chiai,chias,chiat,chics,chiee,chien,chier,chies,chiez,china,chine,chiot,chipa,chipe,chips,chocs,choie,choir,chois,choit,choix,choma,chome,chopa,chope,chose,chott,choux,choya,choye,chues,chuta,chute,chyle,chyme,cible,cidre,ciels,cieux,cigue,cilie,cilla,cille,cimes,cines,cippe,cirai,ciras,cirat,ciree,cirer,cires,cirez,ciron,cirre,ciste,citai,citas,citat,citee,citer,cites,citez,civet,civil,clade,claie,clair,clama,clame,clamp,clams,clans,clapa,clape,clapi,clava,clave,clebs,clefs,clerc,clics,clins,clips,cliva,clive,clodo,clone,clope,clora,clore,close,cloua,cloue,clous,clown,clubs,cluse,coach,coati,cobea,cobol,cobra,cocas,cocha,coche,cocon,cocos,cocus,codai,codas,codat,codee,coder,codes,codex,codez,codon,coeur,cogna,cogne,cohue,coing,coins,coita,coite,coits,colin,colis,colla,colle,colon,colts,colza,comas,combe,comma,comme,comte,concu,conde,cones,conga,conge,conie,conir,conis,conit,connu,conta,conte,copal,copia,copie,copra,copte,coqua,coque,coran,corda,corde,corna,corne,cornu,coron,corps,corsa,corse,cossa,cosse,cossu,cosys,cotai,cotas,cotat,cotee,coter,cotes,cotez,cotie,cotir,cotis,cotit,coton,cotte,couac,couda,coude,couds,couic,coula,coule,coupa,coupe,coups,coure,cours,court,couru,couse,cousu,couta,coute,couts,couva,couve,coxal,coyau,crabe,crack,crado,craie,crama,crame,crana,crane,crans,crase,crash,crave,crawl,creai,creas,creat,credo,creee,creer,crees,creez,crema,creme,crena,crene,crepa,crepe,crepi,crepu,crete,creux,creva,creve,criai,crias,criat,crics,criee,crier,cries,criez,crime,crins,crise,crocs,croie,crois,croit,croix,cross,cruel,crues,cubai,cubas,cubat,cubee,cuber,cubes,cubez,cuira,cuire,cuirs,cuise,cuita,cuite,cuits,culai,culas,culat,culee,culer,cules,culex,culez,culot,culte,cumin,cumul,curai,curas,curat,curee,curer,cures,curez,curry,cuvai,cuvas,cuvat,cuvee,cuver,cuves,cuvez,cyans,cycas,cycle,cygne,czars,dadas,dagua,dague,dahir,daims,daine,dalla,dalle,dalot,damai,daman,damas,damat,damee,damer,dames,damez,damna,damne,dandy,dansa,danse,darce,darda,darde,dards,darne,darse,datai,datas,datat,datee,dater,dates,datez,datif,datte,dauba,daube,debat,debet,debit,debut,decan,decas,deces,deche,dechu,decis,decor,decri,decru,decue,decus,decut,dedia,dedie,dedis,dedit,defia,defie,defis,defit,degat,degel,degre,deite,delai,delco,delia,delie,delit,delot,delta,demes,demet,demie,demis,demit,demon,denia,denie,denis,dense,dente,dents,denua,denue,depit,deplu,depot,derby,derme,derny,desir,dette,deuil,devet,devez,devia,devie,devin,devis,devot,devra,diane,diapo,dicos,dicta,dicte,diese,diete,dieux,diffa,digit,digne,digon,digue,dilua,dilue,dimes,dinai,dinar,dinas,dinat,dinde,diner,dines,dinez,dingo,diode,dirai,diras,direz,disco,dises,disse,dites,divan,divas,divin,divis,djain,djinn,docks,docte,dodos,dodue,dodus,doges,dogme,dogue,doigt,doive,dolai,dolas,dolat,dolce,dolee,doler,doles,dolez,dolic,domes,donna,donne,dopai,dopas,dopat,dopee,doper,dopes,dopez,dorai,doras,dorat,doree,dorer,dores,dorez,doris,dorme,dormi,dosai,dosas,dosat,dosee,doser,doses,dosez,dosse,dotai,dotal,dotas,dotat,dotee,doter,dotes,dotez,douai,douar,douas,douat,douce,douci,douee,douer,doues,douez,doums,douro,douta,doute,douve,douze,doyen,draie,drain,drame,drapa,drape,draps,drave,draya,draye,drege,drill,dring,drink,driva,drive,droit,drole,dropa,drope,drops,drues,drupe,duale,duaux,ducal,ducat,duces,duche,duels,duite,duits,dulie,dumes,dunes,duodi,dupai,dupas,dupat,dupee,duper,dupes,dupez,durai,duras,durat,durci,duree,durer,dures,durez,durit,dusse,dutes,duvet,dyade,dzeta,ebahi,ebats,ebene,eboua,eboue,ecala,ecale,ecang,ecart,ecati,echec,eches,echos,echue,echus,echut,ecima,ecime,eclat,eclos,eclot,ecole,ecopa,ecope,ecora,ecore,ecote,ecots,ecran,ecrie,ecrin,ecris,ecrit,ecrou,ecrue,ecrus,ecula,ecule,ecuma,ecume,ecura,ecure,edams,edens,edile,edita,edite,edits,effet,egaie,egala,egale,egara,egard,egare,egaux,egaya,egaye,egeen,egide,egout,eider,elans,elave,elbot,elegi,eleis,eleva,eleve,elfes,elida,elide,elima,elime,elira,elire,elise,elite,elles,eloge,eluda,elude,elues,email,emana,emane,emaux,embat,embua,embue,embus,emeri,emets,emeus,emeut,emiai,emias,emiat,emiee,emier,emies,emiez,emirs,emise,emois,emoud,emous,empan,empli,emues,emula,emule,encan,encas,encra,encre,endos,enfer,enfeu,enfin,enfla,enfle,enfui,engin,enjeu,enlia,enlie,ennui,enoua,enoue,entai,entas,entat,entee,enter,entes,entez,entra,entre,envia,envie,envoi,envol,epair,epais,epala,epale,epand,epars,epata,epate,epave,epees,epela,epele,ephod,epiai,epias,epiat,epica,epice,epiee,epier,epies,epieu,epiez,epige,epila,epile,epina,epine,epite,epode,epoux,epris,epuca,epuce,epura,epure,equin,eraie,eraya,eraye,ergot,erige,erine,eroda,erode,errai,erras,errat,errer,erres,errez,escha,esche,escot,espar,essai,esses,essor,ester,estoc,etage,etaie,etain,etais,etait,etala,etale,etals,etama,etame,etang,etant,etape,etats,etaux,etaya,etaye,etend,eteta,etete,eteuf,ether,etier,etiez,etira,etire,etocs,etole,etres,etron,etude,etuis,etuva,etuve,eumes,euros,eusse,eutes,evade,evasa,evase,eveil,event,evida,evide,evier,evita,evite,evohe,exact,exces,exclu,exige,exigu,exila,exile,exils,exode,expia,expie,extra,fable,faces,facha,fache,facho,facon,facto,fadai,fadas,fadat,fadee,fader,fades,fadez,fados,fagne,fagot,faims,faine,faire,faite,faits,fakir,fallu,falot,falun,famee,fames,fanai,fanal,fanas,fanat,fanee,faner,fanes,fanez,fange,fanon,faons,farad,farce,farci,farda,farde,fards,faros,farta,farte,farts,fasce,fasse,faste,fatal,fatma,fatum,faune,fauta,faute,fauve,favus,faxai,faxas,faxat,faxee,faxer,faxes,faxez,fayot,feale,feaux,fecal,feces,feins,feint,felai,felas,felat,felee,feler,feles,felez,felin,felon,femme,femur,fende,fends,fendu,fenil,fente,ferai,feras,ferez,ferie,ferla,ferle,ferma,ferme,ferra,ferre,ferry,ferue,ferus,fessa,fesse,fessu,fetai,fetas,fetat,fetee,feter,fetes,fetez,fetus,feues,feuil,feula,feule,feves,fiais,fiait,fiant,fibre,ficha,fiche,fichu,ficus,fiees,fiefs,fiels,fient,fiera,fiere,fiers,fieux,fifre,figea,figee,figer,figes,figez,figue,fiiez,filai,filas,filat,filee,filer,files,filet,filez,filin,fille,filma,filme,films,filon,filou,fimes,final,fines,finie,finir,finis,finit,fiole,fions,firme,fiscs,fisse,fites,fixai,fixas,fixat,fixee,fixer,fixes,fixez,fjeld,fjord,flair,flana,flanc,flane,flans,flapi,flash,fleau,flein,fleur,flics,flint,flirt,flood,flops,flore,flots,floua,floue,flous,fluai,fluas,fluat,fluer,flues,fluet,fluez,fluor,flush,fluta,flute,fluxa,fluxe,focal,foehn,foies,foins,foira,foire,folie,folio,folks,folle,fonca,fonce,fonda,fonde,fonds,fondu,fonte,foots,forai,foras,forat,forca,force,forci,foree,forer,fores,foret,forez,forge,forma,forme,forte,forts,forum,fosse,fouee,fouet,fouge,fouie,fouir,fouis,fouit,foula,foule,fours,foute,foutu,fovea,foxee,foxes,foyer,fracs,fraie,frais,franc,frape,fraya,fraye,frein,frele,fremi,frene,freon,frere,freta,frete,frets,freux,frics,frigo,frima,frime,fripa,fripe,frira,frire,frisa,frise,frite,fritz,frocs,froid,frola,frole,front,froua,froue,fruit,fucus,fuels,fugua,fugue,fuies,fuira,fuite,fulls,fumai,fumas,fumat,fumee,fumer,fumes,fumet,fumez,funin,funky,furax,furet,furia,furie,fusai,fusas,fusat,fusee,fusel,fuser,fuses,fusez,fusil,fusse,futee,futes,futur,fuyez,gable,gacha,gache,gades,gadin,gaffa,gaffe,gagas,gagea,gagee,gager,gages,gagez,gagna,gagne,gaiac,gaies,gaina,gaine,gains,galas,galba,galbe,gales,galet,gallo,galon,galop,gamba,gambe,gamin,gamme,ganga,gangs,gansa,ganse,ganta,gante,gants,garai,garas,garat,garce,garda,garde,garee,garer,gares,garez,garni,garou,gatai,gatas,gatat,gatee,gater,gates,gatez,gatte,gaude,gaula,gaule,gaupe,gaurs,gauss,gavai,gavas,gavat,gavee,gaver,gaves,gavez,gayal,gazai,gazas,gazat,gazee,gazer,gazes,gazez,gazon,geais,geant,gecko,geins,geint,gelai,gelas,gelat,gelee,geler,geles,gelez,gelif,gemie,gemir,gemis,gemit,gemma,gemme,genai,genas,genat,genee,gener,genes,genet,genez,genie,genou,genre,geode,geole,gerai,geras,gerat,gerba,gerbe,gerca,gerce,geree,gerer,geres,gerez,germa,germe,gesir,gesse,geste,gibet,gibus,gicla,gicle,gifla,gifle,gigot,gigue,gilde,gilet,gille,girie,girls,giron,gisez,gitai,gitan,gitas,gitat,giter,gites,gitez,giton,givra,givre,glaca,glace,glana,gland,glane,glapi,glass,glati,glebe,glene,globe,glome,glosa,glose,gluau,gluis,glume,gnole,gnome,gnons,gnose,gnous,goals,gobai,gobas,gobat,gobee,gober,gobes,gobez,gobie,godai,godas,godat,goder,godes,godet,godez,goglu,gogos,golfe,golfs,gombo,gomma,gomme,gonda,gonde,gonds,gongs,gonze,gords,goret,gorge,gosse,goton,gouda,gouet,gouge,goule,goulu,goums,goura,gourd,goure,gouta,goute,gouts,goyim,grace,grade,grain,grand,graux,grava,grave,gravi,greai,greas,great,grebe,grecs,greee,green,greer,grees,greez,grege,grela,grele,grena,grene,grenu,gresa,grese,greva,greve,grief,grill,grils,grima,grime,griot,grisa,grise,grive,grogs,groin,grole,groom,group,gruau,grues,gruge,grume,guais,guano,gueai,gueas,gueat,guede,gueee,gueer,guees,gueez,guepe,guere,gueri,guete,guets,gueux,guida,guide,guipa,guipe,guise,guppy,gurus,guzla,gypse,gyrin,habit,habla,hable,hacha,hache,hadji,haies,haiks,haiku,haine,haira,haire,halai,halas,halat,halbi,halee,haler,hales,halez,halle,halls,halos,halte,halva,hamac,hampe,hanap,hanse,hanta,hante,hapax,happa,happe,haras,harda,harde,hardi,harem,harki,harle,haros,harpa,harpe,harts,hasch,hases,haste,hasts,hatai,hatas,hatat,hatee,hater,hates,hatez,hatif,haute,hauts,havai,havas,havat,havee,haver,haves,havez,havie,havir,havis,havit,havre,hayon,hecto,helai,helas,helat,helee,heler,heles,helez,helix,hello,henne,henni,henry,herba,herbe,herbu,heres,heron,heros,herpe,hersa,herse,hertz,hetre,heure,heurs,heurt,hevea,hibou,hindi,hippy,hissa,hisse,hiver,hobby,hocco,hocha,hoche,hoirs,homes,homme,homos,honni,honte,horde,horst,hosto,hotel,hotes,hotte,houai,houas,houat,houee,houer,houes,houez,houka,houle,hourd,houri,hoyau,huais,huait,huant,huard,huart,hucha,huche,huees,huent,huera,huiez,huila,huile,humai,humas,humat,humee,humer,humes,humez,humus,hunes,huons,huppe,hures,hurla,hurle,huron,hutte,hydne,hydre,hyene,hymen,hymne,iambe,ibere,ichor,icone,ictus,ideal,ideel,idees,idiot,idole,igloo,ignee,ignes,igues,ileal,ileon,ileus,ilien,ilion,ilote,ilots,image,imago,imams,imbue,imbus,imide,imita,imite,immun,imper,impie,impot,impur,incas,index,indue,indus,infra,infus,inlay,innee,innes,inoui,input,inter,intis,inuit,inule,iodai,iodas,iodat,iodee,ioder,iodes,iodez,iodla,iodle,ioula,ioule,ipeca,irais,irait,iriez,irisa,irise,irone,irons,iront,isard,isbas,islam,isola,isole,issue,issus,items,itera,itere,iules,ivres,ixias,ixode,jabla,jable,jabot,jacee,jacks,jacot,jacta,jacte,jades,jadis,jaina,jains,jalap,jales,jalon,jambe,jante,japon,jappa,jappe,jarde,jarre,jasai,jasas,jasat,jaser,jases,jasez,jaspa,jaspe,jatte,jauge,jaune,jauni,javas,javel,jeans,jeeps,jenny,jerez,jerka,jerke,jerks,jesus,jetai,jetas,jetat,jetee,jeter,jetes,jetez,jeton,jette,jeudi,jeuna,jeune,jodla,jodle,joies,joins,joint,joker,jolie,jolis,jonca,jonce,joncs,jotas,jouai,joual,jouas,jouat,jouee,jouer,joues,jouet,jouez,jougs,jouir,jouis,jouit,joule,jours,jouta,joute,joyau,jubes,jucha,juche,judas,judos,jugal,jugea,jugee,juger,juges,jugez,juifs,juill,juive,julep,jules,jumbo,jumel,junte,jupes,jupon,jurai,juras,jurat,juree,jurer,jures,jurez,juron,jurys,jusee,jusqu,juste,jutai,jutas,jutat,jutee,juter,jutes,jutez,kacha,kache,kakis,kalis,kamis,kapok,kappa,karma,karts,kavas,kawas,kayac,kayak,kefir,kendo,kepis,ketch,khans,khats,khmer,khols,kicks,kiefs,kikis,kilos,kilts,kiwis,knout,koala,koine,kolas,kores,kraal,krach,kraft,kraks,kriss,ksour,kurde,kyrie,kyste,label,labie,labre,lacai,lacas,lacat,lacee,lacer,laces,lacet,lacez,lacha,lache,lacis,lacte,ladin,ladre,lagon,laics,laide,laids,laies,laina,laine,laird,laite,laits,laius,laize,lamai,lamas,lamat,lamee,lamer,lames,lamez,lamie,lampa,lampe,lanca,lance,lande,lange,lapai,lapas,lapat,lapee,laper,lapes,lapez,lapin,lapis,laqua,laque,larda,larde,lards,large,largo,larme,larve,laser,lassa,lasse,lasso,latex,latin,latta,latte,laure,lavai,lavas,lavat,lavee,laver,laves,lavez,lavis,layai,layas,layat,layee,layer,layes,layez,layon,lazzi,lebel,lecha,leche,lecon,ledit,legal,legat,leger,leges,legua,legue,lemme,lente,lento,lents,lepre,lerot,lesai,lesas,lesat,lesee,leser,leses,lesez,lesta,leste,lests,letal,leude,leurs,levai,levas,levat,levee,lever,leves,levez,levre,lexie,lexis,liage,liais,liait,liane,liant,liard,liber,libre,lices,licha,liche,licol,licou,lidos,lieds,liees,liege,liens,lient,liera,lieue,lieur,lieus,lieux,lifta,lifte,lifts,liges,ligie,ligna,ligne,ligot,ligua,ligue,liiez,lilas,limai,liman,limas,limat,limbe,limee,limer,limes,limez,limon,liner,linga,linge,links,linon,linos,lions,lippe,lippu,lirai,liras,lirez,liron,lises,lisez,lissa,lisse,lista,liste,litai,litas,litat,litee,liter,lites,litez,litho,litre,liure,lives,livet,livra,livre,lobai,lobas,lobat,lobby,lobee,lober,lobes,lobez,local,locha,loche,lochs,loden,loess,lofai,lofas,lofat,lofer,lofes,lofez,lofts,logea,logee,loger,loges,logez,logis,logos,loirs,lolos,longe,longs,looch,loofa,looks,lopin,loqua,loque,loran,lords,loris,lotes,lotie,lotir,lotis,lotit,lotos,lotte,lotus,louai,louas,louat,louee,louer,loues,louez,loufa,loufe,louis,loupa,loupe,loups,loura,lourd,loure,louva,louve,lovai,lovas,lovat,lovee,lover,loves,lovez,loyal,loyer,lubie,lucre,lueur,luffa,lugea,luger,luges,lugez,luira,luire,luise,luite,luits,lulus,lumen,lumes,lumps,lunch,lundi,lunee,lunes,lupin,lupus,luron,lusin,lusse,lutai,lutas,lutat,lutee,luter,lutes,lutez,luths,lutin,lutta,lutte,luxai,luxas,luxat,luxee,luxer,luxes,luxez,lycee,lycra,lyres,lyric,lysai,lysas,lysat,lysee,lyser,lyses,lysez,macha,mache,macho,macis,macla,macle,macon,macre,madre,mafia,mages,magie,magma,magna,magne,magot,maias,maies,mails,mains,maint,maire,major,makis,males,malin,malis,malle,malta,malte,malts,malus,maman,mambo,mamie,mammy,manas,manda,mande,manes,mange,mania,manie,manne,manse,mante,maori,maoux,maqua,maque,marcs,mardi,maree,mares,marge,maria,marie,marin,maris,marks,marli,marna,marne,marra,marre,marri,marte,maser,massa,masse,mataf,matai,matas,matat,match,matee,mater,mates,matez,maths,matie,matin,matir,matis,matit,maton,matou,matte,maure,mauve,mayas,mayen,mayes,meats,mecha,meche,medes,media,medis,medit,medoc,mefia,mefie,mefis,mefit,megie,megir,megis,megit,megot,meiji,melai,melas,melat,melba,melee,meler,meles,melez,melia,melon,melos,memes,menai,menas,menat,menee,mener,menes,menez,menin,mense,mente,menti,menue,menus,merci,merde,meres,merle,merlu,merou,mesas,messe,metal,metas,meteo,metis,metra,metre,metro,mette,meula,meule,meure,meurs,meurt,meute,meuve,mezzo,miaou,micas,miche,micro,midis,miels,miens,mieux,migra,migre,milan,miles,mille,mimai,mimas,mimat,mimee,mimer,mimes,mimez,mimis,minai,minas,minat,mince,minci,minee,miner,mines,minet,minez,minis,minot,minou,minus,mirai,miras,mirat,miree,mirer,mires,mirez,miros,misai,misas,misat,misee,miser,mises,misez,misse,mitai,mitan,mitas,mitat,mitee,miter,mites,mitez,miton,mitre,mixai,mixas,mixat,mixee,mixer,mixes,mixez,mixte,moche,mocos,modal,modem,modes,modus,moere,moine,moins,moira,moire,moisa,moise,moisi,moita,moite,moiti,mokas,moles,molle,molli,mollo,molys,momes,momie,monda,monde,monel,monos,monta,monte,monts,moqua,moque,moral,morde,mords,mordu,mores,morio,morne,morse,morte,morts,morue,morve,mosan,motel,motet,motif,motos,motta,motte,motus,mouds,moues,moula,moule,moult,moulu,mouts,mouva,mouve,moxas,moyee,moyen,moyes,moyeu,muais,muait,muant,mucha,muche,mucor,mucus,muees,muent,muera,muets,mufle,mufti,muges,mugir,mugis,mugit,muids,muiez,mules,mulet,mulon,mulot,mumes,munie,munir,munis,munit,muons,murai,mural,muras,murat,muree,murer,mures,muret,murex,murez,murie,murir,muris,murit,musai,musas,musat,muscs,musee,muser,muses,musez,mussa,musse,musts,mutai,mutas,mutat,mutee,muter,mutes,mutez,mutin,myome,myope,myrte,mythe,nabab,nabot,nacra,nacre,nadir,nafes,nagea,nagee,nager,nages,nagez,naifs,naine,nains,naive,najas,nanan,nanar,nanas,nanti,napee,napel,nappa,nappe,nards,narra,narre,nasal,nases,nasse,natal,natif,natta,natte,naval,navet,navra,navre,nazie,nazis,neant,nebka,necks,nefle,negre,negus,neige,nenes,nenni,neons,nerfs,nervi,nette,neufs,neume,neuve,neves,neveu,niais,niait,niant,nicha,niche,nicol,niece,niees,nieme,nient,niera,nifes,niiez,nille,nimba,nimbe,ninas,niole,nions,nippa,nippe,nique,nitra,nitre,nival,nixes,noble,noces,nocif,noels,noeud,noies,noire,noirs,noise,nolis,nomes,nomma,nomme,nonce,nones,nonne,nopai,nopal,nopas,nopat,nopee,noper,nopes,nopez,nordi,noria,norme,notai,notas,notat,notee,noter,notes,notez,notre,nouai,nouas,nouat,nouba,nouee,nouer,noues,nouez,novai,novas,novat,novee,nover,noves,novez,noyai,noyas,noyat,noyau,noyee,noyer,noyes,noyez,nuage,nuais,nuait,nuant,nuees,nuent,nuera,nuiez,nuira,nuire,nuise,nuite,nuits,nulle,nuons,nuque,nurse,nylon,oasis,obeir,obeis,obeit,obele,obels,obera,obere,obese,obier,obits,objet,oblat,obole,obtus,obvia,obvie,occlu,ocean,ocrai,ocras,ocrat,ocree,ocrer,ocres,ocrez,octet,odeon,odeur,oeufs,oeuve,offre,oflag,ogive,ogres,oille,oings,ointe,oints,oisif,oison,okapi,oleum,olive,omble,ombra,ombre,omega,omets,omise,onces,oncle,ondee,ondes,ondin,ongle,opale,opens,opera,opere,opiat,opina,opine,opium,optai,optas,optat,opter,optes,optez,orage,orale,orant,oraux,orbes,ordre,orees,orges,orgie,orgue,oriel,orins,orles,orlon,ormes,ornai,ornas,ornat,ornee,orner,ornes,ornez,orobe,orpin,orque,ortie,orvet,osais,osait,osant,oscar,osees,osent,osera,oside,osier,osiez,osons,osque,ossue,ossus,otage,otais,otait,otant,otees,otent,otera,otiez,otite,otons,ouais,ouata,ouate,oubli,ouche,oueds,ouest,ouies,ouira,ourdi,ourla,ourle,ourse,ouste,outil,outra,outre,ouvra,ouvre,ovale,ovate,ovine,ovins,ovnis,ovula,ovule,oxyda,oxyde,oyais,oyats,ozene,ozone,pacha,packs,pacte,paddy,padou,pagea,pagee,pagel,pager,pages,pagez,pagne,pagre,pagus,paien,paies,pains,paire,pairs,palan,palee,pales,palet,palie,palir,palis,palit,palma,palme,palot,palpa,palpe,palud,palus,pamai,pamas,pamat,pamee,pamer,pames,pamez,pampa,panai,panas,panat,panax,panca,panda,panee,panel,paner,panes,panez,panic,panka,panna,panne,pansa,panse,pansu,paons,papal,papas,papes,papis,papys,paque,parai,paras,parat,parce,parcs,pardi,paree,pareo,parer,pares,parez,paria,parie,paris,parka,parla,parle,parme,parmi,paroi,paros,parsi,parte,parti,parts,parue,parus,parut,passa,passe,patai,patas,patat,patee,pater,pates,patez,patio,patir,patis,patit,paton,patre,patta,patte,pattu,pauma,paume,pausa,pause,pavai,pavas,pavat,pavee,paver,paves,pavez,pavie,pavot,payai,payas,payat,payee,payer,payes,payez,payse,peage,peans,peaux,pecha,peche,pedum,pegre,peina,peine,peins,peint,pekan,pekin,pelai,pelas,pelat,pelee,peler,peles,pelez,pelle,pelta,pelte,penal,pende,pends,pendu,penes,penil,penis,penne,penny,penon,pensa,pense,pente,pentu,peons,pepes,pepia,pepie,pepin,pepon,perca,perce,percu,perde,perds,perdu,peres,peril,perir,peris,perit,perla,perle,perot,perse,perte,pesai,pesas,pesat,pesee,peser,peses,pesez,peson,pesos,pesse,pesta,peste,petai,petas,petat,petee,peter,petes,petez,petit,peton,petre,petri,petun,peuls,peurs,pezes,phage,phare,phase,philo,phlox,phone,phono,photo,piafs,piano,pians,picas,picot,piece,pieds,piege,pieta,piete,pieux,pieze,pifai,pifas,pifat,pifee,pifer,pifes,pifez,piffa,piffe,pigea,pigee,piger,piges,pigez,pigne,pilaf,pilai,pilas,pilat,pilee,piler,piles,pilet,pilez,pilla,pille,pilon,pilou,pilum,pinca,pince,pinne,pinot,pinta,pinte,pions,pipai,pipas,pipat,pipee,piper,pipes,pipez,pipis,pipit,piqua,pique,pires,pises,pissa,pisse,pista,piste,pites,pitie,piton,pitre,pives,pivot,pizza,placa,place,plage,plaid,plaie,plais,plait,plana,plane,plans,plant,plate,plats,plebe,plein,pleur,pleut,pliai,plias,pliat,pliee,plier,plies,pliez,ploie,plomb,plots,plouc,plouf,plouk,ploya,ploye,pluie,pluma,plume,pneus,pocha,poche,poela,poele,poeme,poete,pogne,poids,poila,poile,poils,poilu,poing,poins,point,poire,poise,poker,polar,poles,polie,polio,polir,polis,polit,polka,polos,pomma,pomme,pompa,pompe,ponca,ponce,ponde,ponds,pondu,poney,ponge,ponta,ponte,ponts,pools,popes,poqua,poque,porcs,pores,porno,porta,porte,porto,ports,posai,posas,posat,posee,poser,poses,posez,posta,poste,potee,potes,potin,pouah,pouce,poufs,poule,pouls,poupe,prame,preau,prele,prend,preta,prete,prets,preux,prevu,priai,prias,priat,priee,prier,pries,priez,prima,prime,primo,prisa,prise,priva,prive,probe,profs,proie,prolo,promo,promu,prona,prone,prose,prote,proue,provo,prude,prune,psitt,psoas,ptose,puais,puait,puant,pubis,puces,puche,puees,puent,puera,puiez,puine,puisa,puise,puits,pulls,pulpe,pulsa,pulse,pumas,pumes,punas,punch,punie,punir,punis,punit,punks,puons,pupes,puree,pures,purge,purin,purot,pusse,putes,putti,putto,pyrex,quais,quand,quant,quark,quart,quasi,quels,queta,quete,queue,queux,quiet,quine,quint,quipo,quipu,quota,raban,rabat,rabbi,rabla,rable,rabot,racee,racer,races,racla,racle,radai,radar,radas,radat,radee,rader,rades,radez,radia,radie,radin,radio,radis,rafla,rafle,ragea,rager,rages,ragez,ragot,ragua,rague,raias,raide,raidi,raids,raies,rails,raina,raine,rajah,rajas,rakis,ralai,ralas,ralat,raler,rales,ralez,ramai,ramas,ramat,ramee,ramer,rames,ramez,ramie,ramis,rampa,rampe,rance,ranch,ranci,range,rangs,ranis,raout,rapai,rapas,rapat,rapee,raper,rapes,rapez,rapin,rapts,raqua,raque,rares,rasai,rasas,rasat,rasee,raser,rases,rasez,rashs,rasta,ratai,ratas,ratat,ratee,ratel,rater,rates,ratez,ratio,raton,raves,ravie,ravin,ravir,ravis,ravit,rayai,rayas,rayat,rayee,rayer,rayes,rayez,rayon,reacs,reagi,reais,reait,reale,reant,reaux,rebab,rebat,rebec,rebus,rebut,recel,reces,recez,reche,recif,recit,recru,recta,recto,recue,recul,recus,recut,redan,redie,redis,redit,redue,redus,redut,reels,reelu,reent,reera,refis,refit,refus,regal,regie,regir,regis,regit,regla,regle,reglo,regna,regne,reiez,reine,reins,rejet,relax,relia,relie,relis,relit,relue,relus,relut,remet,remis,remit,remiz,remua,remue,renal,rende,rends,rendu,renee,renes,renia,renie,renne,renom,renta,rente,reons,repas,repic,repit,repli,replu,repos,repue,repus,reput,resta,reste,retif,retro,reuni,revai,revas,revat,revee,rever,reves,revet,revez,revis,revit,revue,revus,rhuma,rhumb,rhume,rhums,riais,riait,rials,riant,ribla,rible,riche,ricin,ridai,ridas,ridat,ridee,rider,rides,ridez,riels,riens,rient,rieur,rifla,rifle,rifts,riiez,rimai,rimas,rimat,rimee,rimer,rimes,rimez,rinca,rince,rings,rions,ripai,ripas,ripat,ripee,riper,ripes,ripez,rirai,riras,rires,rirez,risee,risse,rital,rites,rivai,rival,rivas,rivat,rivee,river,rives,rivet,rivez,rixes,robai,robas,robat,robee,rober,robes,robez,robin,robot,roche,rocks,rocou,rodai,rodas,rodat,rodee,rodeo,roder,rodes,rodez,rogna,rogne,rogue,roide,roidi,roles,roman,rompe,romps,rompt,rompu,ronce,ronde,rondi,rondo,ronds,roneo,ronge,roqua,roque,rosai,rosas,rosat,rosee,roser,roses,rosez,rosie,rosir,rosis,rosit,rossa,rosse,rotai,rotas,rotat,roter,rotes,rotez,rotie,rotin,rotir,rotis,rotit,rotor,rouai,rouan,rouas,rouat,rouee,rouer,roues,rouet,rouez,roufs,rouge,rougi,rouie,rouir,rouis,rouit,roula,roule,roumi,round,routa,route,royal,ruade,ruais,ruait,ruant,ruban,rubis,rucha,ruche,rudes,ruees,ruent,ruera,rugby,rugir,rugis,rugit,ruiez,ruila,ruile,ruina,ruine,rumba,rumen,rumex,ruolz,ruons,rupin,rural,rusai,rusas,rusat,rusee,ruser,ruses,rusez,rushs,russe,sabir,sabla,sable,sabot,sabra,sabre,sache,sacra,sacre,safre,sagas,sages,sagou,sagum,sahel,saiga,saine,sains,saint,saisi,saite,sajou,sakes,sakis,salai,salas,salat,salee,salep,saler,sales,salez,salie,salin,salir,salis,salit,salle,salol,salon,salop,salsa,salse,salua,salue,salut,salve,samba,samit,sampi,sanas,sangs,sanie,sante,sanve,sanza,saoul,sapai,sapas,sapat,sapee,saper,sapes,sapez,sapin,saqua,saque,sarde,saris,saros,sassa,sasse,satin,satis,sauca,sauce,sauge,saule,sauna,saune,saura,saure,sauri,saurs,sauta,saute,sauts,sauva,sauve,savez,savon,saxes,saxon,saxos,sayon,sbire,scalp,scare,scats,sceau,scene,schah,sciai,scias,sciat,sciee,scier,scies,sciez,scion,scoop,score,scout,scull,scuta,seant,seaux,sebka,sebum,secha,seche,secte,seide,seime,seine,seing,seins,seize,selfs,sella,selle,selon,seltz,selve,semai,semas,semat,semee,semer,semes,semez,semis,senat,senau,senes,senne,sense,sente,senti,seoir,sepia,serac,serai,seras,serbe,serez,serfs,serge,seria,serie,serin,serpe,serra,serre,serte,serti,serum,serve,servi,seton,seuil,seule,seuls,seves,sevir,sevis,sevit,sevra,sevre,sexes,sexte,sexto,sexue,shahs,shako,shoot,short,shows,shunt,sicle,siege,siens,siera,sieur,sigle,sigma,signa,signe,silex,silos,simas,singe,sinon,sinus,sioux,sires,sirex,sirli,sirop,sisal,sises,sitar,sites,sitot,situa,situe,siums,sixte,skais,skate,skiai,skias,skiat,skier,skies,skiez,skiff,skifs,slang,slave,slips,sloop,slows,smala,smalt,smart,smash,smogs,smolt,smurf,snack,sniff,snoba,snobe,snobs,sobre,socle,sodas,sodee,sodes,soeur,sofas,soies,soifs,soins,soirs,sojas,solda,solde,solen,soles,solex,solin,solos,somas,somma,somme,sonar,sonda,sonde,songe,sonna,sonne,sonos,sorbe,sores,sorte,sorti,sorts,sosie,sotch,sotie,sotte,souci,souda,soude,soues,souks,soula,soule,souls,soupa,soupe,sourd,souri,soute,soyas,soyer,soyez,spahi,spart,spath,speos,sphex,spire,spore,sport,spots,sprat,spray,sprue,squat,squaw,stade,staff,stage,stand,stars,stase,steak,stele,stemm,stems,steno,stera,stere,stick,stipe,stock,stops,store,stout,stras,stria,strie,strix,stucs,styla,style,stylo,suage,suais,suait,suant,suave,suber,subie,subir,subis,subit,sucai,sucas,sucat,sucee,sucer,suces,sucez,sucon,sucra,sucre,suede,suees,suent,suera,sueur,suies,suiez,suifa,suife,suifs,suint,suite,suive,suivi,sujet,sulky,sumac,sumes,sunna,suons,super,supin,supra,surah,sures,suret,surfa,surfe,surfs,surgi,surin,surir,suris,surit,suros,sushi,susse,sutes,sutra,swaps,swing,sylve,sympa,tabac,tabar,tabes,tabla,table,tabor,tabou,tacca,tacet,tacha,tache,tacon,tacot,tacts,tafia,tagal,taies,taiga,tains,taira,taire,taise,talai,talas,talat,talcs,talee,taler,tales,talez,talla,talle,talon,talus,tamia,tamil,tamis,tanca,tance,tango,tanin,tanks,tanna,tanne,tante,taons,tapai,tapas,tapat,tapee,taper,tapes,tapez,tapie,tapin,tapir,tapis,tapit,tapon,taqua,taque,tarai,taras,tarat,tarda,tarde,taree,tarer,tares,taret,tarez,targe,tarie,tarif,tarin,tarir,taris,tarit,tarot,tarse,tarte,tarti,tassa,tasse,tatai,tatas,tatat,tatee,tater,tates,tatez,tatou,taule,taupe,taure,taxai,taxas,taxat,taxee,taxer,taxes,taxez,taxie,taxis,taxon,tchao,tecks,teins,teint,teles,telex,telle,tells,tempe,tempo,temps,tende,tends,tendu,tenez,tenia,tenir,tenon,tenor,tenta,tente,tenue,tenus,terca,terce,terme,terne,terni,terra,terre,terri,tersa,terse,testa,teste,tests,tetai,tetas,tetat,tetee,teter,tetes,tetez,tetin,teton,tetra,tette,tetue,tetus,texan,texte,thaie,theme,these,theta,thons,thora,thune,thuya,thyms,tians,tiare,tibia,tiede,tiedi,tiens,tient,tiers,tiffe,tiges,tigra,tigre,tilde,tilla,tille,tilts,timon,tinta,tinte,tiqua,tique,tirai,tiras,tirat,tiree,tirer,tires,tiret,tirez,tisai,tisas,tisat,tisee,tiser,tises,tisez,tison,tissa,tisse,tissu,titan,titis,titra,titre,tmese,toast,toges,toila,toile,toisa,toise,toits,tokai,tokay,tolee,toles,tolet,tolle,tolus,tomai,tomas,tomat,tomba,tombe,tomee,tomer,tomes,tomez,tomme,tommy,tonal,tonde,tonds,tondu,tonie,tonka,tonna,tonne,tonte,tonus,topai,topas,topat,toper,topes,topez,topos,toqua,toque,torah,torde,tords,tordu,torea,toree,torii,toril,toron,torse,torts,torve,total,totem,toton,totos,touai,touas,touat,touee,touer,toues,touez,tourd,tours,toute,touts,trabe,traca,trace,tracs,tract,trahi,traie,train,trais,trait,trama,trame,trams,trapu,trema,treve,triai,trial,trias,triat,tribu,tridi,triee,trier,tries,triez,trima,trime,trine,trins,triol,trios,tripe,trips,trocs,trois,troll,trona,tronc,trone,trope,trots,troua,troue,trous,trucs,truie,trust,tsars,tuage,tuais,tuait,tuant,tubai,tubas,tubat,tubee,tuber,tubes,tubez,tuees,tuent,tuera,tueur,tuiez,tuila,tuile,tulle,tumes,tuner,tunes,tuons,tuque,turbe,turco,turcs,turfs,turne,tusse,tutes,tutie,tutti,tutus,tuyau,tweed,twist,typai,typas,typat,typee,typer,types,typez,typha,typon,typos,tyran,tzars,ubacs,ukase,ulema,ultra,ulula,ulule,ulves,unaus,unies,union,unira,unite,urane,urate,urees,urgea,urger,urina,urine,urnes,urubu,usage,usais,usait,usant,usees,usent,usera,usiez,usina,usine,usite,usnee,usons,usuel,usure,utile,uvale,uvaux,uvees,uvula,uvule,vache,vagin,vagir,vagis,vagit,vagua,vague,vainc,vaine,vains,vaire,vairs,valet,valez,valsa,valse,value,valus,valut,valve,vampa,vampe,vamps,vanda,vanna,vanne,vanta,vante,vapes,vaqua,vaque,varan,varia,varie,varus,varve,vases,vaste,veaux,veces,vecue,vecus,vecut,vedas,veina,veine,velai,velar,velas,velat,velds,veler,veles,velez,velie,velin,velos,velot,velte,velue,velum,velus,venal,vende,vends,vendu,venet,venez,venge,venin,venir,venta,vente,vents,venue,venus,verbe,verdi,verge,verin,verni,verra,verre,versa,verse,verso,verte,verts,vertu,verve,vesce,vespa,vessa,vesse,veste,vetes,vetez,vetir,vetis,vetit,vetue,vetus,veufs,veule,veuve,vexai,vexas,vexat,vexee,vexer,vexes,vexez,vibra,vibre,vices,vichy,vicia,vicie,vidai,vidas,vidat,videe,video,vider,vides,videz,vieil,viens,vient,vieux,vigie,vigne,viles,villa,ville,vimes,vinai,vinas,vinat,vinee,viner,vines,vinez,vingt,viocs,viola,viole,viols,virai,viral,viras,virat,viree,virer,vires,virez,viril,virus,visai,visas,visat,visee,viser,vises,visez,vison,vissa,visse,vitae,vital,vites,vitra,vitre,vivat,vives,vivez,vivra,vivre,vizir,vocal,vodka,voeux,vogua,vogue,voici,voies,voila,voile,voire,volai,volas,volat,volee,voler,voles,volet,volez,volis,volta,volte,volts,volve,vomer,vomie,vomir,vomis,vomit,votai,votas,votat,votee,voter,votes,votez,votif,votre,vouai,vouas,vouat,vouee,vouer,voues,vouez,vouge,voulu,vouta,voute,voyer,voyez,voyou,vraie,vrais,vulgo,vulve,wagon,watts,weber,wharf,whigs,whist,winch,xenon,xeres,xerus,xipho,xyste,yacht,yacks,yards,yeble,yeuse,yogas,yogis,yoles,yucca,zabre,zains,zanis,zanni,zanzi,zazou,zebra,zebre,zebus,zelee,zeles,zends,zeros,zesta,zeste,zibai,zibas,zibat,zibee,ziber,zibes,zibez,zigua,zigue,zincs,zippa,zippe,zizis,zloty,zoile,zombi,zonai,zonal,zonas,zonat,zonee,zoner,zones,zonez,zooms,zozos');
-    var $author$project$Main$getWords = function(lang) {
-        if (lang.$ === 'English') return $author$project$Words$english;
-        else return $author$project$Words$french;
-    };
-    var $elm$random$Random$andThen = F2(function(callback, _v0) {
-        var genA = _v0.a;
-        return $elm$random$Random$Generator(function(seed) {
-            var _v1 = genA(seed);
-            var result = _v1.a;
-            var newSeed = _v1.b;
-            var _v2 = callback(result);
-            var genB = _v2.a;
-            return genB(newSeed);
-        });
-    });
-    var $elm$random$Random$constant = function(value) {
-        return $elm$random$Random$Generator(function(seed) {
-            return _Utils_Tuple2(value, seed);
-        });
-    };
-    var $elm$core$List$drop = F2(function(n, list) {
-        drop: while(true){
-            if (n <= 0) return list;
-            else {
-                if (!list.b) return list;
-                else {
-                    var x = list.a;
-                    var xs = list.b;
-                    var $temp$n = n - 1, $temp$list = xs;
-                    n = $temp$n;
-                    list = $temp$list;
-                    continue drop;
-                }
-            }
-        }
-    });
-    var $elm$core$List$head = function(list) {
-        if (list.b) {
-            var x = list.a;
-            var xs = list.b;
-            return $elm$core$Maybe$Just(x);
-        } else return $elm$core$Maybe$Nothing;
-    };
-    var $elm_community$list_extra$List$Extra$getAt = F2(function(idx, xs) {
-        return idx < 0 ? $elm$core$Maybe$Nothing : $elm$core$List$head(A2($elm$core$List$drop, idx, xs));
-    });
-    var $elm$core$Bitwise$and = _Bitwise_and;
-    var $elm$core$Basics$negate = function(n) {
-        return -n;
-    };
-    var $elm$core$Bitwise$xor = _Bitwise_xor;
-    var $elm$random$Random$peel = function(_v0) {
-        var state = _v0.a;
-        var word = (state ^ state >>> (state >>> 28) + 4) * 277803737;
-        return (word >>> 22 ^ word) >>> 0;
-    };
-    var $elm$random$Random$int = F2(function(a, b) {
-        return $elm$random$Random$Generator(function(seed0) {
-            var _v0 = _Utils_cmp(a, b) < 0 ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
-            var lo = _v0.a;
-            var hi = _v0.b;
-            var range = hi - lo + 1;
-            if (!(range - 1 & range)) return _Utils_Tuple2(((range - 1 & $elm$random$Random$peel(seed0)) >>> 0) + lo, $elm$random$Random$next(seed0));
-            else {
-                var threshhold = (-range >>> 0) % range >>> 0;
-                var accountForBias = function(seed) {
-                    accountForBias: while(true){
-                        var x = $elm$random$Random$peel(seed);
-                        var seedN = $elm$random$Random$next(seed);
-                        if (_Utils_cmp(x, threshhold) < 0) {
-                            var $temp$seed = seedN;
-                            seed = $temp$seed;
-                            continue accountForBias;
-                        } else return _Utils_Tuple2(x % range + lo, seedN);
-                    }
-                };
-                return accountForBias(seed0);
-            }
-        });
-    });
-    var $author$project$Main$randomWord = function(words) {
-        return A2($elm$random$Random$andThen, function(_int) {
-            return $elm$random$Random$constant(A2($elm_community$list_extra$List$Extra$getAt, _int, words));
-        }, A2($elm$random$Random$int, 0, $elm$core$List$length(words) - 1));
-    };
-    var $author$project$Main$getRandomWord = A2($elm$core$Basics$composeR, $author$project$Main$getWords, A2($elm$core$Basics$composeR, $author$project$Main$randomWord, $elm$random$Random$generate($author$project$Main$NewWord)));
-    var $author$project$Main$HelpModal = {
-        $: 'HelpModal'
-    };
-    var $author$project$Game$Idle = {
-        $: 'Idle'
-    };
-    var $pablen$toasty$Toasty$Stack = F2(function(a, b) {
+    var $author$project$Main$getRandomWordSize = A2($elm$random$Random$generate, $author$project$Main$UpdateWordSize, A2($elm$random$Random$int, 5, 7));
+    var $elm$http$Http$BadStatus_ = F2(function(a, b) {
         return {
-            $: 'Stack',
+            $: 'BadStatus_',
             a: a,
             b: b
         };
     });
-    var $pablen$toasty$Toasty$initialState = A2($pablen$toasty$Toasty$Stack, _List_Nil, $elm$random$Random$initialSeed(0));
-    var $author$project$Main$initialModel = function(store) {
+    var $elm$http$Http$BadUrl_ = function(a) {
         return {
-            modal: store.helpViewed ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just($author$project$Main$HelpModal),
-            state: $author$project$Game$Idle,
-            store: store,
-            time: $elm$time$Time$millisToPosix(0),
-            toasties: $pablen$toasty$Toasty$initialState
-        };
-    };
-    var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-    var $author$project$I18n$parseLang = function(string) {
-        return A2($elm$core$String$startsWith, 'fr', string) ? $author$project$I18n$French : $author$project$I18n$English;
-    };
-    var $author$project$Main$init = function(flags) {
-        var _v0 = function() {
-            var _v1 = $author$project$Store$fromJson(flags.rawStore);
-            if (_v1.$ === 'Ok') {
-                var store = _v1.a;
-                return _Utils_Tuple2($author$project$Main$initialModel(store), $elm$core$Platform$Cmd$none);
-            } else {
-                var error = _v1.a;
-                var store = $author$project$Store$default($author$project$I18n$parseLang(flags.lang));
-                var newModel = $author$project$Main$initialModel(store);
-                return _Utils_Tuple2(_Utils_update(newModel, {
-                    state: $author$project$Game$Errored($author$project$Game$DecodeError($elm$json$Json$Decode$errorToString(error)))
-                }), $author$project$Main$encodeAndSaveStore(store));
-            }
-        }();
-        var model = _v0.a;
-        var cmds = _v0.b;
-        return _Utils_Tuple2(model, $elm$core$Platform$Cmd$batch(_List_fromArray([
-            $author$project$Main$getRandomWord(model.store.lang),
-            cmds
-        ])));
-    };
-    var $author$project$Main$BackSpace = {
-        $: 'BackSpace'
-    };
-    var $author$project$Main$CloseModal = {
-        $: 'CloseModal'
-    };
-    var $author$project$Main$KeyPressed = function(a) {
-        return {
-            $: 'KeyPressed',
+            $: 'BadUrl_',
             a: a
         };
     };
-    var $author$project$Main$NewTime = function(a) {
+    var $elm$http$Http$GoodStatus_ = F2(function(a, b) {
         return {
-            $: 'NewTime',
-            a: a
-        };
-    };
-    var $author$project$Main$StoreChanged = function(a) {
-        return {
-            $: 'StoreChanged',
-            a: a
-        };
-    };
-    var $author$project$Main$Submit = {
-        $: 'Submit'
-    };
-    var $elm$core$Platform$Sub$batch = _Platform_batch;
-    var $elm$json$Json$Decode$fail = _Json_fail;
-    var $elm$core$Tuple$mapFirst = F2(function(func, _v0) {
-        var x = _v0.a;
-        var y = _v0.b;
-        return _Utils_Tuple2(func(x), y);
-    });
-    var $elm$regex$Regex$Match = F4(function(match, index, number, submatches) {
-        return {
-            index: index,
-            match: match,
-            number: number,
-            submatches: submatches
-        };
-    });
-    var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-    var $elm$regex$Regex$fromString = function(string) {
-        return A2($elm$regex$Regex$fromStringWith, {
-            caseInsensitive: false,
-            multiline: false
-        }, string);
-    };
-    var $elm$regex$Regex$never = _Regex_never;
-    var $elm$core$Maybe$withDefault = F2(function(_default, maybe) {
-        if (maybe.$ === 'Just') {
-            var value = maybe.a;
-            return value;
-        } else return _default;
-    });
-    var $elm_community$string_extra$String$Extra$regexFromString = A2($elm$core$Basics$composeR, $elm$regex$Regex$fromString, $elm$core$Maybe$withDefault($elm$regex$Regex$never));
-    var $elm_community$string_extra$String$Extra$accentRegex = function() {
-        var matches = _List_fromArray([
-            _Utils_Tuple2('[à-æ]', 'a'),
-            _Utils_Tuple2('[À-Æ]', 'A'),
-            _Utils_Tuple2('ç', 'c'),
-            _Utils_Tuple2('Ç', 'C'),
-            _Utils_Tuple2('[è-ë]', 'e'),
-            _Utils_Tuple2('[È-Ë]', 'E'),
-            _Utils_Tuple2('[ì-ï]', 'i'),
-            _Utils_Tuple2('[Ì-Ï]', 'I'),
-            _Utils_Tuple2('ñ', 'n'),
-            _Utils_Tuple2('Ñ', 'N'),
-            _Utils_Tuple2('[ò-ö]', 'o'),
-            _Utils_Tuple2('[Ò-Ö]', 'O'),
-            _Utils_Tuple2('[ù-ü]', 'u'),
-            _Utils_Tuple2('[Ù-Ü]', 'U'),
-            _Utils_Tuple2('ý', 'y'),
-            _Utils_Tuple2('ÿ', 'y'),
-            _Utils_Tuple2('Ý', 'Y')
-        ]);
-        return A2($elm$core$List$map, $elm$core$Tuple$mapFirst($elm_community$string_extra$String$Extra$regexFromString), matches);
-    }();
-    var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-    var $elm_community$string_extra$String$Extra$removeAccents = function(string) {
-        if ($elm$core$String$isEmpty(string)) return string;
-        else {
-            var do_regex_to_remove_acents = function(_v1) {
-                var regex = _v1.a;
-                var replace_character = _v1.b;
-                return A2($elm$regex$Regex$replace, regex, function(_v0) {
-                    return replace_character;
-                });
-            };
-            return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
-        }
-    };
-    var $elm$core$String$toLower = _String_toLower;
-    var $author$project$Event$decodeKey = function(_v0) {
-        var onKeyPress = _v0.onKeyPress;
-        var onBackSpace = _v0.onBackSpace;
-        var onEnter = _v0.onEnter;
-        var onEscape = _v0.onEscape;
-        return A2($elm$json$Json$Decode$andThen, function(key) {
-            var _v1 = $elm$core$String$uncons($elm_community$string_extra$String$Extra$removeAccents($elm$core$String$toLower(key)));
-            if (_v1.$ === 'Just' && _v1.a.b === '') {
-                var _v2 = _v1.a;
-                var _char = _v2.a;
-                return $elm$core$Char$isAlpha(_char) ? $elm$json$Json$Decode$succeed(onKeyPress(_char)) : $elm$json$Json$Decode$fail('discarded char');
-            } else return key === 'Backspace' ? $elm$json$Json$Decode$succeed(onBackSpace) : key === 'Enter' ? $elm$json$Json$Decode$succeed(onEnter) : key === 'Escape' ? $elm$json$Json$Decode$succeed(onEscape) : $elm$json$Json$Decode$fail('discarded key');
-        }, A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-    };
-    var $elm$time$Time$Every = F2(function(a, b) {
-        return {
-            $: 'Every',
+            $: 'GoodStatus_',
             a: a,
             b: b
         };
     });
-    var $elm$time$Time$State = F2(function(taggers, processes) {
+    var $elm$http$Http$NetworkError_ = {
+        $: 'NetworkError_'
+    };
+    var $elm$http$Http$Receiving = function(a) {
         return {
-            processes: processes,
-            taggers: taggers
+            $: 'Receiving',
+            a: a
         };
-    });
+    };
+    var $elm$http$Http$Sending = function(a) {
+        return {
+            $: 'Sending',
+            a: a
+        };
+    };
+    var $elm$http$Http$Timeout_ = {
+        $: 'Timeout_'
+    };
     var $elm$core$Dict$RBEmpty_elm_builtin = {
         $: 'RBEmpty_elm_builtin'
     };
     var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-    var $elm$time$Time$init = $elm$core$Task$succeed(A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
+    var $elm$core$Maybe$isJust = function(maybe) {
+        if (maybe.$ === 'Just') return true;
+        else return false;
+    };
+    var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
     var $elm$core$Basics$compare = _Utils_compare;
     var $elm$core$Dict$get = F2(function(targetKey, dict) {
         get: while(true){
@@ -5538,6 +5622,817 @@ type alias Process =
             return x;
         }
     });
+    var $elm$core$Dict$getMin = function(dict) {
+        getMin: while(true){
+            if (dict.$ === 'RBNode_elm_builtin' && dict.d.$ === 'RBNode_elm_builtin') {
+                var left = dict.d;
+                var $temp$dict = left;
+                dict = $temp$dict;
+                continue getMin;
+            } else return dict;
+        }
+    };
+    var $elm$core$Dict$moveRedLeft = function(dict) {
+        if (dict.$ === 'RBNode_elm_builtin' && dict.d.$ === 'RBNode_elm_builtin' && dict.e.$ === 'RBNode_elm_builtin') {
+            if (dict.e.d.$ === 'RBNode_elm_builtin' && dict.e.d.a.$ === 'Red') {
+                var clr = dict.a;
+                var k = dict.b;
+                var v = dict.c;
+                var _v1 = dict.d;
+                var lClr = _v1.a;
+                var lK = _v1.b;
+                var lV = _v1.c;
+                var lLeft = _v1.d;
+                var lRight = _v1.e;
+                var _v2 = dict.e;
+                var rClr = _v2.a;
+                var rK = _v2.b;
+                var rV = _v2.c;
+                var rLeft = _v2.d;
+                var _v3 = rLeft.a;
+                var rlK = rLeft.b;
+                var rlV = rLeft.c;
+                var rlL = rLeft.d;
+                var rlR = rLeft.e;
+                var rRight = _v2.e;
+                return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rlK, rlV, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight), rlL), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
+            } else {
+                var clr = dict.a;
+                var k = dict.b;
+                var v = dict.c;
+                var _v4 = dict.d;
+                var lClr = _v4.a;
+                var lK = _v4.b;
+                var lV = _v4.c;
+                var lLeft = _v4.d;
+                var lRight = _v4.e;
+                var _v5 = dict.e;
+                var rClr = _v5.a;
+                var rK = _v5.b;
+                var rV = _v5.c;
+                var rLeft = _v5.d;
+                var rRight = _v5.e;
+                if (clr.$ === 'Black') return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+                else return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+            }
+        } else return dict;
+    };
+    var $elm$core$Dict$moveRedRight = function(dict) {
+        if (dict.$ === 'RBNode_elm_builtin' && dict.d.$ === 'RBNode_elm_builtin' && dict.e.$ === 'RBNode_elm_builtin') {
+            if (dict.d.d.$ === 'RBNode_elm_builtin' && dict.d.d.a.$ === 'Red') {
+                var clr = dict.a;
+                var k = dict.b;
+                var v = dict.c;
+                var _v1 = dict.d;
+                var lClr = _v1.a;
+                var lK = _v1.b;
+                var lV = _v1.c;
+                var _v2 = _v1.d;
+                var _v3 = _v2.a;
+                var llK = _v2.b;
+                var llV = _v2.c;
+                var llLeft = _v2.d;
+                var llRight = _v2.e;
+                var lRight = _v1.e;
+                var _v4 = dict.e;
+                var rClr = _v4.a;
+                var rK = _v4.b;
+                var rV = _v4.c;
+                var rLeft = _v4.d;
+                var rRight = _v4.e;
+                return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, lRight, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+            } else {
+                var clr = dict.a;
+                var k = dict.b;
+                var v = dict.c;
+                var _v5 = dict.d;
+                var lClr = _v5.a;
+                var lK = _v5.b;
+                var lV = _v5.c;
+                var lLeft = _v5.d;
+                var lRight = _v5.e;
+                var _v6 = dict.e;
+                var rClr = _v6.a;
+                var rK = _v6.b;
+                var rV = _v6.c;
+                var rLeft = _v6.d;
+                var rRight = _v6.e;
+                if (clr.$ === 'Black') return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+                else return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight), A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+            }
+        } else return dict;
+    };
+    var $elm$core$Dict$removeHelpPrepEQGT = F7(function(targetKey, dict, color, key, value, left, right) {
+        if (left.$ === 'RBNode_elm_builtin' && left.a.$ === 'Red') {
+            var _v1 = left.a;
+            var lK = left.b;
+            var lV = left.c;
+            var lLeft = left.d;
+            var lRight = left.e;
+            return A5($elm$core$Dict$RBNode_elm_builtin, color, lK, lV, lLeft, A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
+        } else {
+            _v2$2: while(true){
+                if (right.$ === 'RBNode_elm_builtin' && right.a.$ === 'Black') {
+                    if (right.d.$ === 'RBNode_elm_builtin') {
+                        if (right.d.a.$ === 'Black') {
+                            var _v3 = right.a;
+                            var _v4 = right.d;
+                            var _v5 = _v4.a;
+                            return $elm$core$Dict$moveRedRight(dict);
+                        } else break _v2$2;
+                    } else {
+                        var _v6 = right.a;
+                        var _v7 = right.d;
+                        return $elm$core$Dict$moveRedRight(dict);
+                    }
+                } else break _v2$2;
+            }
+            return dict;
+        }
+    });
+    var $elm$core$Dict$removeMin = function(dict) {
+        if (dict.$ === 'RBNode_elm_builtin' && dict.d.$ === 'RBNode_elm_builtin') {
+            var color = dict.a;
+            var key = dict.b;
+            var value = dict.c;
+            var left = dict.d;
+            var lColor = left.a;
+            var lLeft = left.d;
+            var right = dict.e;
+            if (lColor.$ === 'Black') {
+                if (lLeft.$ === 'RBNode_elm_builtin' && lLeft.a.$ === 'Red') {
+                    var _v3 = lLeft.a;
+                    return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, $elm$core$Dict$removeMin(left), right);
+                } else {
+                    var _v4 = $elm$core$Dict$moveRedLeft(dict);
+                    if (_v4.$ === 'RBNode_elm_builtin') {
+                        var nColor = _v4.a;
+                        var nKey = _v4.b;
+                        var nValue = _v4.c;
+                        var nLeft = _v4.d;
+                        var nRight = _v4.e;
+                        return A5($elm$core$Dict$balance, nColor, nKey, nValue, $elm$core$Dict$removeMin(nLeft), nRight);
+                    } else return $elm$core$Dict$RBEmpty_elm_builtin;
+                }
+            } else return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, $elm$core$Dict$removeMin(left), right);
+        } else return $elm$core$Dict$RBEmpty_elm_builtin;
+    };
+    var $elm$core$Dict$removeHelp = F2(function(targetKey, dict) {
+        if (dict.$ === 'RBEmpty_elm_builtin') return $elm$core$Dict$RBEmpty_elm_builtin;
+        else {
+            var color = dict.a;
+            var key = dict.b;
+            var value = dict.c;
+            var left = dict.d;
+            var right = dict.e;
+            if (_Utils_cmp(targetKey, key) < 0) {
+                if (left.$ === 'RBNode_elm_builtin' && left.a.$ === 'Black') {
+                    var _v4 = left.a;
+                    var lLeft = left.d;
+                    if (lLeft.$ === 'RBNode_elm_builtin' && lLeft.a.$ === 'Red') {
+                        var _v6 = lLeft.a;
+                        return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, A2($elm$core$Dict$removeHelp, targetKey, left), right);
+                    } else {
+                        var _v7 = $elm$core$Dict$moveRedLeft(dict);
+                        if (_v7.$ === 'RBNode_elm_builtin') {
+                            var nColor = _v7.a;
+                            var nKey = _v7.b;
+                            var nValue = _v7.c;
+                            var nLeft = _v7.d;
+                            var nRight = _v7.e;
+                            return A5($elm$core$Dict$balance, nColor, nKey, nValue, A2($elm$core$Dict$removeHelp, targetKey, nLeft), nRight);
+                        } else return $elm$core$Dict$RBEmpty_elm_builtin;
+                    }
+                } else return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, A2($elm$core$Dict$removeHelp, targetKey, left), right);
+            } else return A2($elm$core$Dict$removeHelpEQGT, targetKey, A7($elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+        }
+    });
+    var $elm$core$Dict$removeHelpEQGT = F2(function(targetKey, dict) {
+        if (dict.$ === 'RBNode_elm_builtin') {
+            var color = dict.a;
+            var key = dict.b;
+            var value = dict.c;
+            var left = dict.d;
+            var right = dict.e;
+            if (_Utils_eq(targetKey, key)) {
+                var _v1 = $elm$core$Dict$getMin(right);
+                if (_v1.$ === 'RBNode_elm_builtin') {
+                    var minKey = _v1.b;
+                    var minValue = _v1.c;
+                    return A5($elm$core$Dict$balance, color, minKey, minValue, left, $elm$core$Dict$removeMin(right));
+                } else return $elm$core$Dict$RBEmpty_elm_builtin;
+            } else return A5($elm$core$Dict$balance, color, key, value, left, A2($elm$core$Dict$removeHelp, targetKey, right));
+        } else return $elm$core$Dict$RBEmpty_elm_builtin;
+    });
+    var $elm$core$Dict$remove = F2(function(key, dict) {
+        var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
+        if (_v0.$ === 'RBNode_elm_builtin' && _v0.a.$ === 'Red') {
+            var _v1 = _v0.a;
+            var k = _v0.b;
+            var v = _v0.c;
+            var l = _v0.d;
+            var r = _v0.e;
+            return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+        } else {
+            var x = _v0;
+            return x;
+        }
+    });
+    var $elm$core$Dict$update = F3(function(targetKey, alter, dictionary) {
+        var _v0 = alter(A2($elm$core$Dict$get, targetKey, dictionary));
+        if (_v0.$ === 'Just') {
+            var value = _v0.a;
+            return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+        } else return A2($elm$core$Dict$remove, targetKey, dictionary);
+    });
+    var $elm$http$Http$expectStringResponse = F2(function(toMsg, toResult) {
+        return A3(_Http_expect, '', $elm$core$Basics$identity, A2($elm$core$Basics$composeR, toResult, toMsg));
+    });
+    var $elm$http$Http$BadBody = function(a) {
+        return {
+            $: 'BadBody',
+            a: a
+        };
+    };
+    var $elm$http$Http$BadStatus = function(a) {
+        return {
+            $: 'BadStatus',
+            a: a
+        };
+    };
+    var $elm$http$Http$BadUrl = function(a) {
+        return {
+            $: 'BadUrl',
+            a: a
+        };
+    };
+    var $elm$http$Http$NetworkError = {
+        $: 'NetworkError'
+    };
+    var $elm$http$Http$Timeout = {
+        $: 'Timeout'
+    };
+    var $elm$core$Result$mapError = F2(function(f, result) {
+        if (result.$ === 'Ok') {
+            var v = result.a;
+            return $elm$core$Result$Ok(v);
+        } else {
+            var e = result.a;
+            return $elm$core$Result$Err(f(e));
+        }
+    });
+    var $elm$http$Http$resolve = F2(function(toResult, response) {
+        switch(response.$){
+            case 'BadUrl_':
+                var url = response.a;
+                return $elm$core$Result$Err($elm$http$Http$BadUrl(url));
+            case 'Timeout_':
+                return $elm$core$Result$Err($elm$http$Http$Timeout);
+            case 'NetworkError_':
+                return $elm$core$Result$Err($elm$http$Http$NetworkError);
+            case 'BadStatus_':
+                var metadata = response.a;
+                return $elm$core$Result$Err($elm$http$Http$BadStatus(metadata.statusCode));
+            default:
+                var body = response.b;
+                return A2($elm$core$Result$mapError, $elm$http$Http$BadBody, toResult(body));
+        }
+    });
+    var $elm$http$Http$expectString = function(toMsg) {
+        return A2($elm$http$Http$expectStringResponse, toMsg, $elm$http$Http$resolve($elm$core$Result$Ok));
+    };
+    var $elm$http$Http$emptyBody = _Http_emptyBody;
+    var $elm$http$Http$Request = function(a) {
+        return {
+            $: 'Request',
+            a: a
+        };
+    };
+    var $elm$http$Http$State = F2(function(reqs, subs) {
+        return {
+            reqs: reqs,
+            subs: subs
+        };
+    });
+    var $elm$http$Http$init = $elm$core$Task$succeed(A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+    var $elm$core$Process$kill = _Scheduler_kill;
+    var $elm$core$Process$spawn = _Scheduler_spawn;
+    var $elm$http$Http$updateReqs = F3(function(router, cmds, reqs) {
+        updateReqs: while(true){
+            if (!cmds.b) return $elm$core$Task$succeed(reqs);
+            else {
+                var cmd = cmds.a;
+                var otherCmds = cmds.b;
+                if (cmd.$ === 'Cancel') {
+                    var tracker = cmd.a;
+                    var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+                    if (_v2.$ === 'Nothing') {
+                        var $temp$router = router, $temp$cmds = otherCmds, $temp$reqs = reqs;
+                        router = $temp$router;
+                        cmds = $temp$cmds;
+                        reqs = $temp$reqs;
+                        continue updateReqs;
+                    } else {
+                        var pid = _v2.a;
+                        return A2($elm$core$Task$andThen, function(_v3) {
+                            return A3($elm$http$Http$updateReqs, router, otherCmds, A2($elm$core$Dict$remove, tracker, reqs));
+                        }, $elm$core$Process$kill(pid));
+                    }
+                } else {
+                    var req = cmd.a;
+                    return A2($elm$core$Task$andThen, function(pid) {
+                        var _v4 = req.tracker;
+                        if (_v4.$ === 'Nothing') return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+                        else {
+                            var tracker = _v4.a;
+                            return A3($elm$http$Http$updateReqs, router, otherCmds, A3($elm$core$Dict$insert, tracker, pid, reqs));
+                        }
+                    }, $elm$core$Process$spawn(A3(_Http_toTask, router, $elm$core$Platform$sendToApp(router), req)));
+                }
+            }
+        }
+    });
+    var $elm$http$Http$onEffects = F4(function(router, cmds, subs, state) {
+        return A2($elm$core$Task$andThen, function(reqs) {
+            return $elm$core$Task$succeed(A2($elm$http$Http$State, reqs, subs));
+        }, A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+    });
+    var $elm$core$List$maybeCons = F3(function(f, mx, xs) {
+        var _v0 = f(mx);
+        if (_v0.$ === 'Just') {
+            var x = _v0.a;
+            return A2($elm$core$List$cons, x, xs);
+        } else return xs;
+    });
+    var $elm$core$List$filterMap = F2(function(f, xs) {
+        return A3($elm$core$List$foldr, $elm$core$List$maybeCons(f), _List_Nil, xs);
+    });
+    var $elm$http$Http$maybeSend = F4(function(router, desiredTracker, progress, _v0) {
+        var actualTracker = _v0.a;
+        var toMsg = _v0.b;
+        return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(A2($elm$core$Platform$sendToApp, router, toMsg(progress))) : $elm$core$Maybe$Nothing;
+    });
+    var $elm$http$Http$onSelfMsg = F3(function(router, _v0, state) {
+        var tracker = _v0.a;
+        var progress = _v0.b;
+        return A2($elm$core$Task$andThen, function(_v1) {
+            return $elm$core$Task$succeed(state);
+        }, $elm$core$Task$sequence(A2($elm$core$List$filterMap, A3($elm$http$Http$maybeSend, router, tracker, progress), state.subs)));
+    });
+    var $elm$http$Http$Cancel = function(a) {
+        return {
+            $: 'Cancel',
+            a: a
+        };
+    };
+    var $elm$http$Http$cmdMap = F2(function(func, cmd) {
+        if (cmd.$ === 'Cancel') {
+            var tracker = cmd.a;
+            return $elm$http$Http$Cancel(tracker);
+        } else {
+            var r = cmd.a;
+            return $elm$http$Http$Request({
+                allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+                body: r.body,
+                expect: A2(_Http_mapExpect, func, r.expect),
+                headers: r.headers,
+                method: r.method,
+                timeout: r.timeout,
+                tracker: r.tracker,
+                url: r.url
+            });
+        }
+    });
+    var $elm$http$Http$MySub = F2(function(a, b) {
+        return {
+            $: 'MySub',
+            a: a,
+            b: b
+        };
+    });
+    var $elm$http$Http$subMap = F2(function(func, _v0) {
+        var tracker = _v0.a;
+        var toMsg = _v0.b;
+        return A2($elm$http$Http$MySub, tracker, A2($elm$core$Basics$composeR, toMsg, func));
+    });
+    _Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+    var $elm$http$Http$command = _Platform_leaf('Http');
+    var $elm$http$Http$subscription = _Platform_leaf('Http');
+    var $elm$http$Http$request = function(r) {
+        return $elm$http$Http$command($elm$http$Http$Request({
+            allowCookiesFromOtherDomains: false,
+            body: r.body,
+            expect: r.expect,
+            headers: r.headers,
+            method: r.method,
+            timeout: r.timeout,
+            tracker: r.tracker,
+            url: r.url
+        }));
+    };
+    var $elm$http$Http$get = function(r) {
+        return $elm$http$Http$request({
+            body: $elm$http$Http$emptyBody,
+            expect: r.expect,
+            headers: _List_Nil,
+            method: 'GET',
+            timeout: $elm$core$Maybe$Nothing,
+            tracker: $elm$core$Maybe$Nothing,
+            url: r.url
+        });
+    };
+    var $author$project$I18n$langToCode = function(lang) {
+        if (lang.$ === 'English') return 'en';
+        else return 'fr';
+    };
+    var $author$project$Client$getWords = F2(function(lang, msg) {
+        return $elm$http$Http$get({
+            expect: $elm$http$Http$expectString(msg),
+            url: 'db/' + ($author$project$I18n$langToCode(lang) + '.txt')
+        });
+    });
+    var $author$project$Main$HelpModal = {
+        $: 'HelpModal'
+    };
+    var $author$project$Game$Idle = {
+        $: 'Idle'
+    };
+    var $pablen$toasty$Toasty$initialState = A2($pablen$toasty$Toasty$Stack, _List_Nil, $elm$random$Random$initialSeed(0));
+    var $author$project$Main$initialModel = function(store) {
+        return {
+            modal: store.helpViewed ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just($author$project$Main$HelpModal),
+            state: $author$project$Game$Idle,
+            store: store,
+            time: $elm$time$Time$millisToPosix(0),
+            toasties: $pablen$toasty$Toasty$initialState,
+            wordSize: A2($elm$core$Maybe$withDefault, 5, store.settings.wordSize),
+            words: _List_Nil
+        };
+    };
+    var $author$project$I18n$parseLang = function(string) {
+        return A2($elm$core$String$startsWith, 'fr', string) ? $author$project$I18n$French : $author$project$I18n$English;
+    };
+    var $author$project$I18n$Set = F2(function(english, french) {
+        return {
+            english: english,
+            french: french
+        };
+    });
+    var $elm$core$Maybe$andThen = F2(function(callback, maybeValue) {
+        if (maybeValue.$ === 'Just') {
+            var value = maybeValue.a;
+            return callback(value);
+        } else return $elm$core$Maybe$Nothing;
+    });
+    var $elm$core$Basics$composeL = F3(function(g, f, x) {
+        return g(f(x));
+    });
+    var $elm$core$String$dropRight = F2(function(n, string) {
+        return n < 1 ? string : A3($elm$core$String$slice, 0, -n, string);
+    });
+    var $elm$core$Array$bitMask = 4294967295 >>> 32 - $elm$core$Array$shiftStep;
+    var $elm$core$Basics$ge = _Utils_ge;
+    var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+    var $elm$core$Array$getHelp = F3(function(shift, index, tree) {
+        getHelp: while(true){
+            var pos = $elm$core$Array$bitMask & index >>> shift;
+            var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+            if (_v0.$ === 'SubTree') {
+                var subTree = _v0.a;
+                var $temp$shift = shift - $elm$core$Array$shiftStep, $temp$index = index, $temp$tree = subTree;
+                shift = $temp$shift;
+                index = $temp$index;
+                tree = $temp$tree;
+                continue getHelp;
+            } else {
+                var values = _v0.a;
+                return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+            }
+        }
+    });
+    var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+    var $elm$core$Array$tailIndex = function(len) {
+        return len >>> 5 << 5;
+    };
+    var $elm$core$Array$get = F2(function(index, _v0) {
+        var len = _v0.a;
+        var startShift = _v0.b;
+        var tree = _v0.c;
+        var tail = _v0.d;
+        return index < 0 || _Utils_cmp(index, len) > -1 ? $elm$core$Maybe$Nothing : _Utils_cmp(index, $elm$core$Array$tailIndex(len)) > -1 ? $elm$core$Maybe$Just(A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(A3($elm$core$Array$getHelp, startShift, index, tree));
+    });
+    var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(function(replacements, _v0) {
+        var match = _v0.match;
+        var ordinalString = A2($elm$core$Basics$composeL, $elm$core$String$dropLeft(1), $elm$core$String$dropRight(1))(match);
+        return A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$andThen, function(value) {
+            return A2($elm$core$Array$get, value, replacements);
+        }, $elm$core$String$toInt(ordinalString)));
+    });
+    var $elm$core$Array$fromListHelp = F3(function(list, nodeList, nodeListSize) {
+        fromListHelp: while(true){
+            var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+            var jsArray = _v0.a;
+            var remainingItems = _v0.b;
+            if (_Utils_cmp($elm$core$Elm$JsArray$length(jsArray), $elm$core$Array$branchFactor) < 0) return A2($elm$core$Array$builderToArray, true, {
+                nodeList: nodeList,
+                nodeListSize: nodeListSize,
+                tail: jsArray
+            });
+            else {
+                var $temp$list = remainingItems, $temp$nodeList = A2($elm$core$List$cons, $elm$core$Array$Leaf(jsArray), nodeList), $temp$nodeListSize = nodeListSize + 1;
+                list = $temp$list;
+                nodeList = $temp$nodeList;
+                nodeListSize = $temp$nodeListSize;
+                continue fromListHelp;
+            }
+        }
+    });
+    var $elm$core$Array$fromList = function(list) {
+        if (!list.b) return $elm$core$Array$empty;
+        else return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+    };
+    var $elm$regex$Regex$Match = F4(function(match, index, number, submatches) {
+        return {
+            index: index,
+            match: match,
+            number: number,
+            submatches: submatches
+        };
+    });
+    var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+    var $elm$regex$Regex$fromString = function(string) {
+        return A2($elm$regex$Regex$fromStringWith, {
+            caseInsensitive: false,
+            multiline: false
+        }, string);
+    };
+    var $elm$regex$Regex$never = _Regex_never;
+    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2($elm$core$Maybe$withDefault, $elm$regex$Regex$never, $elm$regex$Regex$fromString('\\{\\d+\\}'));
+    var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(function(string, args) {
+        var asArray = $elm$core$Array$fromList(args);
+        return A3($elm$regex$Regex$replace, $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex, $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray), string);
+    });
+    var $author$project$I18n$set = F3(function(params, english, french) {
+        return A2($author$project$I18n$Set, A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, english, params), A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, french, params));
+    });
+    var $elm$core$String$toUpper = _String_toUpper;
+    var $author$project$I18n$getSet = function(id) {
+        switch(id.$){
+            case 'AbsentFromDictionary':
+                var lang = id.a.lang;
+                var word = id.a.word;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$toUpper(word)
+                ]), 'Not in {0} dictionary: {1}', 'Absent du dictionnaire {0}\u00A0: {1}');
+            case 'DecodeError':
+                return A3($author$project$I18n$set, _List_Nil, 'Unable to restore previously saved data.', 'Impossible de restaurer les données précedemment sauvegardées.');
+            case 'Definition':
+                return A3($author$project$I18n$set, _List_Nil, 'Definition', 'Définition');
+            case 'ErrorCorruptedSession':
+                return A3($author$project$I18n$set, _List_Nil, 'Corrupted data, reinitialized', 'Données corrompues, réinitialisées');
+            case 'ErrorDetail':
+                var error = id.a.error;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    error
+                ]), 'Erreur: {0}', 'Erreur\u00A0: {0}');
+            case 'GameLoading':
+                return A3($author$project$I18n$set, _List_Nil, 'Loading game…', 'Chargement du jeu…');
+            case 'GameLost':
+                return A3($author$project$I18n$set, _List_Nil, 'Ok that was hard.', 'Pas facile, hein\u00A0?');
+            case 'GameWin':
+                return A3($author$project$I18n$set, _List_Nil, 'Well done!', 'Bien joué\u00A0!');
+            case 'Help':
+                return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
+            case 'HelpGamePitch':
+                var nbLetters = id.a.nbLetters;
+                var lang = id.a.lang;
+                var maxGuesses = id.a.maxGuesses;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $elm$core$String$fromInt(nbLetters),
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$fromInt(maxGuesses)
+                ]), 'Guess a {0} letters {1} word in {2} guesses or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.');
+            case 'HelpInThisExample':
+                return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
+            case 'HelpInspiredBy':
+                var wordleUrl = id.a.wordleUrl;
+                var githubUrl = id.a.githubUrl;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    wordleUrl,
+                    githubUrl
+                ]), 'Inspired by [Wordle]({0}) - [Source code]({1}).', 'Inspiré de [Wordle]({0}) - [Code source]({1}).');
+            case 'HelpKeyboard':
+                return A3($author$project$I18n$set, _List_Nil, 'Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.');
+            case 'HelpKeyboardLetter':
+                return A3($author$project$I18n$set, _List_Nil, 'The keyboard at the bottom highlight letters which have been played already.', 'Le clavier en bas de page met en relief les lettres qui ont déjà été joué.');
+            case 'HelpLetterCorrectlyPlaced':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is at the correct spot', '{0} est à la bonne position');
+            case 'HelpLetterMisplaced':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is misplaced', '{0} est mal positionnée');
+            case 'HelpLetterUnused':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is unused', '{0} n\'est pas utilisée');
+            case 'LoadError':
+                return A3($author$project$I18n$set, _List_Nil, 'Error loading dictionary', 'Impossible de charger le dictionnaire');
+            case 'NotEnoughLetters':
+                return A3($author$project$I18n$set, _List_Nil, 'Not enough letters', 'Mot trop court');
+            case 'PlayAgain':
+                return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
+            case 'Settings':
+                return A3($author$project$I18n$set, _List_Nil, 'Settings', 'Préférences');
+            case 'SettingsKeyboardLayout':
+                return A3($author$project$I18n$set, _List_Nil, 'Keyboard layout', 'Disposition du clavier');
+            case 'SettingsWordSize':
+                return A3($author$project$I18n$set, _List_Nil, 'Word length', 'Longueur de mot');
+            case 'SettingsWordSizeRandom':
+                return A3($author$project$I18n$set, _List_Nil, 'Random', 'Aléatoire');
+            case 'SettingsWordSizeInt':
+                var size = id.a.size;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $elm$core$String$fromInt(size)
+                ]), '{0} letters', '{0} lettres');
+            case 'StatsAverageGuesses':
+                return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
+            case 'StatsButton':
+                return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
+            case 'StatsGamesPlayed':
+                return A3($author$project$I18n$set, _List_Nil, 'games played', 'parties jouées');
+            case 'StatsGuessDistribution':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Guess distribution ({0})', 'Distribution des scores ({0})');
+            case 'StatsGuessEvolution':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Guess evolution ({0})', 'Évolution des scores ({0})');
+            case 'StatsGuessEvolutionHelp':
+                var lang = id.a.lang;
+                var length = id.a.length;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang),
+                    $elm$core$String$fromInt(length)
+                ]), 'Chart based on latest {1} played games in {0}. A 0 bar means lost game.', 'Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue.');
+            case 'StatsLang':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'Statistics ({0})', 'Statistiques ({0})');
+            case 'StatsMissingData':
+                return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
+            case 'StatsLangDataMissing':
+                var lang = id.a.lang;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    $author$project$I18n$langToString(lang)
+                ]), 'You haven\'t played in {0} yet, so I can\'t render any stats.', 'Vous n\'avez pas encore joué en {0}, je ne peux pas afficher de statistiques.');
+            default:
+                return A3($author$project$I18n$set, _List_Nil, 'win rate', 'parties gagnées');
+        }
+    };
+    var $author$project$I18n$translate = F2(function(lang, id) {
+        if (lang.$ === 'English') return (function($) {
+            return $.english;
+        })($author$project$I18n$getSet(id));
+        else return (function($) {
+            return $.french;
+        })($author$project$I18n$getSet(id));
+    });
+    var $author$project$Main$init = function(flags) {
+        var _v0 = function() {
+            var _v1 = $author$project$Store$fromJson(flags.rawStore);
+            if (_v1.$ === 'Ok') {
+                var store = _v1.a;
+                return _Utils_Tuple2($author$project$Main$initialModel(store), $elm$core$Platform$Cmd$none);
+            } else {
+                var error = _v1.a;
+                var store = $author$project$Store$default($author$project$I18n$parseLang(flags.lang));
+                var newModel = $author$project$Main$initialModel(store);
+                return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(A2($author$project$I18n$translate, store.lang, $author$project$I18n$ErrorCorruptedSession)), _Utils_Tuple2(_Utils_update(newModel, {
+                    state: $author$project$Game$Errored($author$project$Game$DecodeError($elm$json$Json$Decode$errorToString(error)))
+                }), $author$project$Main$encodeAndSaveStore(store)));
+            }
+        }();
+        var model = _v0.a;
+        var cmds = _v0.b;
+        return _Utils_Tuple2(model, $elm$core$Platform$Cmd$batch(_List_fromArray([
+            function() {
+                var _v2 = model.store.settings.wordSize;
+                if (_v2.$ === 'Just') return A2($author$project$Client$getWords, model.store.lang, $author$project$Main$WordsReceived);
+                else return $author$project$Main$getRandomWordSize;
+            }(),
+            cmds
+        ])));
+    };
+    var $author$project$Main$BackSpace = {
+        $: 'BackSpace'
+    };
+    var $author$project$Main$CloseModal = {
+        $: 'CloseModal'
+    };
+    var $author$project$Main$KeyPressed = function(a) {
+        return {
+            $: 'KeyPressed',
+            a: a
+        };
+    };
+    var $author$project$Main$NewTime = function(a) {
+        return {
+            $: 'NewTime',
+            a: a
+        };
+    };
+    var $author$project$Main$StoreChanged = function(a) {
+        return {
+            $: 'StoreChanged',
+            a: a
+        };
+    };
+    var $author$project$Main$Submit = {
+        $: 'Submit'
+    };
+    var $elm$core$Platform$Sub$batch = _Platform_batch;
+    var $elm$json$Json$Decode$fail = _Json_fail;
+    var $elm$core$Tuple$mapFirst = F2(function(func, _v0) {
+        var x = _v0.a;
+        var y = _v0.b;
+        return _Utils_Tuple2(func(x), y);
+    });
+    var $elm_community$string_extra$String$Extra$regexFromString = A2($elm$core$Basics$composeR, $elm$regex$Regex$fromString, $elm$core$Maybe$withDefault($elm$regex$Regex$never));
+    var $elm_community$string_extra$String$Extra$accentRegex = function() {
+        var matches = _List_fromArray([
+            _Utils_Tuple2('[à-æ]', 'a'),
+            _Utils_Tuple2('[À-Æ]', 'A'),
+            _Utils_Tuple2('ç', 'c'),
+            _Utils_Tuple2('Ç', 'C'),
+            _Utils_Tuple2('[è-ë]', 'e'),
+            _Utils_Tuple2('[È-Ë]', 'E'),
+            _Utils_Tuple2('[ì-ï]', 'i'),
+            _Utils_Tuple2('[Ì-Ï]', 'I'),
+            _Utils_Tuple2('ñ', 'n'),
+            _Utils_Tuple2('Ñ', 'N'),
+            _Utils_Tuple2('[ò-ö]', 'o'),
+            _Utils_Tuple2('[Ò-Ö]', 'O'),
+            _Utils_Tuple2('[ù-ü]', 'u'),
+            _Utils_Tuple2('[Ù-Ü]', 'U'),
+            _Utils_Tuple2('ý', 'y'),
+            _Utils_Tuple2('ÿ', 'y'),
+            _Utils_Tuple2('Ý', 'Y')
+        ]);
+        return A2($elm$core$List$map, $elm$core$Tuple$mapFirst($elm_community$string_extra$String$Extra$regexFromString), matches);
+    }();
+    var $elm_community$string_extra$String$Extra$removeAccents = function(string) {
+        if ($elm$core$String$isEmpty(string)) return string;
+        else {
+            var do_regex_to_remove_acents = function(_v1) {
+                var regex = _v1.a;
+                var replace_character = _v1.b;
+                return A2($elm$regex$Regex$replace, regex, function(_v0) {
+                    return replace_character;
+                });
+            };
+            return A3($elm$core$List$foldl, do_regex_to_remove_acents, string, $elm_community$string_extra$String$Extra$accentRegex);
+        }
+    };
+    var $elm$core$String$toLower = _String_toLower;
+    var $author$project$Event$decodeKey = function(_v0) {
+        var onKeyPress = _v0.onKeyPress;
+        var onBackSpace = _v0.onBackSpace;
+        var onEnter = _v0.onEnter;
+        var onEscape = _v0.onEscape;
+        return A2($elm$json$Json$Decode$andThen, function(key) {
+            var _v1 = $elm$core$String$uncons($elm_community$string_extra$String$Extra$removeAccents($elm$core$String$toLower(key)));
+            if (_v1.$ === 'Just' && _v1.a.b === '') {
+                var _v2 = _v1.a;
+                var _char = _v2.a;
+                return $elm$core$Char$isAlpha(_char) ? $elm$json$Json$Decode$succeed(onKeyPress(_char)) : $elm$json$Json$Decode$fail('discarded char');
+            } else return key === 'Backspace' ? $elm$json$Json$Decode$succeed(onBackSpace) : key === 'Enter' ? $elm$json$Json$Decode$succeed(onEnter) : key === 'Escape' ? $elm$json$Json$Decode$succeed(onEscape) : $elm$json$Json$Decode$fail('discarded key');
+        }, A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+    };
+    var $elm$time$Time$Every = F2(function(a, b) {
+        return {
+            $: 'Every',
+            a: a,
+            b: b
+        };
+    });
+    var $elm$time$Time$State = F2(function(taggers, processes) {
+        return {
+            processes: processes,
+            taggers: taggers
+        };
+    });
+    var $elm$time$Time$init = $elm$core$Task$succeed(A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
     var $elm$time$Time$addMySub = F2(function(_v0, state) {
         var interval = _v0.a;
         var tagger = _v0.b;
@@ -5550,7 +6445,6 @@ type alias Process =
             return A3($elm$core$Dict$insert, interval, A2($elm$core$List$cons, tagger, taggers), state);
         }
     });
-    var $elm$core$Process$kill = _Scheduler_kill;
     var $elm$core$Dict$foldl = F3(function(func, acc, dict) {
         foldl: while(true){
             if (dict.$ === 'RBEmpty_elm_builtin') return acc;
@@ -5600,9 +6494,7 @@ type alias Process =
             return A3(leftStep, k, v, result);
         }), intermediateResult, leftovers);
     });
-    var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
     var $elm$time$Time$setInterval = _Time_setInterval;
-    var $elm$core$Process$spawn = _Scheduler_spawn;
     var $elm$time$Time$spawnHelp = F3(function(router, intervals, processes) {
         if (!intervals.b) return $elm$core$Task$succeed(processes);
         else {
@@ -5662,9 +6554,6 @@ type alias Process =
                 return $elm$core$Task$succeed(state);
             }, A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
         }
-    });
-    var $elm$core$Basics$composeL = F3(function(g, f, x) {
-        return g(f(x));
     });
     var $elm$time$Time$subMap = F2(function(f, _v0) {
         var interval = _v0.a;
@@ -5763,16 +6652,6 @@ type alias Process =
             return $elm$core$Task$sequence(makeNewPids);
         }, $elm$core$Task$sequence(A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
     });
-    var $elm$core$List$maybeCons = F3(function(f, mx, xs) {
-        var _v0 = f(mx);
-        if (_v0.$ === 'Just') {
-            var x = _v0.a;
-            return A2($elm$core$List$cons, x, xs);
-        } else return xs;
-    });
-    var $elm$core$List$filterMap = F2(function(f, xs) {
-        return A3($elm$core$List$foldr, $elm$core$List$maybeCons(f), _List_Nil, xs);
-    });
     var $elm$browser$Browser$Events$onSelfMsg = F3(function(router, _v0, state) {
         var key = _v0.key;
         var event = _v0.event;
@@ -5821,6 +6700,9 @@ type alias Process =
     var $author$project$Game$LoadError = {
         $: 'LoadError'
     };
+    var $author$project$I18n$LoadError = {
+        $: 'LoadError'
+    };
     var $author$project$Game$Ongoing = F3(function(a, b, c) {
         return {
             $: 'Ongoing',
@@ -5829,105 +6711,12 @@ type alias Process =
             c: c
         };
     });
-    var $author$project$Main$ToastyMsg = function(a) {
-        return {
-            $: 'ToastyMsg',
-            a: a
-        };
-    };
-    var $author$project$Notif$Warning = function(a) {
-        return {
-            $: 'Warning',
-            a: a
-        };
-    };
-    var $pablen$toasty$Toasty$Temporary = {
-        $: 'Temporary'
-    };
-    var $pablen$toasty$Toasty$Entered = {
-        $: 'Entered'
-    };
-    var $pablen$toasty$Toasty$TransitionOut = function(a) {
-        return {
-            $: 'TransitionOut',
-            a: a
-        };
-    };
-    var $elm$random$Random$maxInt = 2147483647;
-    var $elm$random$Random$minInt = -2147483648;
-    var $pablen$toasty$Toasty$getNewId = function(seed) {
-        return A2($elm$random$Random$step, A2($elm$random$Random$int, $elm$random$Random$minInt, $elm$random$Random$maxInt), seed);
-    };
-    var $elm$core$Process$sleep = _Process_sleep;
-    var $pablen$toasty$Toasty$addToast_ = F5(function(removeBehaviour, _v0, tagger, toast, _v1) {
-        var cfg = _v0.a;
-        var model = _v1.a;
-        var cmd = _v1.b;
-        var _v2 = model.toasties;
-        var toasts = _v2.a;
-        var seed = _v2.b;
-        var _v3 = $pablen$toasty$Toasty$getNewId(seed);
-        var newId = _v3.a;
-        var newSeed = _v3.b;
-        var task = function() {
-            if (removeBehaviour.$ === 'Temporary') return A2($elm$core$Task$perform, function(_v5) {
-                return tagger($pablen$toasty$Toasty$TransitionOut(newId));
-            }, $elm$core$Process$sleep(cfg.delay));
-            else return $elm$core$Platform$Cmd$none;
-        }();
-        return _Utils_Tuple2(_Utils_update(model, {
-            toasties: A2($pablen$toasty$Toasty$Stack, _Utils_ap(toasts, _List_fromArray([
-                _Utils_Tuple3(newId, $pablen$toasty$Toasty$Entered, toast)
-            ])), newSeed)
-        }), $elm$core$Platform$Cmd$batch(_List_fromArray([
-            cmd,
-            task
-        ])));
-    });
-    var $pablen$toasty$Toasty$addToast = $pablen$toasty$Toasty$addToast_($pablen$toasty$Toasty$Temporary);
-    var $elm$html$Html$Attributes$stringProperty = F2(function(key, string) {
-        return A2(_VirtualDom_property, key, $elm$json$Json$Encode$string(string));
-    });
-    var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-    var $pablen$toasty$Toasty$Config = function(a) {
-        return {
-            $: 'Config',
-            a: a
-        };
-    };
-    var $pablen$toasty$Toasty$config = $pablen$toasty$Toasty$Config({
-        containerAttrs: _List_Nil,
-        delay: 5000,
-        itemAttrs: _List_Nil,
-        transitionInAttrs: _List_Nil,
-        transitionOutAttrs: _List_Nil,
-        transitionOutDuration: 0
-    });
-    var $pablen$toasty$Toasty$containerAttrs = F2(function(attrs, _v0) {
-        var cfg = _v0.a;
-        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
-            containerAttrs: attrs
-        }));
-    });
-    var $pablen$toasty$Toasty$delay = F2(function(time, _v0) {
-        var cfg = _v0.a;
-        return $pablen$toasty$Toasty$Config(_Utils_update(cfg, {
-            delay: time
-        }));
-    });
-    var $author$project$Notif$config = A2($pablen$toasty$Toasty$containerAttrs, _List_fromArray([
-        $elm$html$Html$Attributes$class('Notifs')
-    ]), A2($pablen$toasty$Toasty$delay, 2500, $pablen$toasty$Toasty$config));
-    var $author$project$Notif$add = function(msg) {
-        return A2($pablen$toasty$Toasty$addToast, $author$project$Notif$config, msg);
-    };
     var $elm$core$String$cons = _String_cons;
     var $elm$core$String$fromChar = function(_char) {
         return A2($elm$core$String$cons, _char, '');
     };
-    var $author$project$Main$numberOfLetters = 5;
-    var $author$project$Main$addChar = F2(function(_char, input) {
-        return A3($elm$core$String$slice, 0, $author$project$Main$numberOfLetters, _Utils_ap(input, $elm$core$String$fromChar(_char)));
+    var $author$project$Main$addChar = F3(function(wordSize, _char, input) {
+        return A3($elm$core$String$slice, 0, wordSize, _Utils_ap(input, $elm$core$String$fromChar(_char)));
     });
     var $author$project$Game$Lost = F2(function(a, b) {
         return {
@@ -5943,7 +6732,6 @@ type alias Process =
             b: b
         };
     });
-    var $elm$core$Basics$ge = _Utils_ge;
     var $elm$core$List$any = F2(function(isOkay, list) {
         any: while(true){
             if (!list.b) return false;
@@ -6000,8 +6788,66 @@ type alias Process =
         'btn-help',
         'btn-settings'
     ])));
-    var $elm$core$String$dropRight = F2(function(n, string) {
-        return n < 1 ? string : A3($elm$core$String$slice, 0, -n, string);
+    var $elm$core$List$filter = F2(function(isGood, list) {
+        return A3($elm$core$List$foldr, F2(function(x, xs) {
+            return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+        }), _List_Nil, list);
+    });
+    var $author$project$Main$NewWord = function(a) {
+        return {
+            $: 'NewWord',
+            a: a
+        };
+    };
+    var $elm$random$Random$andThen = F2(function(callback, _v0) {
+        var genA = _v0.a;
+        return $elm$random$Random$Generator(function(seed) {
+            var _v1 = genA(seed);
+            var result = _v1.a;
+            var newSeed = _v1.b;
+            var _v2 = callback(result);
+            var genB = _v2.a;
+            return genB(newSeed);
+        });
+    });
+    var $elm$random$Random$constant = function(value) {
+        return $elm$random$Random$Generator(function(seed) {
+            return _Utils_Tuple2(value, seed);
+        });
+    };
+    var $elm$core$List$drop = F2(function(n, list) {
+        drop: while(true){
+            if (n <= 0) return list;
+            else {
+                if (!list.b) return list;
+                else {
+                    var x = list.a;
+                    var xs = list.b;
+                    var $temp$n = n - 1, $temp$list = xs;
+                    n = $temp$n;
+                    list = $temp$list;
+                    continue drop;
+                }
+            }
+        }
+    });
+    var $elm$core$List$head = function(list) {
+        if (list.b) {
+            var x = list.a;
+            var xs = list.b;
+            return $elm$core$Maybe$Just(x);
+        } else return $elm$core$Maybe$Nothing;
+    };
+    var $elm_community$list_extra$List$Extra$getAt = F2(function(idx, xs) {
+        return idx < 0 ? $elm$core$Maybe$Nothing : $elm$core$List$head(A2($elm$core$List$drop, idx, xs));
+    });
+    var $author$project$Main$randomWord = function(words) {
+        return A2($elm$random$Random$andThen, function(_int) {
+            return $elm$random$Random$constant(A2($elm_community$list_extra$List$Extra$getAt, _int, words));
+        }, A2($elm$random$Random$int, 0, $elm$core$List$length(words) - 1));
+    };
+    var $author$project$Main$getRandomWord = F2(function(wordSize, words) {
+        return A2($elm$random$Random$generate, $author$project$Main$NewWord, $author$project$Main$randomWord(A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(wordSize)), words)));
     });
     var $author$project$Main$handleHelpViewed = function(_v0) {
         var model = _v0.a;
@@ -6019,6 +6865,7 @@ type alias Process =
             ])));
         } else return _Utils_Tuple2(model, cmds);
     };
+    var $elm$core$String$lines = _String_lines;
     var $author$project$Store$addLog = F2(function(log, store) {
         var logs = store.logs;
         return _Utils_update(store, {
@@ -6084,210 +6931,6 @@ type alias Process =
             a: a
         };
     };
-    var $author$project$I18n$Set = F2(function(english, french) {
-        return {
-            english: english,
-            french: french
-        };
-    });
-    var $elm$core$Maybe$andThen = F2(function(callback, maybeValue) {
-        if (maybeValue.$ === 'Just') {
-            var value = maybeValue.a;
-            return callback(value);
-        } else return $elm$core$Maybe$Nothing;
-    });
-    var $elm$core$Array$bitMask = 4294967295 >>> 32 - $elm$core$Array$shiftStep;
-    var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-    var $elm$core$Array$getHelp = F3(function(shift, index, tree) {
-        getHelp: while(true){
-            var pos = $elm$core$Array$bitMask & index >>> shift;
-            var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-            if (_v0.$ === 'SubTree') {
-                var subTree = _v0.a;
-                var $temp$shift = shift - $elm$core$Array$shiftStep, $temp$index = index, $temp$tree = subTree;
-                shift = $temp$shift;
-                index = $temp$index;
-                tree = $temp$tree;
-                continue getHelp;
-            } else {
-                var values = _v0.a;
-                return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-            }
-        }
-    });
-    var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-    var $elm$core$Array$tailIndex = function(len) {
-        return len >>> 5 << 5;
-    };
-    var $elm$core$Array$get = F2(function(index, _v0) {
-        var len = _v0.a;
-        var startShift = _v0.b;
-        var tree = _v0.c;
-        var tail = _v0.d;
-        return index < 0 || _Utils_cmp(index, len) > -1 ? $elm$core$Maybe$Nothing : _Utils_cmp(index, $elm$core$Array$tailIndex(len)) > -1 ? $elm$core$Maybe$Just(A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(A3($elm$core$Array$getHelp, startShift, index, tree));
-    });
-    var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(function(replacements, _v0) {
-        var match = _v0.match;
-        var ordinalString = A2($elm$core$Basics$composeL, $elm$core$String$dropLeft(1), $elm$core$String$dropRight(1))(match);
-        return A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$andThen, function(value) {
-            return A2($elm$core$Array$get, value, replacements);
-        }, $elm$core$String$toInt(ordinalString)));
-    });
-    var $elm$core$Array$fromListHelp = F3(function(list, nodeList, nodeListSize) {
-        fromListHelp: while(true){
-            var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
-            var jsArray = _v0.a;
-            var remainingItems = _v0.b;
-            if (_Utils_cmp($elm$core$Elm$JsArray$length(jsArray), $elm$core$Array$branchFactor) < 0) return A2($elm$core$Array$builderToArray, true, {
-                nodeList: nodeList,
-                nodeListSize: nodeListSize,
-                tail: jsArray
-            });
-            else {
-                var $temp$list = remainingItems, $temp$nodeList = A2($elm$core$List$cons, $elm$core$Array$Leaf(jsArray), nodeList), $temp$nodeListSize = nodeListSize + 1;
-                list = $temp$list;
-                nodeList = $temp$nodeList;
-                nodeListSize = $temp$nodeListSize;
-                continue fromListHelp;
-            }
-        }
-    });
-    var $elm$core$Array$fromList = function(list) {
-        if (!list.b) return $elm$core$Array$empty;
-        else return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
-    };
-    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2($elm$core$Maybe$withDefault, $elm$regex$Regex$never, $elm$regex$Regex$fromString('\\{\\d+\\}'));
-    var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(function(string, args) {
-        var asArray = $elm$core$Array$fromList(args);
-        return A3($elm$regex$Regex$replace, $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex, $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray), string);
-    });
-    var $author$project$I18n$set = F3(function(params, english, french) {
-        return A2($author$project$I18n$Set, A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, english, params), A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, french, params));
-    });
-    var $elm$core$String$toUpper = _String_toUpper;
-    var $author$project$I18n$getSet = function(id) {
-        switch(id.$){
-            case 'AbsentFromDictionary':
-                var lang = id.a.lang;
-                var word = id.a.word;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$toUpper(word)
-                ]), 'Not in {0} dictionary: {1}', 'Absent du dictionnaire {0}\u00A0: {1}');
-            case 'DecodeError':
-                return A3($author$project$I18n$set, _List_Nil, 'Unable to restore previously saved data.', 'Impossible de restaurer les données précedemment sauvegardées.');
-            case 'Definition':
-                return A3($author$project$I18n$set, _List_Nil, 'Definition', 'Définition');
-            case 'ErrorDetail':
-                var error = id.a.error;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    error
-                ]), 'Erreur: {0}', 'Erreur\u00A0: {0}');
-            case 'GameLoading':
-                return A3($author$project$I18n$set, _List_Nil, 'Loading game…', 'Chargement du jeu…');
-            case 'GameLost':
-                return A3($author$project$I18n$set, _List_Nil, 'Ok that was hard.', 'Pas facile, hein\u00A0?');
-            case 'GameWin':
-                return A3($author$project$I18n$set, _List_Nil, 'Well done!', 'Bien joué\u00A0!');
-            case 'Help':
-                return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
-            case 'HelpGamePitch':
-                var nbLetters = id.a.nbLetters;
-                var lang = id.a.lang;
-                var maxGuesses = id.a.maxGuesses;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $elm$core$String$fromInt(nbLetters),
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$fromInt(maxGuesses)
-                ]), 'Guess a {0} letters {1} word in {2} guesses or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.');
-            case 'HelpInThisExample':
-                return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
-            case 'HelpInspiredBy':
-                var wordleUrl = id.a.wordleUrl;
-                var githubUrl = id.a.githubUrl;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    wordleUrl,
-                    githubUrl
-                ]), 'Inspired by [Wordle]({0}) - [Source code]({1}).', 'Inspiré de [Wordle]({0}) - [Code source]({1}).');
-            case 'HelpKeyboard':
-                return A3($author$project$I18n$set, _List_Nil, 'Use your dekstop computer keyboard to enter words, or the virtual one at the bottom.', 'Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l\'écran.');
-            case 'HelpKeyboardLetter':
-                return A3($author$project$I18n$set, _List_Nil, 'The keyboard at the bottom highlight letters which have been played already.', 'Le clavier en bas de page met en relief les lettres qui ont déjà été joué.');
-            case 'HelpLetterCorrectlyPlaced':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is at the correct spot', '{0} est à la bonne position');
-            case 'HelpLetterMisplaced':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is misplaced', '{0} est mal positionnée');
-            case 'HelpLetterUnused':
-                var letter = id.a.letter;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    letter
-                ]), '{0} is unused', '{0} n\'est pas utilisée');
-            case 'LoadError':
-                return A3($author$project$I18n$set, _List_Nil, 'Unable to pick a word.', 'Impossible de sélectionner un mot à trouver.');
-            case 'NotEnoughLetters':
-                return A3($author$project$I18n$set, _List_Nil, 'Not enough letters', 'Mot trop court');
-            case 'PlayAgain':
-                return A3($author$project$I18n$set, _List_Nil, 'Play again', 'Rejouer');
-            case 'Settings':
-                return A3($author$project$I18n$set, _List_Nil, 'Settings', 'Préférences');
-            case 'SettingsKeyboardLayout':
-                return A3($author$project$I18n$set, _List_Nil, 'Keyboard layout', 'Disposition du clavier');
-            case 'StatsAverageGuesses':
-                return A3($author$project$I18n$set, _List_Nil, 'average guesses', 'essais en moyenne');
-            case 'StatsButton':
-                return A3($author$project$I18n$set, _List_Nil, 'Stats', 'Stats');
-            case 'StatsGamesPlayed':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'games played in {0}', 'parties jouées en {0}');
-            case 'StatsGuessDistribution':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Guess distribution ({0})', 'Distribution des scores ({0})');
-            case 'StatsGuessEvolution':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Guess evolution ({0})', 'Évolution des scores ({0})');
-            case 'StatsGuessEvolutionHelp':
-                var lang = id.a.lang;
-                var length = id.a.length;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang),
-                    $elm$core$String$fromInt(length)
-                ]), 'Chart based on latest {1} played games in {0}. A 0 bar means lost game.', 'Graphique basé sur les {1} dernières parties jouées en {0}. La valeur 0 correspond à une partie perdue.');
-            case 'StatsLang':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'Statistics ({0})', 'Statistiques ({0})');
-            case 'StatsMissingData':
-                return A3($author$project$I18n$set, _List_Nil, 'No game data yet', 'Pas de données de parties jouées');
-            case 'StatsLangDataMissing':
-                var lang = id.a.lang;
-                return A3($author$project$I18n$set, _List_fromArray([
-                    $author$project$I18n$langToString(lang)
-                ]), 'You haven\'t played in {0} yet, so I can\'t render any stats.', 'Vous n\'avez pas encore joué en {0}, je ne peux pas afficher de statistiques.');
-            default:
-                return A3($author$project$I18n$set, _List_Nil, 'win rate', 'de parties gagnées');
-        }
-    };
-    var $author$project$I18n$translate = F2(function(lang, id) {
-        if (lang.$ === 'English') return (function($) {
-            return $.english;
-        })($author$project$I18n$getSet(id));
-        else return (function($) {
-            return $.french;
-        })($author$project$I18n$getSet(id));
-    });
     var $author$project$Main$processStateNotif = function(_v0) {
         var model = _v0.a;
         var store = model.store;
@@ -6321,11 +6964,6 @@ type alias Process =
             a: a
         };
     };
-    var $elm$core$List$filter = F2(function(isGood, list) {
-        return A3($elm$core$List$foldr, F2(function(x, xs) {
-            return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-        }), _List_Nil, list);
-    });
     var $elm$core$Basics$neq = _Utils_notEqual;
     var $pablen$toasty$Toasty$update = F4(function(_v0, tagger, msg, model) {
         var cfg = _v0.a;
@@ -6449,7 +7087,7 @@ type alias Process =
         var _v0 = _Utils_Tuple2($elm$core$String$toList(normalize(word)), $elm$core$String$toList(normalize(input)));
         var wordChars = _v0.a;
         var inputChars = _v0.b;
-        return !_Utils_eq($elm$core$List$length(inputChars), $elm$core$String$length(word)) ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$NotEnoughLetters)) : !A2($elm$core$List$member, normalize(input), words) ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$AbsentFromDictionary({
+        return _Utils_cmp($elm$core$List$length(inputChars), $elm$core$String$length(word)) < 0 ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$NotEnoughLetters)) : !A2($elm$core$List$member, normalize(input), A2($elm$core$List$map, normalize, words)) ? $elm$core$Result$Err(A2($author$project$I18n$translate, lang, $author$project$I18n$AbsentFromDictionary({
             lang: lang,
             word: input
         }))) : $elm$core$Result$Ok(A2($author$project$Game$handleMisplacedDuplicates, wordChars, A2($author$project$Game$handleCorrectDuplicates, wordChars, A3($elm$core$List$map2, $author$project$Game$mapChars(wordChars), inputChars, wordChars))));
@@ -6485,13 +7123,19 @@ type alias Process =
                     var guesses = _v5.b;
                     var input = _v5.c;
                     return _Utils_Tuple2(_Utils_update(model, {
-                        state: A3($author$project$Game$Ongoing, word, guesses, A2($author$project$Main$addChar, _char, input))
+                        state: A3($author$project$Game$Ongoing, word, guesses, A3($author$project$Main$addChar, model.wordSize, _char, input))
                     }), $author$project$Main$scrollToBottom('board-container'));
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'NewGame':
                 var _v6 = _v0.a;
                 var newModel = $author$project$Main$initialModel(store);
-                return _Utils_Tuple2(newModel, $author$project$Main$getRandomWord(store.lang));
+                return _Utils_Tuple2(newModel, function() {
+                    var _v7 = store.settings.wordSize;
+                    if (_v7.$ === 'Just') {
+                        var wordSize = _v7.a;
+                        return A2($author$project$Main$getRandomWord, wordSize, model.words);
+                    } else return $author$project$Main$getRandomWordSize;
+                }());
             case 'NewTime':
                 var time = _v0.a.a;
                 return _Utils_Tuple2(_Utils_update(model, {
@@ -6501,22 +7145,22 @@ type alias Process =
                 if (_v0.a.a.$ === 'Just') {
                     if (_v0.b.$ === 'Idle') {
                         var newWord = _v0.a.a.a;
-                        var _v7 = _v0.b;
+                        var _v8 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, newWord, _List_Nil, '')
                         }), $author$project$Main$defocusMenuButtons);
                     } else break _v0$9;
                 } else {
                     if (_v0.b.$ === 'Idle') {
-                        var _v8 = _v0.a.a;
-                        var _v9 = _v0.b;
+                        var _v9 = _v0.a.a;
+                        var _v10 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: $author$project$Game$Errored($author$project$Game$LoadError)
                         }), $elm$core$Platform$Cmd$none);
                     } else break _v0$9;
                 }
             case 'NoOp':
-                var _v10 = _v0.a;
+                var _v11 = _v0.a;
                 return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'OpenModal':
                 var modal = _v0.a.a;
@@ -6532,25 +7176,25 @@ type alias Process =
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'Submit':
                 if (_v0.b.$ === 'Ongoing') {
-                    var _v11 = _v0.a;
-                    var _v12 = _v0.b;
-                    var word = _v12.a;
-                    var guesses = _v12.b;
-                    var input = _v12.c;
-                    var _v13 = A4($author$project$Game$validateGuess, store.lang, $author$project$Main$getWords(store.lang), word, input);
-                    if (_v13.$ === 'Ok') {
-                        var guess = _v13.a;
+                    var _v12 = _v0.a;
+                    var _v13 = _v0.b;
+                    var word = _v13.a;
+                    var guesses = _v13.b;
+                    var input = _v13.c;
+                    var _v14 = A4($author$project$Game$validateGuess, store.lang, model.words, word, input);
+                    if (_v14.$ === 'Ok') {
+                        var guess = _v14.a;
                         return $author$project$Main$logResult($author$project$Main$processStateNotif(_Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$checkGame, $author$project$Main$maxAttempts, word, A2($elm$core$List$cons, guess, guesses))
                         }), $author$project$Main$scrollToBottom('board-container'))));
                     } else {
-                        var error = _v13.a;
+                        var error = _v14.a;
                         return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(error), _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, word, guesses, input)
                         }), $elm$core$Platform$Cmd$none));
                     }
                 } else {
-                    var _v14 = _v0.a;
+                    var _v15 = _v0.a;
                     return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
                 }
             case 'SwitchLang':
@@ -6561,7 +7205,7 @@ type alias Process =
                 var newModel = $author$project$Main$initialModel(newStore);
                 return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$batch(_List_fromArray([
                     $author$project$Main$encodeAndSaveStore(newStore),
-                    $author$project$Main$getRandomWord(lang)
+                    A2($author$project$Client$getWords, lang, $author$project$Main$WordsReceived)
                 ])));
             case 'SwitchLayout':
                 var layout_ = _v0.a.a;
@@ -6573,15 +7217,56 @@ type alias Process =
                 return _Utils_Tuple2(_Utils_update(model, {
                     store: newStore
                 }), $author$project$Main$encodeAndSaveStore(newStore));
-            default:
+            case 'SwitchWordSize':
+                if (_v0.a.a.$ === 'Just') {
+                    var wordSize1 = _v0.a.a.a;
+                    var newStore = A2($author$project$Store$updateSettings, function(s) {
+                        return _Utils_update(s, {
+                            wordSize: $elm$core$Maybe$Just(wordSize1)
+                        });
+                    }, store);
+                    var newModel = $author$project$Main$initialModel(newStore);
+                    return _Utils_Tuple2(_Utils_update(newModel, {
+                        store: newStore,
+                        wordSize: wordSize1
+                    }), $elm$core$Platform$Cmd$batch(_List_fromArray([
+                        A2($author$project$Client$getWords, newStore.lang, $author$project$Main$WordsReceived),
+                        $author$project$Main$encodeAndSaveStore(newStore)
+                    ])));
+                } else {
+                    var _v16 = _v0.a.a;
+                    var newStore = A2($author$project$Store$updateSettings, function(s) {
+                        return _Utils_update(s, {
+                            wordSize: $elm$core$Maybe$Nothing
+                        });
+                    }, store);
+                    return _Utils_Tuple2(_Utils_update(model, {
+                        store: newStore
+                    }), $elm$core$Platform$Cmd$batch(_List_fromArray([
+                        $author$project$Main$getRandomWordSize,
+                        $author$project$Main$encodeAndSaveStore(newStore)
+                    ])));
+                }
+            case 'ToastyMsg':
                 var subMsg = _v0.a.a;
                 return A4($pablen$toasty$Toasty$update, $author$project$Notif$config, $author$project$Main$ToastyMsg, subMsg, model);
+            case 'UpdateWordSize':
+                var wordSize1 = _v0.a.a;
+                var newModel = $author$project$Main$initialModel(store);
+                return _Utils_Tuple2(_Utils_update(newModel, {
+                    wordSize: wordSize1
+                }), A2($author$project$Client$getWords, store.lang, $author$project$Main$WordsReceived));
+            default:
+                if (_v0.a.a.$ === 'Ok') {
+                    var rawWords = _v0.a.a.a;
+                    var words = A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(model.wordSize)), A2($elm$core$List$filter, A2($elm$core$Basics$composeL, $elm$core$Basics$not, $elm$core$String$isEmpty), $elm$core$String$lines(rawWords)));
+                    return _Utils_Tuple2(_Utils_update(model, {
+                        words: words
+                    }), A2($author$project$Main$getRandomWord, model.wordSize, words));
+                } else return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(A2($author$project$I18n$translate, store.lang, $author$project$I18n$LoadError)), _Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
         }
         return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
     });
-    var $author$project$I18n$GameLoading = {
-        $: 'GameLoading'
-    };
     var $author$project$I18n$Definition = {
         $: 'Definition'
     };
@@ -6980,21 +7665,19 @@ type alias Process =
         sanitize: true,
         smartypants: false
     };
-    var $elm$core$Maybe$isJust = function(maybe) {
-        if (maybe.$ === 'Just') return true;
-        else return false;
-    };
     var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
     var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
     var $elm$html$Html$ul = _VirtualDom_node('ul');
     var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
     var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-    var $author$project$Main$viewBoardRow = $elm$html$Html$div(_List_fromArray([
-        $elm$html$Html$Attributes$class('BoardRow'),
-        A2($elm$html$Html$Attributes$style, 'grid-template-columns', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
-            $elm$core$String$fromInt($author$project$Main$numberOfLetters)
-        ])))
-    ]));
+    var $author$project$Main$viewBoardRow = function(wordSize) {
+        return $elm$html$Html$div(_List_fromArray([
+            $elm$html$Html$Attributes$class('BoardRow'),
+            A2($elm$html$Html$Attributes$style, 'grid-template-columns', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
+                $elm$core$String$fromInt(wordSize)
+            ])))
+        ]));
+    };
     var $author$project$Main$viewTile = F2(function(classes, _char) {
         return A2($elm$html$Html$div, _List_fromArray([
             $elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
@@ -7002,23 +7685,25 @@ type alias Process =
             $elm$html$Html$text($author$project$Main$charToText(_char))
         ]));
     });
-    var $author$project$Main$viewAttempt = A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
-        switch(letter.$){
-            case 'Misplaced':
-                var _char = letter.a;
-                return A2($author$project$Main$viewTile, 'btn-warning', _char);
-            case 'Correct':
-                var _char = letter.a;
-                return A2($author$project$Main$viewTile, 'btn-success', _char);
-            case 'Unused':
-                var _char = letter.a;
-                return A2($author$project$Main$viewTile, 'btn-dark', _char);
-            default:
-                var _char = letter.a;
-                return A2($author$project$Main$viewTile, 'btn-secondary', _char);
-        }
-    }), $author$project$Main$viewBoardRow);
-    var $author$project$Main$viewHelp = function(_v0) {
+    var $author$project$Main$viewAttempt = function(wordSize) {
+        return A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
+            switch(letter.$){
+                case 'Misplaced':
+                    var _char = letter.a;
+                    return A2($author$project$Main$viewTile, 'btn-warning', _char);
+                case 'Correct':
+                    var _char = letter.a;
+                    return A2($author$project$Main$viewTile, 'btn-success', _char);
+                case 'Unused':
+                    var _char = letter.a;
+                    return A2($author$project$Main$viewTile, 'btn-dark', _char);
+                default:
+                    var _char = letter.a;
+                    return A2($author$project$Main$viewTile, 'btn-secondary', _char);
+            }
+        }), $author$project$Main$viewBoardRow(wordSize));
+    };
+    var $author$project$Main$viewHelp = F2(function(_v0, wordSize) {
         var lang = _v0.lang;
         var demo = _List_fromArray([
             $author$project$Game$Correct(_Utils_chr('m')),
@@ -7031,13 +7716,13 @@ type alias Process =
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpGamePitch({
                 lang: lang,
                 maxGuesses: $author$project$Main$maxAttempts,
-                nbLetters: $author$project$Main$numberOfLetters
+                nbLetters: wordSize
             })),
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboard),
             A2($elm$html$Html$div, _List_fromArray([
                 $elm$html$Html$Attributes$class('BoardRowExample mb-3')
             ]), _List_fromArray([
-                $author$project$Main$viewAttempt(demo)
+                A2($author$project$Main$viewAttempt, wordSize, demo)
             ])),
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpInThisExample),
             A2($elm$html$Html$ul, _List_Nil, A2($elm$core$List$map, function(line) {
@@ -7053,7 +7738,7 @@ type alias Process =
                 wordleUrl: 'https://www.powerlanguage.co.uk/wordle/'
             })))
         ]);
-    };
+    });
     var $author$project$Icon$Close = {
         $: 'Close'
     };
@@ -7127,9 +7812,27 @@ type alias Process =
     var $author$project$I18n$SettingsKeyboardLayout = {
         $: 'SettingsKeyboardLayout'
     };
+    var $author$project$I18n$SettingsWordSize = {
+        $: 'SettingsWordSize'
+    };
+    var $author$project$I18n$SettingsWordSizeInt = function(a) {
+        return {
+            $: 'SettingsWordSizeInt',
+            a: a
+        };
+    };
+    var $author$project$I18n$SettingsWordSizeRandom = {
+        $: 'SettingsWordSizeRandom'
+    };
     var $author$project$Main$SwitchLayout = function(a) {
         return {
             $: 'SwitchLayout',
+            a: a
+        };
+    };
+    var $author$project$Main$SwitchWordSize = function(a) {
+        return {
+            $: 'SwitchWordSize',
             a: a
         };
     };
@@ -7164,24 +7867,59 @@ type alias Process =
         var lang = _v0.lang;
         var settings = _v0.settings;
         return _List_fromArray([
-            A2($elm$html$Html$label, _List_Nil, _List_fromArray([
-                A2($author$project$I18n$htmlText, lang, $author$project$I18n$SettingsKeyboardLayout)
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('mb-3')
+            ]), _List_fromArray([
+                A2($elm$html$Html$label, _List_Nil, _List_fromArray([
+                    A2($author$project$I18n$htmlText, lang, $author$project$I18n$SettingsKeyboardLayout)
+                ])),
+                A2($elm$html$Html$select, _List_fromArray([
+                    $elm$html$Html$Attributes$class('form-select w-100 mt-1'),
+                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $author$project$Keyboard$layoutFromString, $author$project$Main$SwitchLayout))
+                ]), A2($elm$core$List$map, function(l) {
+                    return A2($elm$html$Html$option, _List_fromArray([
+                        $elm$html$Html$Attributes$value($author$project$Keyboard$layoutToString(l)),
+                        $elm$html$Html$Attributes$selected(_Utils_eq(l, settings.layout))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text($elm$core$String$toUpper($author$project$Keyboard$layoutToString(l)))
+                    ]));
+                }, _List_fromArray([
+                    $author$project$Keyboard$Auto,
+                    $author$project$Keyboard$Azerty,
+                    $author$project$Keyboard$Qwerty
+                ])))
             ])),
-            A2($elm$html$Html$select, _List_fromArray([
-                $elm$html$Html$Attributes$class('form-select w-100 mt-1'),
-                $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $author$project$Keyboard$layoutFromString, $author$project$Main$SwitchLayout))
-            ]), A2($elm$core$List$map, function(l) {
-                return A2($elm$html$Html$option, _List_fromArray([
-                    $elm$html$Html$Attributes$value($author$project$Keyboard$layoutToString(l)),
-                    $elm$html$Html$Attributes$selected(_Utils_eq(l, settings.layout))
-                ]), _List_fromArray([
-                    $elm$html$Html$text($elm$core$String$toUpper($author$project$Keyboard$layoutToString(l)))
-                ]));
-            }, _List_fromArray([
-                $author$project$Keyboard$Auto,
-                $author$project$Keyboard$Azerty,
-                $author$project$Keyboard$Qwerty
-            ])))
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('mb-3')
+            ]), _List_fromArray([
+                A2($elm$html$Html$label, _List_Nil, _List_fromArray([
+                    A2($author$project$I18n$htmlText, lang, $author$project$I18n$SettingsWordSize)
+                ])),
+                A2($elm$html$Html$select, _List_fromArray([
+                    $elm$html$Html$Attributes$class('form-select w-100 mt-1'),
+                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $elm$core$String$toInt, $author$project$Main$SwitchWordSize))
+                ]), A2($elm$core$List$map, function(_v1) {
+                    var wordSize = _v1.a;
+                    var i18n = _v1.b;
+                    return A2($elm$html$Html$option, _List_fromArray([
+                        $elm$html$Html$Attributes$selected(_Utils_eq(wordSize, settings.wordSize)),
+                        $elm$html$Html$Attributes$value(A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$map, $elm$core$String$fromInt, wordSize)))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text(A2($author$project$I18n$translate, lang, i18n))
+                    ]));
+                }, _List_fromArray([
+                    _Utils_Tuple2($elm$core$Maybe$Nothing, $author$project$I18n$SettingsWordSizeRandom),
+                    _Utils_Tuple2($elm$core$Maybe$Just(5), $author$project$I18n$SettingsWordSizeInt({
+                        size: 5
+                    })),
+                    _Utils_Tuple2($elm$core$Maybe$Just(6), $author$project$I18n$SettingsWordSizeInt({
+                        size: 6
+                    })),
+                    _Utils_Tuple2($elm$core$Maybe$Just(7), $author$project$I18n$SettingsWordSizeInt({
+                        size: 7
+                    }))
+                ])))
+            ]))
         ]);
     };
     var $author$project$I18n$StatsLangDataMissing = function(a) {
@@ -7193,11 +7931,8 @@ type alias Process =
     var $author$project$I18n$StatsAverageGuesses = {
         $: 'StatsAverageGuesses'
     };
-    var $author$project$I18n$StatsGamesPlayed = function(a) {
-        return {
-            $: 'StatsGamesPlayed',
-            a: a
-        };
+    var $author$project$I18n$StatsGamesPlayed = {
+        $: 'StatsGamesPlayed'
     };
     var $author$project$I18n$StatsGuessDistribution = function(a) {
         return {
@@ -7321,12 +8056,6 @@ type alias Process =
     };
     var $elm$core$Basics$isInfinite = _Basics_isInfinite;
     var $elm$core$Basics$isNaN = _Basics_isNaN;
-    var $elm$core$Maybe$map = F2(function(f, maybe) {
-        if (maybe.$ === 'Just') {
-            var value = maybe.a;
-            return $elm$core$Maybe$Just(f(value));
-        } else return $elm$core$Maybe$Nothing;
-    });
     var $elm$core$String$padRight = F3(function(n, _char, string) {
         return _Utils_ap(string, A2($elm$core$String$repeat, n - $elm$core$String$length(string), $elm$core$String$fromChar(_char)));
     });
@@ -12176,6 +12905,11 @@ type alias Process =
     var $elm$html$Html$th = _VirtualDom_node('th');
     var $author$project$Main$viewLangStats = F2(function(lang, langLogs) {
         var totalPlayed = $elm$core$List$length(langLogs);
+        var stat = function(nodes) {
+            return A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('col-4 text-center mb-4')
+            ]), nodes);
+        };
         var onlyVictories = $elm$core$List$filter(function($) {
             return $.victory;
         });
@@ -12214,32 +12948,21 @@ type alias Process =
         };
         var guessAvg = totalGuesses / totalWins;
         var chartLogs = A2($elm$core$List$take, 100, $elm$core$List$reverse(langLogs));
-        var card = function(nodes) {
-            return A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('card py-0')
-            ]), _List_fromArray([
-                A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('card-body text-center')
-                ]), nodes)
-            ]));
-        };
         return _List_fromArray([
             A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('card-group mb-3')
+                $elm$html$Html$Attributes$class('row')
             ]), _List_fromArray([
-                card(_List_fromArray([
+                stat(_List_fromArray([
                     A2($elm$html$Html$div, _List_fromArray([
                         $elm$html$Html$Attributes$class('fs-3')
                     ]), _List_fromArray([
                         $elm$html$Html$text($elm$core$String$fromInt(totalPlayed))
                     ])),
                     A2($elm$html$Html$small, _List_Nil, _List_fromArray([
-                        A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsGamesPlayed({
-                            lang: lang
-                        }))
+                        A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsGamesPlayed)
                     ]))
                 ])),
-                card(_List_fromArray([
+                stat(_List_fromArray([
                     A2($elm$html$Html$div, _List_fromArray([
                         $elm$html$Html$Attributes$class('fs-3')
                     ]), _List_fromArray([
@@ -12249,7 +12972,7 @@ type alias Process =
                         A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsWinRate)
                     ]))
                 ])),
-                guessAvg > 0 ? card(_List_fromArray([
+                guessAvg > 0 ? stat(_List_fromArray([
                     A2($elm$html$Html$div, _List_fromArray([
                         $elm$html$Html$Attributes$class('fs-3')
                     ]), _List_fromArray([
@@ -12321,7 +13044,7 @@ type alias Process =
                 if (modal.$ === 'Just') switch(modal.a.$){
                     case 'HelpModal':
                         var _v1 = modal.a;
-                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Help, $author$project$Main$viewHelp(store));
+                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Help, A2($author$project$Main$viewHelp, store, model.wordSize));
                     case 'SettingsModal':
                         var _v2 = modal.a;
                         return A3($author$project$Main$viewModal, store, $author$project$I18n$Settings, $author$project$Main$viewSettings(store));
@@ -12365,38 +13088,35 @@ type alias Process =
         });
         return A2(step, n - 1, _List_Nil);
     });
-    var $author$project$Main$viewInput = function(input) {
+    var $author$project$Main$viewInput = F2(function(wordSize, input) {
         var chars = $elm$core$String$toList(input);
-        var spots = _Utils_ap(chars, A2($elm_community$list_extra$List$Extra$initialize, $author$project$Main$numberOfLetters - $elm$core$List$length(chars), $elm$core$Basics$always(_Utils_chr('\u00A0'))));
-        return $author$project$Main$viewBoardRow(A2($elm$core$List$map, $author$project$Main$viewTile('btn-secondary'), spots));
-    };
-    var $author$project$Main$viewBoard = F2(function(input, guesses) {
+        var spots = _Utils_ap(chars, A2($elm_community$list_extra$List$Extra$initialize, wordSize - $elm$core$List$length(chars), $elm$core$Basics$always(_Utils_chr('\u00A0'))));
+        return A2($author$project$Main$viewBoardRow, wordSize, A2($elm$core$List$map, $author$project$Main$viewTile('btn-secondary'), spots));
+    });
+    var $author$project$Main$viewBoard = F3(function(wordSize, input, guesses) {
         var remaining = $author$project$Main$maxAttempts - $elm$core$List$length(guesses) - A2($elm$core$Maybe$withDefault, 1, A2($elm$core$Maybe$map, $elm$core$Basics$always(2), input));
         return A2($elm$html$Html$div, _List_fromArray([
             $elm$html$Html$Attributes$class('BoardContainer'),
             $elm$html$Html$Attributes$id('board-container')
         ]), _List_fromArray([
             A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('Board'),
+                $elm$html$Html$Attributes$class('Board Board-' + $elm$core$String$fromInt(wordSize)),
                 A2($elm$html$Html$Attributes$style, 'grid-template-rows', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
                     $elm$core$String$fromInt($author$project$Main$maxAttempts)
                 ])))
             ]), A2($elm$core$List$filterMap, $elm$core$Basics$identity, $elm$core$List$concat(_List_fromArray([
-                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt, $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
+                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt(wordSize), $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
                 _List_fromArray([
-                    A2($elm$core$Maybe$map, $author$project$Main$viewInput, input)
+                    A2($elm$core$Maybe$map, $author$project$Main$viewInput(wordSize), input)
                 ]),
                 A2($elm$core$List$map, function(_v0) {
-                    return $elm$core$Maybe$Just($author$project$Main$viewInput($elm$core$String$fromList(A2($elm$core$List$repeat, $author$project$Main$numberOfLetters, _Utils_chr('\u00A0')))));
+                    return $elm$core$Maybe$Just(A2($author$project$Main$viewInput, wordSize, $elm$core$String$fromList(A2($elm$core$List$repeat, wordSize, _Utils_chr('\u00A0')))));
                 }, A2($elm$core$List$range, 0, remaining))
             ]))))
         ]));
     });
     var $author$project$I18n$DecodeError = {
         $: 'DecodeError'
-    };
-    var $author$project$I18n$LoadError = {
-        $: 'LoadError'
     };
     var $elm$html$Html$pre = _VirtualDom_node('pre');
     var $author$project$Main$viewError = F2(function(lang, error) {
@@ -12504,14 +13224,13 @@ type alias Process =
         ])), $elm$core$List$map(A2($elm$core$Basics$composeR, $author$project$Keyboard$keyState(guesses), $author$project$Main$viewKeyState))), A2($author$project$Keyboard$disposition, lang, settings.layout)));
     });
     var $author$project$Main$view = function(model) {
+        var wordSize = model.wordSize;
         var store = model.store;
         var state = model.state;
         return A2($author$project$Main$layout, model, function() {
             switch(state.$){
                 case 'Idle':
-                    return _List_fromArray([
-                        A2($author$project$I18n$htmlText, store.lang, $author$project$I18n$GameLoading)
-                    ]);
+                    return _List_Nil;
                 case 'Errored':
                     var error = state.a;
                     return _List_fromArray([
@@ -12526,7 +13245,7 @@ type alias Process =
                     var word = state.a;
                     var guesses = state.b;
                     return _List_fromArray([
-                        A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, guesses),
+                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Nothing, guesses),
                         A2($author$project$Main$endGameButtons, store.lang, word),
                         A2($author$project$Main$viewKeyboard, store, guesses)
                     ]);
@@ -12534,7 +13253,7 @@ type alias Process =
                     var word = state.a;
                     var guesses = state.b;
                     return _List_fromArray([
-                        A2($author$project$Main$viewBoard, $elm$core$Maybe$Nothing, function(a) {
+                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Nothing, function(a) {
                             return A2($elm$core$List$cons, a, guesses);
                         }(A2($elm$core$List$map, $author$project$Game$Correct, $elm$core$String$toList(word)))),
                         A2($author$project$Main$endGameButtons, store.lang, word),
@@ -12544,7 +13263,7 @@ type alias Process =
                     var guesses = state.b;
                     var input = state.c;
                     return _List_fromArray([
-                        A2($author$project$Main$viewBoard, $elm$core$Maybe$Just(input), guesses),
+                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Just(input), guesses),
                         A2($author$project$Main$viewKeyboard, store, guesses)
                     ]);
             }
