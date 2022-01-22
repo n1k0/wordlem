@@ -10,8 +10,28 @@ body {
   max-width: 600px;
   min-height: 34px;
 
+  &Logo {
+    background: url(public/logo.svg) no-repeat;
+    background-size: contain;
+    color: transparent;
+    overflow: hidden;
+    min-width: 28px;
+    width: 28px;
+    height: 28px;
+
+    @media screen and (min-width: 600px) {
+      min-width: 40px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
   &Button {
     min-width: 0;
+
+    @media screen and (max-width: 319px) {
+      padding: 0 5px;
+    }
 
     @media screen and (min-width: 600px) {
       font-size: 1.2em;
@@ -20,20 +40,6 @@ body {
         font-size: 1.2em;
       }
     }
-  }
-}
-
-.Logo {
-  background: url(public/logo.svg) no-repeat;
-  background-size: contain;
-  color: transparent;
-  overflow: hidden;
-  width: 32px;
-  height: 32px;
-
-  @media screen and (min-width: 600px) {
-    width: 40px;
-    height: 40px;
   }
 }
 

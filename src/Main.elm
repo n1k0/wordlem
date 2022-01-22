@@ -881,9 +881,9 @@ viewHeader { store, modal } =
     in
     nav [ class "navbar sticky-top navbar-dark bg-dark" ]
         [ div [ class "Header container-fluid flex-nowrap py-sm-1" ]
-            [ div [ class "Logo text-white fw-bold me-2" ]
+            [ div [ class "HeaderLogo text-white fw-bold" ]
                 [ h1 [ class "visually-hidden" ] [ text "Wordlem" ] ]
-            , div [ class "d-flex flex-fill justify-content-center text-center" ]
+            , div [ class "d-flex flex-fill justify-content-evenly text-center" ]
                 [ button
                     [ type_ "button"
                     , id "btn-lang-en"
@@ -901,33 +901,35 @@ viewHeader { store, modal } =
                     ]
                     [ text "Français" ]
                 ]
-            , button
-                [ type_ "button"
-                , id "btn-stats"
-                , class "HeaderButton btn btn-sm d-flex align-items-center"
-                , btnClass (modal == Just StatsModal)
-                , onClick (OpenModal StatsModal)
-                , attribute "aria-label" <| I18n.translate store.lang I18n.StatsButton
+            , div [ class "d-flex justify-content-end" ]
+                [ button
+                    [ type_ "button"
+                    , id "btn-stats"
+                    , class "HeaderButton btn btn-sm d-flex align-items-center"
+                    , btnClass (modal == Just StatsModal)
+                    , onClick (OpenModal StatsModal)
+                    , attribute "aria-label" <| I18n.translate store.lang I18n.StatsButton
+                    ]
+                    [ Icon.icon Icon.Stats [] ]
+                , button
+                    [ type_ "button"
+                    , id "btn-help"
+                    , class "HeaderButton btn btn-sm d-flex align-items-center"
+                    , btnClass (modal == Just HelpModal)
+                    , onClick (OpenModal HelpModal)
+                    , attribute "aria-label" <| I18n.translate store.lang I18n.Help
+                    ]
+                    [ Icon.icon Icon.Help [] ]
+                , button
+                    [ type_ "button"
+                    , id "btn-settings"
+                    , class "HeaderButton btn btn-sm d-flex align-items-center"
+                    , btnClass (modal == Just SettingsModal)
+                    , onClick (OpenModal SettingsModal)
+                    , attribute "aria-label" <| I18n.translate store.lang I18n.Settings
+                    ]
+                    [ Icon.icon Icon.Settings [] ]
                 ]
-                [ Icon.icon Icon.Stats [] ]
-            , button
-                [ type_ "button"
-                , id "btn-help"
-                , class "HeaderButton btn btn-sm d-flex align-items-center"
-                , btnClass (modal == Just HelpModal)
-                , onClick (OpenModal HelpModal)
-                , attribute "aria-label" <| I18n.translate store.lang I18n.Help
-                ]
-                [ Icon.icon Icon.Help [] ]
-            , button
-                [ type_ "button"
-                , id "btn-settings"
-                , class "HeaderButton btn btn-sm d-flex align-items-center"
-                , btnClass (modal == Just SettingsModal)
-                , onClick (OpenModal SettingsModal)
-                , attribute "aria-label" <| I18n.translate store.lang I18n.Settings
-                ]
-                [ Icon.icon Icon.Settings [] ]
             ]
         ]
 
