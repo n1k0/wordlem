@@ -7527,7 +7527,7 @@ type alias Process =
                 $elm$html$Html$Attributes$class('Header container-fluid flex-nowrap py-sm-1')
             ]), _List_fromArray([
                 A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('Logo text-white fw-bold me-2')
+                    $elm$html$Html$Attributes$class('HeaderLogo text-white fw-bold')
                 ]), _List_fromArray([
                     A2($elm$html$Html$h1, _List_fromArray([
                         $elm$html$Html$Attributes$class('visually-hidden')
@@ -7536,7 +7536,7 @@ type alias Process =
                     ]))
                 ])),
                 A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('d-flex flex-fill justify-content-center text-center')
+                    $elm$html$Html$Attributes$class('d-flex flex-fill justify-content-evenly text-center')
                 ]), _List_fromArray([
                     A2($elm$html$Html$button, _List_fromArray([
                         $elm$html$Html$Attributes$type_('button'),
@@ -7557,35 +7557,39 @@ type alias Process =
                         $elm$html$Html$text('Français')
                     ]))
                 ])),
-                A2($elm$html$Html$button, _List_fromArray([
-                    $elm$html$Html$Attributes$type_('button'),
-                    $elm$html$Html$Attributes$id('btn-stats'),
-                    $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                    btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal)),
-                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$StatsButton))
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('d-flex justify-content-end')
                 ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_Nil)
-                ])),
-                A2($elm$html$Html$button, _List_fromArray([
-                    $elm$html$Html$Attributes$type_('button'),
-                    $elm$html$Html$Attributes$id('btn-help'),
-                    $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                    btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal)),
-                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Help))
-                ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Help, _List_Nil)
-                ])),
-                A2($elm$html$Html$button, _List_fromArray([
-                    $elm$html$Html$Attributes$type_('button'),
-                    $elm$html$Html$Attributes$id('btn-settings'),
-                    $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                    btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$SettingsModal))),
-                    $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal)),
-                    A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Settings))
-                ]), _List_fromArray([
-                    A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_Nil)
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-stats'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$StatsButton))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_Nil)
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-help'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Help))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Help, _List_Nil)
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-settings'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$SettingsModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Settings))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_Nil)
+                    ]))
                 ]))
             ]))
         ]));

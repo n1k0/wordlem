@@ -10405,8 +10405,29 @@ body {
   max-width: 600px;
   min-height: 34px;
 }
+.HeaderLogo {
+  background: url("logo.2729620f.svg") no-repeat;
+  background-size: contain;
+  color: transparent;
+  overflow: hidden;
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+}
+@media screen and (min-width: 600px) {
+  .HeaderLogo {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+}
 .HeaderButton {
   min-width: 0;
+}
+@media screen and (max-width: 319px) {
+  .HeaderButton {
+    padding: 0 5px;
+  }
 }
 @media screen and (min-width: 600px) {
   .HeaderButton {
@@ -10414,20 +10435,6 @@ body {
   }
   .HeaderButton .icon {
     font-size: 1.2em;
-  }
-}
-.Logo {
-  background: url("logo.2729620f.svg") no-repeat;
-  background-size: contain;
-  color: transparent;
-  overflow: hidden;
-  width: 32px;
-  height: 32px;
-}
-@media screen and (min-width: 600px) {
-  .Logo {
-    width: 40px;
-    height: 40px;
   }
 }
 .Loader {
