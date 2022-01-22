@@ -21,7 +21,6 @@
     "elm-test": "^0.19.1-revision7",
     "elm-tooling": "^1.7.0",
     "gh-pages": "^3.2.3",
-    "isomorphic-fetch": "^3.0.0",
     "parcel": "^2.2.1",
     "rimraf": "^3.0.2"
   }
