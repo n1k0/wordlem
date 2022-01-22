@@ -285,8 +285,8 @@ update msg ({ store } as model) =
             in
             ( newModel
             , case store.settings.wordSize of
-                Just wordSize ->
-                    getRandomWord wordSize model.words
+                Just _ ->
+                    Client.getWords store.lang WordsReceived
 
                 Nothing ->
                     getRandomWordSize
