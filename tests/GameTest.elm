@@ -8,15 +8,15 @@ import TestUtils exposing (asTest)
 
 
 french =
-    [ "agaça"
+    [ "agaca"
     , "envie"
-    , "épées"
-    , "évier"
-    , "génie"
+    , "epees"
+    , "evier"
+    , "genie"
     , "ladre"
-    , "plaça"
+    , "placa"
     , "titra"
-    , "traça"
+    , "traca"
     , "voila"
     ]
 
@@ -53,6 +53,9 @@ suite =
                 , validateGuess French french "envie" "génie"
                     |> Expect.equal (Ok [ u 'g', m 'e', m 'n', c 'i', c 'e' ])
                     |> asTest "should avoid duplicating misplaced letters (2 dupes, bis)"
+                , validateGuess French french "voila" "voilà"
+                    |> Expect.equal (Ok [ c 'v', c 'o', c 'i', c 'l', c 'a' ])
+                    |> asTest "should handle accented input"
                 ]
             ]
         ]

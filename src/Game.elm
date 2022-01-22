@@ -11,7 +11,7 @@ module Game exposing
     , validateGuess
     )
 
-import I18n exposing (Lang, translate)
+import I18n exposing (Lang)
 import String.Extra as SE
 
 
@@ -94,7 +94,7 @@ mapChars wordChars inputChar wordChar =
         Unused inputChar
 
 
-validateGuess : Lang -> List WordToFind -> WordToFind -> UserInput -> Result String Guess
+validateGuess : Lang -> List WordToFind -> WordToFind -> UserInput -> Result I18n.Id Guess
 validateGuess lang words word input =
     let
         normalize =

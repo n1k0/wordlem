@@ -44,6 +44,7 @@ type Id
     | HelpLetterMisplaced { letter : String }
     | HelpLetterUnused { letter : String }
     | LoadError
+    | NewGameLang { lang : Lang }
     | NotEnoughLetters
     | PlayAgain
     | Settings
@@ -155,6 +156,11 @@ getSet id =
             set []
                 "Error loading dictionary"
                 "Impossible de charger le dictionnaire"
+
+        NewGameLang { lang } ->
+            set [ langToString lang ]
+                "Now playing in {0}"
+                "On joue en {0}"
 
         NotEnoughLetters ->
             set []

@@ -107,8 +107,7 @@ init flags =
                       }
                     , encodeAndSaveStore store
                     )
-                        |> Notif.add ToastyMsg
-                            (Notif.Warning (translate store.lang I18n.ErrorCorruptedSession))
+                        |> notifyWarning I18n.ErrorCorruptedSession
     in
     ( model
     , Cmd.batch [ startNewGame model.store, cmds ]
@@ -166,12 +165,10 @@ processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 processStateNotif ( { store, state } as model, cmds ) =
     case state of
         Game.Won _ _ ->
-            ( model, cmds )
-                |> Notif.add ToastyMsg (Notif.Success (translate store.lang I18n.GameWin))
+            notifySuccess I18n.GameWin ( model, cmds )
 
         Game.Lost _ _ ->
-            ( model, cmds )
-                |> Notif.add ToastyMsg (Notif.Info (translate store.lang I18n.GameLost))
+            notifyInfo I18n.GameLost ( model, cmds )
 
         _ ->
             ( model, cmds )
@@ -326,10 +323,10 @@ update msg ({ store } as model) =
                         |> logResult
 
                 Err error ->
-                    ( { model | state = Game.Ongoing word guesses input }
-                    , Cmd.none
-                    )
-                        |> Notif.add ToastyMsg (Notif.Warning error)
+                    notifyWarning error
+                        ( { model | state = Game.Ongoing word guesses input }
+                        , Cmd.none
+                        )
 
         ( Submit, _ ) ->
             ( model, Cmd.none )
@@ -348,6 +345,7 @@ update msg ({ store } as model) =
                 , Client.getWords lang WordsReceived
                 ]
             )
+                |> notifySuccess (I18n.NewGameLang { lang = store.lang })
 
         ( SwitchLayout layout_, _ ) ->
             let
@@ -410,8 +408,25 @@ update msg ({ store } as model) =
             )
 
         ( WordsReceived (Err _), _ ) ->
-            ( model, Cmd.none )
-                |> Notif.add ToastyMsg (Notif.Warning (translate store.lang I18n.LoadError))
+            notifyWarning I18n.LoadError ( model, Cmd.none )
+
+
+notifyInfo : I18n.Id -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+notifyInfo i18nId ( model, cmds ) =
+    ( model, cmds )
+        |> Notif.add ToastyMsg (Notif.Info (translate model.store.lang i18nId))
+
+
+notifySuccess : I18n.Id -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+notifySuccess i18nId ( model, cmds ) =
+    ( model, cmds )
+        |> Notif.add ToastyMsg (Notif.Success (translate model.store.lang i18nId))
+
+
+notifyWarning : I18n.Id -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+notifyWarning i18nId ( model, cmds ) =
+    ( model, cmds )
+        |> Notif.add ToastyMsg (Notif.Warning (translate model.store.lang i18nId))
 
 
 charToText : Char -> String
