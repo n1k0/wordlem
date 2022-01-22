@@ -105,12 +105,13 @@ validateGuess lang words word input =
             , String.toList (normalize input)
             )
     in
-    if List.length inputChars /= String.length word then
+    if List.length inputChars < String.length word then
         I18n.NotEnoughLetters
             |> translate lang
             |> Err
 
-    else if not (List.member (normalize input) words) then
+    else if not (List.member (normalize input) (List.map normalize words)) then
+        -- FIXME: store normalized list of words, this is expensive on each keystroke!
         I18n.AbsentFromDictionary { lang = lang, word = input }
             |> translate lang
             |> Err

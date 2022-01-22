@@ -1,12 +1,13 @@
 {
   "scripts": {
     "build": "rimraf dist && npm run build:init && parcel build index.html --no-cache --public-url ./",
+    "build:words": "node makewords.js",
     "build:init": "mkdir -p dist && cp -r public/* dist/",
     "deploy": "npm run build && gh-pages --dist dist/",
     "elm:build": "elm make src/Main.elm --optimize --output=build/app.js",
     "start:parcel": "parcel serve index.html --port 8000 --no-cache",
     "start:dev": "npm run start:parcel",
-    "start": "PARCEL_ELM_NO_DEBUG=1 npm run start:dev",
+    "start": "npm run build:init && PARCEL_ELM_NO_DEBUG=1 npm run start:dev",
     "test": "elm-test"
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "elm-test": "^0.19.1-revision7",
     "elm-tooling": "^1.7.0",
     "gh-pages": "^3.2.3",
+    "isomorphic-fetch": "^3.0.0",
     "parcel": "^2.2.1",
     "rimraf": "^3.0.2"
   }

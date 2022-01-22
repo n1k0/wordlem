@@ -9,6 +9,7 @@ import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
 import Charts
+import Client
 import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
@@ -16,6 +17,7 @@ import Game
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import I18n exposing (Id(..), Lang(..), translate)
 import Icon
 import Json.Decode as Decode
@@ -31,7 +33,6 @@ import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
 import Toasty
-import Words
 
 
 type alias Flags =
@@ -43,9 +44,11 @@ type alias Flags =
 type alias Model =
     { store : Store
     , state : Game.State
+    , words : List Game.WordToFind
     , modal : Maybe Modal
     , toasties : Toasty.Stack Notif
     , time : Posix
+    , wordSize : Int
     }
 
 
@@ -68,12 +71,10 @@ type Msg
     | Submit
     | SwitchLang Lang
     | SwitchLayout Keyboard.Layout
+    | SwitchWordSize (Maybe Int)
     | ToastyMsg (Toasty.Msg Notif)
-
-
-numberOfLetters : Int
-numberOfLetters =
-    5
+    | UpdateWordSize Int
+    | WordsReceived (Result Http.Error String)
 
 
 maxAttempts : Int
@@ -106,9 +107,19 @@ init flags =
                       }
                     , encodeAndSaveStore store
                     )
+                        |> Notif.add ToastyMsg
+                            (Notif.Warning (translate store.lang I18n.ErrorCorruptedSession))
     in
     ( model
-    , Cmd.batch [ getRandomWord model.store.lang, cmds ]
+    , Cmd.batch
+        [ case model.store.settings.wordSize of
+            Just _ ->
+                Client.getWords model.store.lang WordsReceived
+
+            Nothing ->
+                getRandomWordSize
+        , cmds
+        ]
     )
 
 
@@ -116,6 +127,7 @@ initialModel : Store -> Model
 initialModel store =
     { store = store
     , state = Game.Idle
+    , words = []
     , modal =
         if store.helpViewed then
             Nothing
@@ -124,43 +136,28 @@ initialModel store =
             Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
+    , wordSize = store.settings.wordSize |> Maybe.withDefault 5
     }
 
 
-
--- sampleOngoingState : GameState
--- sampleOngoingState =
---     -- this is useful to debug specific states
---     Ongoing "xxxxx"
---         ("voila"
---             |> String.toList
---             |> List.map Unused
---             |> List.repeat 5
---         )
---         "voila"
---         Nothing
+getRandomWordSize : Cmd Msg
+getRandomWordSize =
+    Random.int 5 7
+        |> Random.generate UpdateWordSize
 
 
-getWords : Lang -> List Game.WordToFind
-getWords lang =
-    case lang of
-        English ->
-            Words.english
-
-        French ->
-            Words.french
-
-
-getRandomWord : Lang -> Cmd Msg
-getRandomWord =
-    getWords >> randomWord >> Random.generate NewWord
+getRandomWord : Int -> List Game.WordToFind -> Cmd Msg
+getRandomWord wordSize words =
+    words
+        |> List.filter (String.length >> (==) wordSize)
+        |> randomWord
+        |> Random.generate NewWord
 
 
 randomWord : List Game.WordToFind -> Random.Generator (Maybe Game.WordToFind)
 randomWord words =
     Random.int 0 (List.length words - 1)
-        |> Random.andThen
-            (\int -> words |> LE.getAt int |> Random.constant)
+        |> Random.andThen (\int -> words |> LE.getAt int |> Random.constant)
 
 
 processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -250,10 +247,10 @@ scrollToBottom id =
         |> Task.attempt (always NoOp)
 
 
-addChar : Char -> Game.UserInput -> Game.UserInput
-addChar char input =
+addChar : Int -> Char -> Game.UserInput -> Game.UserInput
+addChar wordSize char input =
     (input ++ String.fromChar char)
-        |> String.slice 0 numberOfLetters
+        |> String.slice 0 wordSize
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -274,7 +271,7 @@ update msg ({ store } as model) =
                 )
 
         ( KeyPressed char, Game.Ongoing word guesses input ) ->
-            ( { model | state = Game.Ongoing word guesses (addChar char input) }
+            ( { model | state = Game.Ongoing word guesses (addChar model.wordSize char input) }
             , scrollToBottom "board-container"
             )
 
@@ -287,7 +284,12 @@ update msg ({ store } as model) =
                     initialModel store
             in
             ( newModel
-            , getRandomWord store.lang
+            , case store.settings.wordSize of
+                Just wordSize ->
+                    getRandomWord wordSize model.words
+
+                Nothing ->
+                    getRandomWordSize
             )
 
         ( NewTime time, _ ) ->
@@ -322,7 +324,7 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( Submit, Game.Ongoing word guesses input ) ->
-            case Game.validateGuess store.lang (getWords store.lang) word input of
+            case Game.validateGuess store.lang model.words word input of
                 Ok guess ->
                     ( { model | state = Game.checkGame maxAttempts word (guess :: guesses) }
                     , scrollToBottom "board-container"
@@ -350,7 +352,7 @@ update msg ({ store } as model) =
             ( newModel
             , Cmd.batch
                 [ encodeAndSaveStore newStore
-                , getRandomWord lang
+                , Client.getWords lang WordsReceived
                 ]
             )
 
@@ -363,8 +365,61 @@ update msg ({ store } as model) =
             , encodeAndSaveStore newStore
             )
 
+        ( SwitchWordSize (Just wordSize), _ ) ->
+            let
+                newStore =
+                    store |> Store.updateSettings (\s -> { s | wordSize = Just wordSize })
+
+                newModel =
+                    initialModel newStore
+            in
+            ( { newModel | store = newStore, wordSize = wordSize }
+            , Cmd.batch
+                [ Client.getWords newStore.lang WordsReceived
+                , encodeAndSaveStore newStore
+                ]
+            )
+
+        ( SwitchWordSize Nothing, _ ) ->
+            let
+                newStore =
+                    store |> Store.updateSettings (\s -> { s | wordSize = Nothing })
+            in
+            ( { model | store = newStore }
+            , Cmd.batch
+                [ -- FIXME: get random new word size
+                  getRandomWordSize
+                , encodeAndSaveStore newStore
+                ]
+            )
+
         ( ToastyMsg subMsg, _ ) ->
             Toasty.update Notif.config ToastyMsg subMsg model
+
+        ( UpdateWordSize wordSize, _ ) ->
+            let
+                newModel =
+                    initialModel store
+            in
+            ( { newModel | wordSize = wordSize }
+            , Client.getWords store.lang WordsReceived
+            )
+
+        ( WordsReceived (Ok rawWords), _ ) ->
+            let
+                words =
+                    rawWords
+                        |> String.lines
+                        |> List.filter (not << String.isEmpty)
+                        |> List.filter (String.length >> (==) model.wordSize)
+            in
+            ( { model | words = words }
+            , getRandomWord model.wordSize words
+            )
+
+        ( WordsReceived (Err _), _ ) ->
+            ( model, Cmd.none )
+                |> Notif.add ToastyMsg (Notif.Warning (translate store.lang I18n.LoadError))
 
 
 charToText : Char -> String
@@ -372,8 +427,8 @@ charToText =
     Char.toUpper >> String.fromChar
 
 
-viewAttempt : Game.Guess -> Html Msg
-viewAttempt =
+viewAttempt : Int -> Game.Guess -> Html Msg
+viewAttempt wordSize =
     List.map
         (\letter ->
             case letter of
@@ -389,16 +444,16 @@ viewAttempt =
                 Game.Handled char ->
                     viewTile "btn-secondary" char
         )
-        >> viewBoardRow
+        >> viewBoardRow wordSize
 
 
-viewBoardRow : List (Html Msg) -> Html Msg
-viewBoardRow =
+viewBoardRow : Int -> List (Html Msg) -> Html Msg
+viewBoardRow wordSize =
     div
         [ class "BoardRow"
         , style "grid-template-columns"
             (interpolate "repeat({0}, 1fr)"
-                [ String.fromInt numberOfLetters ]
+                [ String.fromInt wordSize ]
             )
         ]
 
@@ -497,8 +552,8 @@ viewKeyState ( char, letter ) =
         ]
 
 
-viewBoard : Maybe Game.UserInput -> Game.Board -> Html Msg
-viewBoard input guesses =
+viewBoard : Int -> Maybe Game.UserInput -> Game.Board -> Html Msg
+viewBoard wordSize input guesses =
     let
         remaining =
             maxAttempts
@@ -508,21 +563,21 @@ viewBoard input guesses =
     div [ class "BoardContainer", id "board-container" ]
         [ [ guesses
                 |> List.reverse
-                |> List.map (viewAttempt >> Just)
-          , [ input |> Maybe.map viewInput ]
+                |> List.map (viewAttempt wordSize >> Just)
+          , [ input |> Maybe.map (viewInput wordSize) ]
           , List.range 0 remaining
                 |> List.map
                     (\_ ->
-                        List.repeat numberOfLetters '\u{00A0}'
+                        List.repeat wordSize '\u{00A0}'
                             |> String.fromList
-                            |> viewInput
+                            |> viewInput wordSize
                             |> Just
                     )
           ]
             |> List.concat
             |> List.filterMap identity
             |> div
-                [ class "Board"
+                [ class <| "Board Board-" ++ String.fromInt wordSize
                 , style "grid-template-rows"
                     (interpolate "repeat({0}, 1fr)"
                         [ String.fromInt maxAttempts ]
@@ -538,18 +593,18 @@ viewTile classes char =
         [ text (charToText char) ]
 
 
-viewInput : Game.UserInput -> Html Msg
-viewInput input =
+viewInput : Int -> Game.UserInput -> Html Msg
+viewInput wordSize input =
     let
         chars =
             String.toList input
 
         spots =
-            chars ++ LE.initialize (numberOfLetters - List.length chars) (always '\u{00A0}')
+            chars ++ LE.initialize (wordSize - List.length chars) (always '\u{00A0}')
     in
     spots
         |> List.map (viewTile "btn-secondary")
-        |> viewBoardRow
+        |> viewBoardRow wordSize
 
 
 guessDescription : Lang -> Game.Guess -> List String
@@ -573,8 +628,8 @@ guessDescription lang =
         )
 
 
-viewHelp : Store -> List (Html Msg)
-viewHelp { lang } =
+viewHelp : Store -> Int -> List (Html Msg)
+viewHelp { lang } wordSize =
     let
         demo =
             [ Game.Correct 'm'
@@ -585,14 +640,14 @@ viewHelp { lang } =
             ]
     in
     [ I18n.HelpGamePitch
-        { nbLetters = numberOfLetters
+        { nbLetters = wordSize
         , lang = lang
         , maxGuesses = maxAttempts
         }
         |> I18n.paragraph lang
     , I18n.paragraph lang I18n.HelpKeyboard
     , div [ class "BoardRowExample mb-3" ]
-        [ viewAttempt demo ]
+        [ viewAttempt wordSize demo ]
     , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
@@ -631,22 +686,52 @@ progressBar percent =
 
 viewSettings : Store -> List (Html Msg)
 viewSettings { lang, settings } =
-    [ label []
-        [ I18n.SettingsKeyboardLayout |> I18n.htmlText lang
-        ]
-    , [ Keyboard.Auto, Keyboard.Azerty, Keyboard.Qwerty ]
-        |> List.map
-            (\l ->
-                option
-                    [ value (Keyboard.layoutToString l)
-                    , selected <| l == settings.layout
-                    ]
-                    [ l |> Keyboard.layoutToString |> String.toUpper |> text ]
-            )
-        |> select
-            [ class "form-select w-100 mt-1"
-            , onInput (Keyboard.layoutFromString >> SwitchLayout)
+    [ -- Keyboard layout setting
+      div [ class "mb-3" ]
+        [ label []
+            [ I18n.SettingsKeyboardLayout |> I18n.htmlText lang
             ]
+        , [ Keyboard.Auto, Keyboard.Azerty, Keyboard.Qwerty ]
+            |> List.map
+                (\l ->
+                    option
+                        [ value (Keyboard.layoutToString l)
+                        , selected <| l == settings.layout
+                        ]
+                        [ l |> Keyboard.layoutToString |> String.toUpper |> text ]
+                )
+            |> select
+                [ class "form-select w-100 mt-1"
+                , onInput (Keyboard.layoutFromString >> SwitchLayout)
+                ]
+        ]
+
+    -- Word size setting
+    , div [ class "mb-3" ]
+        [ label []
+            [ I18n.SettingsWordSize |> I18n.htmlText lang
+            ]
+        , [ ( Nothing, I18n.SettingsWordSizeRandom )
+          , ( Just 5, I18n.SettingsWordSizeInt { size = 5 } )
+          , ( Just 6, I18n.SettingsWordSizeInt { size = 6 } )
+          , ( Just 7, I18n.SettingsWordSizeInt { size = 7 } )
+          ]
+            |> List.map
+                (\( wordSize, i18n ) ->
+                    option
+                        [ selected <| wordSize == settings.wordSize
+                        , wordSize
+                            |> Maybe.map String.fromInt
+                            |> Maybe.withDefault ""
+                            |> value
+                        ]
+                        [ text (I18n.translate lang i18n) ]
+                )
+            |> select
+                [ class "form-select w-100 mt-1"
+                , onInput (String.toInt >> SwitchWordSize)
+                ]
+        ]
     ]
 
 
@@ -706,21 +791,21 @@ viewLangStats lang langLogs =
                 , td [ class "w-100" ] [ progressBar percent ]
                 ]
 
-        card nodes =
-            div [ class "card py-0" ]
-                [ div [ class "card-body text-center" ] nodes ]
+        stat nodes =
+            div [ class "col-4 text-center mb-4" ]
+                nodes
     in
-    [ div [ class "card-group mb-3" ]
-        [ card
+    [ div [ class "row" ]
+        [ stat
             [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-            , small [] [ I18n.htmlText lang (I18n.StatsGamesPlayed { lang = lang }) ]
+            , small [] [ I18n.htmlText lang I18n.StatsGamesPlayed ]
             ]
-        , card
+        , stat
             [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
             , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
             ]
         , if guessAvg > 0 then
-            card
+            stat
                 [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
                 , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
                 ]
@@ -761,7 +846,7 @@ layout ({ store, modal, toasties } as model) content =
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
-                viewModal store I18n.Help (viewHelp store)
+                viewModal store I18n.Help (viewHelp store model.wordSize)
 
             Just SettingsModal ->
                 viewModal store
@@ -915,11 +1000,11 @@ viewError lang error =
 
 
 view : Model -> Html Msg
-view ({ store, state } as model) =
+view ({ wordSize, store, state } as model) =
     layout model
         (case state of
             Game.Idle ->
-                [ I18n.htmlText store.lang I18n.GameLoading ]
+                []
 
             Game.Errored error ->
                 [ viewError store.lang error
@@ -928,7 +1013,7 @@ view ({ store, state } as model) =
                 ]
 
             Game.Won word guesses ->
-                [ viewBoard Nothing guesses
+                [ viewBoard wordSize Nothing guesses
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
@@ -938,13 +1023,13 @@ view ({ store, state } as model) =
                     |> String.toList
                     |> List.map Game.Correct
                     |> (\a -> a :: guesses)
-                    |> viewBoard Nothing
+                    |> viewBoard wordSize Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
 
             Game.Ongoing _ guesses input ->
-                [ viewBoard (Just input) guesses
+                [ viewBoard wordSize (Just input) guesses
                 , viewKeyboard store guesses
                 ]
         )

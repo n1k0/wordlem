@@ -3,6 +3,7 @@ module I18n exposing
     , Lang(..)
     , htmlText
     , langFromString
+    , langToCode
     , langToString
     , paragraph
     , parseLang
@@ -28,6 +29,7 @@ type Id
     = AbsentFromDictionary { lang : Lang, word : String }
     | DecodeError
     | Definition
+    | ErrorCorruptedSession
     | ErrorDetail { error : String }
     | GameLoading
     | GameLost
@@ -46,9 +48,12 @@ type Id
     | PlayAgain
     | Settings
     | SettingsKeyboardLayout
+    | SettingsWordSize
+    | SettingsWordSizeRandom
+    | SettingsWordSizeInt { size : Int }
     | StatsAverageGuesses
     | StatsButton
-    | StatsGamesPlayed { lang : Lang }
+    | StatsGamesPlayed
     | StatsGuessDistribution { lang : Lang }
     | StatsGuessEvolution { lang : Lang }
     | StatsGuessEvolutionHelp { lang : Lang, length : Int }
@@ -75,6 +80,11 @@ getSet id =
             set []
                 "Definition"
                 "Définition"
+
+        ErrorCorruptedSession ->
+            set []
+                "Corrupted data, reinitialized"
+                "Données corrompues, réinitialisées"
 
         ErrorDetail { error } ->
             set [ error ]
@@ -143,8 +153,8 @@ getSet id =
 
         LoadError ->
             set []
-                "Unable to pick a word."
-                "Impossible de sélectionner un mot à trouver."
+                "Error loading dictionary"
+                "Impossible de charger le dictionnaire"
 
         NotEnoughLetters ->
             set []
@@ -166,6 +176,21 @@ getSet id =
                 "Keyboard layout"
                 "Disposition du clavier"
 
+        SettingsWordSize ->
+            set []
+                "Word length"
+                "Longueur de mot"
+
+        SettingsWordSizeRandom ->
+            set []
+                "Random"
+                "Aléatoire"
+
+        SettingsWordSizeInt { size } ->
+            set [ String.fromInt size ]
+                "{0} letters"
+                "{0} lettres"
+
         StatsAverageGuesses ->
             set []
                 "average guesses"
@@ -176,10 +201,10 @@ getSet id =
                 "Stats"
                 "Stats"
 
-        StatsGamesPlayed { lang } ->
-            set [ langToString lang ]
-                "games played in {0}"
-                "parties jouées en {0}"
+        StatsGamesPlayed ->
+            set []
+                "games played"
+                "parties jouées"
 
         StatsGuessDistribution { lang } ->
             set [ langToString lang ]
@@ -214,7 +239,7 @@ getSet id =
         StatsWinRate ->
             set []
                 "win rate"
-                "de parties gagnées"
+                "parties gagnées"
 
 
 set : List String -> String -> String -> Set
@@ -261,6 +286,16 @@ langToString lang =
 
         French ->
             "Français"
+
+
+langToCode : Lang -> String
+langToCode lang =
+    case lang of
+        English ->
+            "en"
+
+        French ->
+            "fr"
 
 
 langFromString : String -> Lang
