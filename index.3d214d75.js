@@ -5038,12 +5038,6 @@ type alias Process =
             a: a
         };
     };
-    var $author$project$Main$WordsReceived = function(a) {
-        return {
-            $: 'WordsReceived',
-            a: a
-        };
-    };
     var $pablen$toasty$Toasty$Temporary = {
         $: 'Temporary'
     };
@@ -5390,6 +5384,40 @@ type alias Process =
     var $author$project$Store$decode = A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'settings', $author$project$Settings$decode, $author$project$Settings$default, A4($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional, 'helpViewed', $elm$json$Json$Decode$bool, false, A3($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required, 'logs', $elm$json$Json$Decode$list($author$project$Log$decode), A3($NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required, 'lang', A2($elm$json$Json$Decode$map, $author$project$I18n$langFromString, $elm$json$Json$Decode$string), $elm$json$Json$Decode$succeed($author$project$Store$Store)))));
     var $elm$json$Json$Decode$decodeString = _Json_runOnString;
     var $author$project$Store$fromJson = $elm$json$Json$Decode$decodeString($author$project$Store$decode);
+    var $author$project$Main$HelpModal = {
+        $: 'HelpModal'
+    };
+    var $author$project$Game$Idle = {
+        $: 'Idle'
+    };
+    var $elm$random$Random$initialSeed = function(x) {
+        var _v0 = $elm$random$Random$next(A2($elm$random$Random$Seed, 0, 1013904223));
+        var state1 = _v0.a;
+        var incr = _v0.b;
+        var state2 = state1 + x >>> 0;
+        return $elm$random$Random$next(A2($elm$random$Random$Seed, state2, incr));
+    };
+    var $pablen$toasty$Toasty$initialState = A2($pablen$toasty$Toasty$Stack, _List_Nil, $elm$random$Random$initialSeed(0));
+    var $author$project$Main$initialModel = function(store) {
+        return {
+            modal: store.helpViewed ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just($author$project$Main$HelpModal),
+            state: $author$project$Game$Idle,
+            store: store,
+            time: $elm$time$Time$millisToPosix(0),
+            toasties: $pablen$toasty$Toasty$initialState,
+            wordSize: A2($elm$core$Maybe$withDefault, 5, store.settings.wordSize),
+            words: _List_Nil
+        };
+    };
+    var $author$project$I18n$parseLang = function(string) {
+        return A2($elm$core$String$startsWith, 'fr', string) ? $author$project$I18n$French : $author$project$I18n$English;
+    };
+    var $author$project$Main$WordsReceived = function(a) {
+        return {
+            $: 'WordsReceived',
+            a: a
+        };
+    };
     var $author$project$Main$UpdateWordSize = function(a) {
         return {
             $: 'UpdateWordSize',
@@ -5401,13 +5429,6 @@ type alias Process =
             $: 'Generate',
             a: a
         };
-    };
-    var $elm$random$Random$initialSeed = function(x) {
-        var _v0 = $elm$random$Random$next(A2($elm$random$Random$Seed, 0, 1013904223));
-        var state1 = _v0.a;
-        var incr = _v0.b;
-        var state2 = state1 + x >>> 0;
-        return $elm$random$Random$next(A2($elm$random$Random$Seed, state2, incr));
     };
     var $elm$time$Time$Name = function(a) {
         return {
@@ -6051,26 +6072,12 @@ type alias Process =
             url: 'db/' + ($author$project$I18n$langToCode(lang) + '.txt')
         });
     });
-    var $author$project$Main$HelpModal = {
-        $: 'HelpModal'
-    };
-    var $author$project$Game$Idle = {
-        $: 'Idle'
-    };
-    var $pablen$toasty$Toasty$initialState = A2($pablen$toasty$Toasty$Stack, _List_Nil, $elm$random$Random$initialSeed(0));
-    var $author$project$Main$initialModel = function(store) {
-        return {
-            modal: store.helpViewed ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just($author$project$Main$HelpModal),
-            state: $author$project$Game$Idle,
-            store: store,
-            time: $elm$time$Time$millisToPosix(0),
-            toasties: $pablen$toasty$Toasty$initialState,
-            wordSize: A2($elm$core$Maybe$withDefault, 5, store.settings.wordSize),
-            words: _List_Nil
-        };
-    };
-    var $author$project$I18n$parseLang = function(string) {
-        return A2($elm$core$String$startsWith, 'fr', string) ? $author$project$I18n$French : $author$project$I18n$English;
+    var $author$project$Main$startNewGame = function(_v0) {
+        var lang = _v0.lang;
+        var settings = _v0.settings;
+        var _v1 = settings.wordSize;
+        if (_v1.$ === 'Just') return A2($author$project$Client$getWords, lang, $author$project$Main$WordsReceived);
+        else return $author$project$Main$getRandomWordSize;
     };
     var $author$project$I18n$Set = F2(function(english, french) {
         return {
@@ -6326,11 +6333,7 @@ type alias Process =
         var model = _v0.a;
         var cmds = _v0.b;
         return _Utils_Tuple2(model, $elm$core$Platform$Cmd$batch(_List_fromArray([
-            function() {
-                var _v2 = model.store.settings.wordSize;
-                if (_v2.$ === 'Just') return A2($author$project$Client$getWords, model.store.lang, $author$project$Main$WordsReceived);
-                else return $author$project$Main$getRandomWordSize;
-            }(),
+            $author$project$Main$startNewGame(model.store),
             cmds
         ])));
     };
@@ -7128,12 +7131,7 @@ type alias Process =
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'NewGame':
                 var _v6 = _v0.a;
-                var newModel = $author$project$Main$initialModel(store);
-                return _Utils_Tuple2(newModel, function() {
-                    var _v7 = store.settings.wordSize;
-                    if (_v7.$ === 'Just') return A2($author$project$Client$getWords, store.lang, $author$project$Main$WordsReceived);
-                    else return $author$project$Main$getRandomWordSize;
-                }());
+                return _Utils_Tuple2($author$project$Main$initialModel(store), $author$project$Main$startNewGame(store));
             case 'NewTime':
                 var time = _v0.a.a;
                 return _Utils_Tuple2(_Utils_update(model, {
@@ -7143,22 +7141,22 @@ type alias Process =
                 if (_v0.a.a.$ === 'Just') {
                     if (_v0.b.$ === 'Idle') {
                         var newWord = _v0.a.a.a;
-                        var _v8 = _v0.b;
+                        var _v7 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, newWord, _List_Nil, '')
                         }), $author$project$Main$defocusMenuButtons);
                     } else break _v0$9;
                 } else {
                     if (_v0.b.$ === 'Idle') {
-                        var _v9 = _v0.a.a;
-                        var _v10 = _v0.b;
+                        var _v8 = _v0.a.a;
+                        var _v9 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: $author$project$Game$Errored($author$project$Game$LoadError)
                         }), $elm$core$Platform$Cmd$none);
                     } else break _v0$9;
                 }
             case 'NoOp':
-                var _v11 = _v0.a;
+                var _v10 = _v0.a;
                 return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'OpenModal':
                 var modal = _v0.a.a;
@@ -7174,25 +7172,25 @@ type alias Process =
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'Submit':
                 if (_v0.b.$ === 'Ongoing') {
-                    var _v12 = _v0.a;
-                    var _v13 = _v0.b;
-                    var word = _v13.a;
-                    var guesses = _v13.b;
-                    var input = _v13.c;
-                    var _v14 = A4($author$project$Game$validateGuess, store.lang, model.words, word, input);
-                    if (_v14.$ === 'Ok') {
-                        var guess = _v14.a;
+                    var _v11 = _v0.a;
+                    var _v12 = _v0.b;
+                    var word = _v12.a;
+                    var guesses = _v12.b;
+                    var input = _v12.c;
+                    var _v13 = A4($author$project$Game$validateGuess, store.lang, model.words, word, input);
+                    if (_v13.$ === 'Ok') {
+                        var guess = _v13.a;
                         return $author$project$Main$logResult($author$project$Main$processStateNotif(_Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$checkGame, $author$project$Main$maxAttempts, word, A2($elm$core$List$cons, guess, guesses))
                         }), $author$project$Main$scrollToBottom('board-container'))));
                     } else {
-                        var error = _v14.a;
+                        var error = _v13.a;
                         return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Warning(error), _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, word, guesses, input)
                         }), $elm$core$Platform$Cmd$none));
                     }
                 } else {
-                    var _v15 = _v0.a;
+                    var _v14 = _v0.a;
                     return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
                 }
             case 'SwitchLang':
@@ -7232,7 +7230,7 @@ type alias Process =
                         $author$project$Main$encodeAndSaveStore(newStore)
                     ])));
                 } else {
-                    var _v16 = _v0.a.a;
+                    var _v15 = _v0.a.a;
                     var newStore = A2($author$project$Store$updateSettings, function(s) {
                         return _Utils_update(s, {
                             wordSize: $elm$core$Maybe$Nothing
