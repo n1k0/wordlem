@@ -17,7 +17,8 @@ async function getWords(url) {
       s
         .trim()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, ""),
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase(),
     )
     .filter((s) => !s.includes("-") && s.length >= MIN_LENGTH && s.length <= MAX_LENGTH);
   return [...new Set(words)].join("\n");
