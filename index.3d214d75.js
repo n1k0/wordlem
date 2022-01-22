@@ -7226,7 +7226,7 @@ type alias Process =
                 });
                 var newModel = $author$project$Main$initialModel(newStore);
                 return A2($author$project$Main$notifySuccess, $author$project$I18n$NewGameLang({
-                    lang: store.lang
+                    lang: newStore.lang
                 }), _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$batch(_List_fromArray([
                     $author$project$Main$encodeAndSaveStore(newStore),
                     A2($author$project$Client$getWords, lang, $author$project$Main$WordsReceived)
