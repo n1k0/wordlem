@@ -400,7 +400,7 @@ update msg ({ store } as model) =
         ( WordsReceived (Ok rawWords), _ ) ->
             let
                 words =
-                    parseWords model.wordSize rawWords
+                    Game.parseWords model.wordSize rawWords
             in
             ( { model | words = words }
             , getRandomWord model.wordSize words
@@ -426,27 +426,6 @@ notifyWarning : I18n.Id -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 notifyWarning i18nId ( model, cmds ) =
     ( model, cmds )
         |> Notif.add ToastyMsg (Notif.Warning (translate model.store.lang i18nId))
-
-
-parseWords : Int -> String -> List Game.WordToFind
-parseWords wordSize =
-    let
-        parseParts parts =
-            case parts of
-                [ word, rawFreq ] ->
-                    rawFreq
-                        |> String.toFloat
-                        |> Maybe.map (\f -> ( word, f ))
-
-                _ ->
-                    Nothing
-    in
-    String.lines
-        >> List.filterMap (String.split "," >> parseParts)
-        >> List.sortBy Tuple.second
-        >> List.map Tuple.first
-        >> List.filter (String.length >> (==) wordSize)
-        >> List.reverse
 
 
 charToText : Char -> String

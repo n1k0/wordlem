@@ -58,6 +58,12 @@ suite =
                     |> asTest "should handle accented input"
                 ]
             ]
+        , describe "parseWords"
+            [ "aaaaa,1.0001\nbbbbb,1.0002"
+                |> parseWords 5
+                |> Expect.equal [ "bbbbb", "aaaaa" ]
+                |> asTest "should parse raw words list"
+            ]
         ]
 
 
