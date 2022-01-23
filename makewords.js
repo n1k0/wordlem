@@ -2,23 +2,14 @@ const fs = require("fs");
 
 const MIN_LENGTH = 5;
 const MAX_LENGTH = 7;
-const THRESHOLD = { en: 79206, fr: 0 };
-
-/**
- * For each language source file:
- * - split each line from TAB, trim each member
- * - normalize word, convert nb to float (watch out for comma as decimal separator)
- * - for duplicates, keep the one with the highest ratio
- * - find freq boundaries (min, max), create a ratio for each word
- * - export as <word>,<ratio>
- * - provide stats
- */
+const THRESHOLD = { en: 100000, fr: 0 };
 
 const blacklist = [].concat(
-  getFileLines("data/countries.txt"),
+  // yeah I don't really want those to be indexed anywhere
+  getFileLines("data/badwords.txt").map((s) => s.split("").reverse().join("")),
   getFileLines("data/firstnames.txt"),
-  getFileLines("data/states.txt"),
-  getFileLines("data/cities.txt"),
+  getFileLines("data/places.txt"),
+  getFileLines("data/techterms.txt"),
 );
 
 function validate(lang, word) {
@@ -75,9 +66,10 @@ function getFileLines(path) {
 }
 
 function getWords(lang, path) {
-  return getFileLines(path)
-    .map((s) => parseLine(lang, s))
-    .filter((w) => w !== null);
+  return getFileLines(path).reduce((acc, line) => {
+    const word = parseLine(lang, line);
+    return word && !acc.includes(word) ? [...acc, word] : acc;
+  }, []);
 }
 
 function processLang(lang) {
