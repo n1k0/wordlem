@@ -150,7 +150,7 @@ init flags url key =
                         wordRef =
                             maybeWordRef |> Maybe.withDefault { lang = defaultLang, size = defaultSize, id = "" }
                     in
-                    ( initialModel (Store.default (I18n.parseLang wordRef.lang)) key wordRef Game.Idle, Cmd.none )
+                    ( initialModel { store | lang = I18n.parseLang wordRef.lang } key wordRef Game.Idle, Cmd.none )
 
                 Err error ->
                     let
