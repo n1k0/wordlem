@@ -151,6 +151,8 @@ getRandomWord : Int -> List Game.WordToFind -> Cmd Msg
 getRandomWord wordSize words =
     words
         |> List.filter (String.length >> (==) wordSize)
+        -- Guessable words are to pick from topmost common words
+        |> List.take 600
         |> randomWord
         |> Random.generate NewWord
 
@@ -398,10 +400,28 @@ update msg ({ store } as model) =
         ( WordsReceived (Ok rawWords), _ ) ->
             let
                 words =
+                    -- FIXME: refactor and move elsewhere
                     rawWords
                         |> String.lines
-                        |> List.filter (not << String.isEmpty)
+                        |> List.filterMap
+                            (\line ->
+                                line
+                                    |> String.split ","
+                                    |> (\parts ->
+                                            case parts of
+                                                [ word, rawFreq ] ->
+                                                    rawFreq
+                                                        |> String.toFloat
+                                                        |> Maybe.map (\f -> ( word, f ))
+
+                                                _ ->
+                                                    Nothing
+                                       )
+                            )
+                        |> List.sortBy Tuple.second
+                        |> List.map Tuple.first
                         |> List.filter (String.length >> (==) model.wordSize)
+                        |> List.reverse
             in
             ( { model | words = words }
             , getRandomWord model.wordSize words

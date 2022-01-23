@@ -387,7 +387,6 @@ taken,7.09
 models,7.06
 known,7.04
 cases,7.03
-florida,6.99
 simple,6.98
 quick,6.98
 license,6.96
@@ -863,7 +862,6 @@ leader,3.23
 servers,3.21
 alone,3.21
 seconds,3.20
-arizona,3.20
 keyword,3.20
 flight,3.20
 italian,3.18
@@ -932,7 +930,6 @@ latin,2.98
 avoid,2.98
 manage,2.97
 corner,2.97
-oregon,2.96
 element,2.96
 birth,2.96
 virus,2.96
@@ -1020,7 +1017,6 @@ falls,2.71
 promote,2.70
 stated,2.70
 stats,2.70
-hawaii,2.70
 appears,2.70
 decided,2.69
 covers,2.69
@@ -1075,7 +1071,6 @@ bought,2.57
 nations,2.56
 route,2.56
 broken,2.56
-alaska,2.56
 battle,2.56
 anime,2.55
 speak,2.55
@@ -1188,7 +1183,6 @@ adobe,2.24
 smoking,2.24
 becomes,2.24
 drives,2.24
-alabama,2.24
 trees,2.23
 achieve,2.23
 dress,2.23
@@ -1234,7 +1228,6 @@ tennis,2.14
 bedroom,2.14
 empty,2.14
 bureau,2.13
-maine,2.12
 ideal,2.12
 specs,2.12
 pieces,2.12
@@ -1409,7 +1402,6 @@ czech,1.78
 novel,1.78
 ultra,1.78
 winner,1.78
-idaho,1.78
 episode,1.77
 potter,1.77
 plays,1.77
@@ -1499,7 +1491,6 @@ powers,1.63
 twice,1.63
 focused,1.62
 bargain,1.62
-vermont,1.62
 asking,1.62
 blocks,1.62
 hunting,1.62
@@ -1680,7 +1671,6 @@ ongoing,1.38
 worst,1.38
 imaging,1.38
 betting,1.38
-wyoming,1.38
 convert,1.38
 analyst,1.38
 garage,1.38

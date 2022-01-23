@@ -16,7 +16,8 @@ const MAX_LENGTH = 7;
 const blacklist = [].concat(
   getFileLines("data/countries.txt"),
   getFileLines("data/firstnames.txt"),
-  getFileLines("data/us-cities.txt"),
+  getFileLines("data/states.txt"),
+  getFileLines("data/cities.txt"),
 );
 
 function validate(lang, word) {
@@ -82,9 +83,11 @@ function computeRatios(lang, words) {
 }
 
 function dump(wordsObj) {
-  return Object.keys(wordsObj)
-    .map((word) => `${word},${wordsObj[word]}`)
-    .join("\n");
+  return (
+    Object.keys(wordsObj)
+      .map((word) => `${word},${wordsObj[word]}`)
+      .join("\n") + "\n"
+  );
 }
 
 function stats(wordsObj) {
