@@ -6,6 +6,23 @@ A simplistic port of the popular [Wordle game](https://www.powerlanguage.co.uk/w
 
 You can play it [here](https://n1k0.github.io/wordlem/).
 
+## Run locally
+
+```
+npm i
+npm start
+```
+
+Then head to localhost:8000.
+
+## Build dictionaries
+
+```
+npm run build:words
+```
+
+Dictionaries are then written in `public/db`.
+
 ## Credits
 
 In no specific order:
@@ -15,6 +32,7 @@ In no specific order:
 - [@mmai](https://github.com/mmai) for his great [patch](https://github.com/n1k0/wordlem/pull/1) which introduced the French version
 - [Evan Czaplicki](https://twitter.com/evancz) who created the most blissful language I ever handled, [Elm](https://elm-lang.org/)
 - [Lexique.org](http://www.lexique.org/shiny/openlexicon/) for the great resources on French language
+- [Peter Norvig](https://norvig.com/) for his compilation of the [330k most frequent English words](https://norvig.com/ngrams/count_1w.txt)
 
 ## License
 

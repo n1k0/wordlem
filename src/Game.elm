@@ -8,6 +8,7 @@ module Game exposing
     , WordToFind
     , checkGame
     , letterIs
+    , parseWords
     , validateGuess
     )
 
@@ -184,3 +185,9 @@ handleMisplacedDuplicates wordChars =
 letterIs : (Char -> Letter) -> Char -> Letter -> Bool
 letterIs build char =
     (==) (build char)
+
+
+parseWords : Int -> String -> List WordToFind
+parseWords wordSize =
+    String.lines
+        >> List.filter (String.length >> (==) wordSize)
