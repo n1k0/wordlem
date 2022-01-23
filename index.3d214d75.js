@@ -6807,17 +6807,17 @@ type alias Process =
         'btn-help',
         'btn-settings'
     ])));
-    var $elm$core$List$filter = F2(function(isGood, list) {
-        return A3($elm$core$List$foldr, F2(function(x, xs) {
-            return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-        }), _List_Nil, list);
-    });
     var $author$project$Main$NewWord = function(a) {
         return {
             $: 'NewWord',
             a: a
         };
     };
+    var $elm$core$List$filter = F2(function(isGood, list) {
+        return A3($elm$core$List$foldr, F2(function(x, xs) {
+            return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+        }), _List_Nil, list);
+    });
     var $elm$random$Random$andThen = F2(function(callback, _v0) {
         var genA = _v0.a;
         return $elm$random$Random$Generator(function(seed) {
@@ -6865,8 +6865,92 @@ type alias Process =
             return $elm$random$Random$constant(A2($elm_community$list_extra$List$Extra$getAt, _int, words));
         }, A2($elm$random$Random$int, 0, $elm$core$List$length(words) - 1));
     };
+    var $elm$core$List$takeReverse = F3(function(n, list, kept) {
+        takeReverse: while(true){
+            if (n <= 0) return kept;
+            else {
+                if (!list.b) return kept;
+                else {
+                    var x = list.a;
+                    var xs = list.b;
+                    var $temp$n = n - 1, $temp$list = xs, $temp$kept = A2($elm$core$List$cons, x, kept);
+                    n = $temp$n;
+                    list = $temp$list;
+                    kept = $temp$kept;
+                    continue takeReverse;
+                }
+            }
+        }
+    });
+    var $elm$core$List$takeTailRec = F2(function(n, list) {
+        return $elm$core$List$reverse(A3($elm$core$List$takeReverse, n, list, _List_Nil));
+    });
+    var $elm$core$List$takeFast = F3(function(ctr, n, list) {
+        if (n <= 0) return _List_Nil;
+        else {
+            var _v0 = _Utils_Tuple2(n, list);
+            _v0$1: while(true){
+                _v0$5: while(true){
+                    if (!_v0.b.b) return list;
+                    else if (_v0.b.b.b) switch(_v0.a){
+                        case 1:
+                            break _v0$1;
+                        case 2:
+                            var _v2 = _v0.b;
+                            var x = _v2.a;
+                            var _v3 = _v2.b;
+                            var y = _v3.a;
+                            return _List_fromArray([
+                                x,
+                                y
+                            ]);
+                        case 3:
+                            if (_v0.b.b.b.b) {
+                                var _v4 = _v0.b;
+                                var x = _v4.a;
+                                var _v5 = _v4.b;
+                                var y = _v5.a;
+                                var _v6 = _v5.b;
+                                var z = _v6.a;
+                                return _List_fromArray([
+                                    x,
+                                    y,
+                                    z
+                                ]);
+                            } else break _v0$5;
+                        default:
+                            if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+                                var _v7 = _v0.b;
+                                var x = _v7.a;
+                                var _v8 = _v7.b;
+                                var y = _v8.a;
+                                var _v9 = _v8.b;
+                                var z = _v9.a;
+                                var _v10 = _v9.b;
+                                var w = _v10.a;
+                                var tl = _v10.b;
+                                return ctr > 1000 ? A2($elm$core$List$cons, x, A2($elm$core$List$cons, y, A2($elm$core$List$cons, z, A2($elm$core$List$cons, w, A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2($elm$core$List$cons, x, A2($elm$core$List$cons, y, A2($elm$core$List$cons, z, A2($elm$core$List$cons, w, A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+                            } else break _v0$5;
+                    }
+                    else {
+                        if (_v0.a === 1) break _v0$1;
+                        else break _v0$5;
+                    }
+                }
+                return list;
+            }
+            var _v1 = _v0.b;
+            var x = _v1.a;
+            return _List_fromArray([
+                x
+            ]);
+        }
+    });
+    var $elm$core$List$take = F2(function(n, list) {
+        return A3($elm$core$List$takeFast, 0, n, list);
+    });
     var $author$project$Main$getRandomWord = F2(function(wordSize, words) {
-        return A2($elm$random$Random$generate, $author$project$Main$NewWord, $author$project$Main$randomWord(A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(wordSize)), words)));
+        return A2($elm$random$Random$generate, $author$project$Main$NewWord, $author$project$Main$randomWord(A2($elm$core$List$take, 1000, A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(wordSize)), words))));
     });
     var $author$project$Main$handleHelpViewed = function(_v0) {
         var model = _v0.a;
@@ -6884,7 +6968,6 @@ type alias Process =
             ])));
         } else return _Utils_Tuple2(model, cmds);
     };
-    var $elm$core$String$lines = _String_lines;
     var $author$project$Store$addLog = F2(function(log, store) {
         var logs = store.logs;
         return _Utils_update(store, {
@@ -6943,6 +7026,10 @@ type alias Process =
         var cmds = _v0.b;
         return A3($author$project$Notif$add, $author$project$Main$ToastyMsg, $author$project$Notif$Success(A2($author$project$I18n$translate, model.store.lang, i18nId)), _Utils_Tuple2(model, cmds));
     });
+    var $elm$core$String$lines = _String_lines;
+    var $author$project$Game$parseWords = function(wordSize) {
+        return A2($elm$core$Basics$composeR, $elm$core$String$lines, $elm$core$List$filter(A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(wordSize))));
+    };
     var $author$project$I18n$GameLost = {
         $: 'GameLost'
     };
@@ -7283,7 +7370,7 @@ type alias Process =
             default:
                 if (_v0.a.a.$ === 'Ok') {
                     var rawWords = _v0.a.a.a;
-                    var words = A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(model.wordSize)), A2($elm$core$List$filter, A2($elm$core$Basics$composeL, $elm$core$Basics$not, $elm$core$String$isEmpty), $elm$core$String$lines(rawWords)));
+                    var words = A2($author$project$Game$parseWords, model.wordSize, rawWords);
                     return _Utils_Tuple2(_Utils_update(model, {
                         words: words
                     }), A2($author$project$Main$getRandomWord, model.wordSize, words));
@@ -11305,90 +11392,6 @@ type alias Process =
     var $elm$core$List$sum = function(numbers) {
         return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
     };
-    var $elm$core$List$takeReverse = F3(function(n, list, kept) {
-        takeReverse: while(true){
-            if (n <= 0) return kept;
-            else {
-                if (!list.b) return kept;
-                else {
-                    var x = list.a;
-                    var xs = list.b;
-                    var $temp$n = n - 1, $temp$list = xs, $temp$kept = A2($elm$core$List$cons, x, kept);
-                    n = $temp$n;
-                    list = $temp$list;
-                    kept = $temp$kept;
-                    continue takeReverse;
-                }
-            }
-        }
-    });
-    var $elm$core$List$takeTailRec = F2(function(n, list) {
-        return $elm$core$List$reverse(A3($elm$core$List$takeReverse, n, list, _List_Nil));
-    });
-    var $elm$core$List$takeFast = F3(function(ctr, n, list) {
-        if (n <= 0) return _List_Nil;
-        else {
-            var _v0 = _Utils_Tuple2(n, list);
-            _v0$1: while(true){
-                _v0$5: while(true){
-                    if (!_v0.b.b) return list;
-                    else if (_v0.b.b.b) switch(_v0.a){
-                        case 1:
-                            break _v0$1;
-                        case 2:
-                            var _v2 = _v0.b;
-                            var x = _v2.a;
-                            var _v3 = _v2.b;
-                            var y = _v3.a;
-                            return _List_fromArray([
-                                x,
-                                y
-                            ]);
-                        case 3:
-                            if (_v0.b.b.b.b) {
-                                var _v4 = _v0.b;
-                                var x = _v4.a;
-                                var _v5 = _v4.b;
-                                var y = _v5.a;
-                                var _v6 = _v5.b;
-                                var z = _v6.a;
-                                return _List_fromArray([
-                                    x,
-                                    y,
-                                    z
-                                ]);
-                            } else break _v0$5;
-                        default:
-                            if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-                                var _v7 = _v0.b;
-                                var x = _v7.a;
-                                var _v8 = _v7.b;
-                                var y = _v8.a;
-                                var _v9 = _v8.b;
-                                var z = _v9.a;
-                                var _v10 = _v9.b;
-                                var w = _v10.a;
-                                var tl = _v10.b;
-                                return ctr > 1000 ? A2($elm$core$List$cons, x, A2($elm$core$List$cons, y, A2($elm$core$List$cons, z, A2($elm$core$List$cons, w, A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2($elm$core$List$cons, x, A2($elm$core$List$cons, y, A2($elm$core$List$cons, z, A2($elm$core$List$cons, w, A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-                            } else break _v0$5;
-                    }
-                    else {
-                        if (_v0.a === 1) break _v0$1;
-                        else break _v0$5;
-                    }
-                }
-                return list;
-            }
-            var _v1 = _v0.b;
-            var x = _v1.a;
-            return _List_fromArray([
-                x
-            ]);
-        }
-    });
-    var $elm$core$List$take = F2(function(n, list) {
-        return A3($elm$core$List$takeFast, 0, n, list);
-    });
     var $elm$time$Time$toYear = F2(function(zone, time) {
         return $elm$time$Time$toCivil(A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
     });
