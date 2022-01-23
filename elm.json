@@ -16,11 +16,13 @@
             "elm/random": "1.0.0",
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
+            "elm/url": "1.0.0",
             "elm-community/list-extra": "8.5.2",
             "elm-community/string-extra": "4.0.1",
             "elm-explorations/markdown": "1.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
             "pablen/toasty": "1.2.0",
+            "pdamoc/elm-hashids": "1.0.4",
             "terezka/elm-charts": "3.0.0"
         },
         "indirect": {
@@ -30,7 +32,6 @@
             "elm/file": "1.0.5",
             "elm/parser": "1.1.0",
             "elm/regex": "1.0.0",
-            "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2",
             "justinmimbs/date": "3.2.1",
             "justinmimbs/time-extra": "1.1.0",

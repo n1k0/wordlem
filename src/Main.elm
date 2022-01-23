@@ -8,12 +8,14 @@ port module Main exposing
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
+import Browser.Navigation as Nav
 import Charts
 import Client
 import Event
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Game
+import Hashids
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -33,6 +35,8 @@ import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
 import Toasty
+import Url
+import Url.Parser exposing ((</>), Parser, int, map, oneOf, s, string)
 
 
 type alias Flags =
@@ -43,6 +47,8 @@ type alias Flags =
 
 type alias Model =
     { store : Store
+    , key : Nav.Key
+    , wordRef : WordRef
     , state : Game.State
     , words : List Game.WordToFind
     , modal : Maybe Modal
@@ -62,9 +68,10 @@ type Msg
     = BackSpace
     | CloseModal
     | KeyPressed Char
+    | LinkClicked Browser.UrlRequest
     | NewGame
     | NewTime Posix
-    | NewWord (Maybe Game.WordToFind)
+    | NewWord ( String, Maybe Game.WordToFind )
     | NoOp
     | OpenModal Modal
     | StoreChanged (Result Decode.Error Store)
@@ -74,7 +81,9 @@ type Msg
     | SwitchWordSize (Maybe Int)
     | ToastyMsg (Toasty.Msg Notif)
     | UpdateWordSize Int
+    | UrlChanged Url.Url
     | WordsReceived (Result Http.Error String)
+    | WordsReceivedForWordRef (Result Http.Error String)
 
 
 maxAttempts : Int
@@ -82,21 +91,77 @@ maxAttempts =
     6
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+type alias WordRef =
+    { lang : String
+    , size : Int
+    , id : String
+    }
+
+
+type Route
+    = WordUri String Int String
+
+
+urlToWordref : Url.Url -> Maybe WordRef
+urlToWordref url =
+    url
+        |> urlFragmentToPath
+        |> Url.Parser.parse routeParser
+        |> Maybe.map (\(WordUri lang wordSize wordId) -> { lang = lang, size = wordSize, id = wordId })
+
+
+wordrefToUrl : WordRef -> String
+wordrefToUrl { lang, size, id } =
+    "#" ++ lang ++ "/" ++ String.fromInt size ++ "/" ++ id
+
+
+
+-- hack : use the url parser on the fragment, cf. https://github.com/elm/url/issues/24
+
+
+urlFragmentToPath : Url.Url -> Url.Url
+urlFragmentToPath url =
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+
+
+routeParser : Parser (Route -> a) a
+routeParser =
+    oneOf
+        [ Url.Parser.map WordUri (string </> int </> string)
+        ]
+
+
+init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
     let
+        maybeWordRef =
+            urlToWordref url
+
+        defaultLang =
+            flags.lang
+
         ( model, cmds ) =
             case Store.fromJson flags.rawStore of
                 Ok store ->
-                    ( initialModel store, Cmd.none )
+                    let
+                        defaultSize =
+                            store.settings.wordSize |> Maybe.withDefault 5
+
+                        wordRef =
+                            maybeWordRef |> Maybe.withDefault { lang = defaultLang, size = defaultSize, id = "" }
+                    in
+                    ( initialModel (Store.default (I18n.parseLang wordRef.lang)) key wordRef Game.Idle, Cmd.none )
 
                 Err error ->
                     let
+                        wordRef =
+                            maybeWordRef |> Maybe.withDefault { lang = defaultLang, size = 5, id = "" }
+
                         store =
-                            Store.default (I18n.parseLang flags.lang)
+                            Store.default (I18n.parseLang wordRef.lang)
 
                         newModel =
-                            initialModel store
+                            initialModel store key wordRef Game.Idle
                     in
                     ( { newModel
                         | state =
@@ -110,14 +175,16 @@ init flags =
                         |> notifyWarning I18n.ErrorCorruptedSession
     in
     ( model
-    , Cmd.batch [ startNewGame model.store, cmds ]
+    , Cmd.batch [ startNewGame model.store maybeWordRef, cmds ]
     )
 
 
-initialModel : Store -> Model
-initialModel store =
+initialModel : Store -> Nav.Key -> WordRef -> Game.State -> Model
+initialModel store key wordRef state =
     { store = store
-    , state = Game.Idle
+    , key = key
+    , state = state
+    , wordRef = wordRef
     , words = []
     , modal =
         if store.helpViewed then
@@ -127,17 +194,20 @@ initialModel store =
             Just HelpModal
     , toasties = Toasty.initialState
     , time = Time.millisToPosix 0
-    , wordSize = store.settings.wordSize |> Maybe.withDefault 5
+    , wordSize = wordRef.size
     }
 
 
-startNewGame : Store -> Cmd Msg
-startNewGame { lang, settings } =
-    case settings.wordSize of
-        Just _ ->
+startNewGame : Store -> Maybe WordRef -> Cmd Msg
+startNewGame { lang, settings } maybeWordRef =
+    case ( maybeWordRef, settings.wordSize ) of
+        ( Just wordRef, _ ) ->
+            Client.getWords (I18n.parseLang wordRef.lang) WordsReceivedForWordRef
+
+        ( _, Just _ ) ->
             Client.getWords lang WordsReceived
 
-        Nothing ->
+        ( _, Nothing ) ->
             getRandomWordSize
 
 
@@ -155,10 +225,26 @@ getRandomWord wordSize words =
         |> Random.generate NewWord
 
 
-randomWord : List Game.WordToFind -> Random.Generator (Maybe Game.WordToFind)
+randomWord : List Game.WordToFind -> Random.Generator ( String, Maybe Game.WordToFind )
 randomWord words =
     Random.int 0 (List.length words - 1)
-        |> Random.andThen (\int -> words |> LE.getAt int |> Random.constant)
+        |> Random.andThen (\int -> pickWord words int |> Random.constant)
+
+
+hashids =
+    Hashids.hashidsSimple "wordelm salt"
+
+
+pickWord : List Game.WordToFind -> Int -> ( String, Maybe Game.WordToFind )
+pickWord words int =
+    ( Hashids.encode hashids int, LE.getAt int words )
+
+
+wordFromRef : List Game.WordToFind -> WordRef -> Maybe Game.WordToFind
+wordFromRef words wordRef =
+    Hashids.decode hashids wordRef.id
+        |> List.head
+        |> Maybe.andThen (\int -> LE.getAt int words)
 
 
 processStateNotif : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -253,7 +339,7 @@ addChar wordSize char input =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ store } as model) =
+update msg ({ store, wordRef } as model) =
     case ( msg, model.state ) of
         ( BackSpace, Game.Ongoing word guesses input ) ->
             ( { model | state = Game.Ongoing word guesses (String.dropRight 1 input) }
@@ -277,20 +363,26 @@ update msg ({ store } as model) =
         ( KeyPressed _, _ ) ->
             ( model, Cmd.none )
 
+        ( LinkClicked _, _ ) ->
+            ( model, Cmd.none )
+
         ( NewGame, _ ) ->
-            ( initialModel store
-            , startNewGame store
+            ( initialModel store model.key wordRef Game.Idle
+            , startNewGame store Nothing
             )
 
         ( NewTime time, _ ) ->
             ( { model | time = time }, Cmd.none )
 
-        ( NewWord (Just newWord), Game.Idle ) ->
-            ( { model | state = Game.Ongoing newWord [] "" }
-            , defocusMenuButtons
+        ( NewWord ( hashid, Just newWord ), Game.Idle ) ->
+            ( { model | state = Game.Ongoing newWord [] "", wordRef = { wordRef | id = hashid } }
+            , Cmd.batch
+                [ defocusMenuButtons
+                , Nav.pushUrl model.key (wordrefToUrl { wordRef | id = hashid })
+                ]
             )
 
-        ( NewWord Nothing, Game.Idle ) ->
+        ( NewWord ( _, Nothing ), Game.Idle ) ->
             ( { model | state = Game.Errored Game.LoadError }
             , Cmd.none
             )
@@ -337,7 +429,7 @@ update msg ({ store } as model) =
                     { store | lang = lang }
 
                 newModel =
-                    initialModel newStore
+                    initialModel newStore model.key { wordRef | lang = I18n.langToCode lang } Game.Idle
             in
             ( newModel
             , Cmd.batch
@@ -362,7 +454,7 @@ update msg ({ store } as model) =
                     store |> Store.updateSettings (\s -> { s | wordSize = Just wordSize })
 
                 newModel =
-                    initialModel newStore
+                    initialModel newStore model.key { wordRef | size = wordSize } Game.Idle
             in
             ( { newModel | store = newStore, wordSize = wordSize }
             , Cmd.batch
@@ -389,11 +481,32 @@ update msg ({ store } as model) =
         ( UpdateWordSize wordSize, _ ) ->
             let
                 newModel =
-                    initialModel store
+                    initialModel store model.key { wordRef | size = wordSize } Game.Idle
             in
             ( { newModel | wordSize = wordSize }
             , Client.getWords store.lang WordsReceived
             )
+
+        ( UrlChanged url, _ ) ->
+            let
+                maybeWordRef =
+                    urlToWordref url
+            in
+            if maybeWordRef == Just wordRef then
+                ( model, Cmd.none )
+
+            else
+                let
+                    newWordRef =
+                        maybeWordRef |> Maybe.withDefault wordRef
+
+                    newStore =
+                        { store | lang = I18n.parseLang newWordRef.lang }
+
+                    newModel =
+                        initialModel newStore model.key newWordRef Game.Idle
+                in
+                ( newModel, startNewGame newStore maybeWordRef )
 
         ( WordsReceived (Ok rawWords), _ ) ->
             let
@@ -408,6 +521,32 @@ update msg ({ store } as model) =
             )
 
         ( WordsReceived (Err _), _ ) ->
+            notifyWarning I18n.LoadError ( model, Cmd.none )
+
+        ( WordsReceivedForWordRef (Ok rawWords), _ ) ->
+            let
+                words =
+                    rawWords
+                        |> String.lines
+                        |> List.filter (not << String.isEmpty)
+                        |> List.filter (String.length >> (==) model.wordSize)
+
+                maybeWordToFind =
+                    wordFromRef words model.wordRef
+
+                ( state, cmd ) =
+                    case maybeWordToFind of
+                        Nothing ->
+                            ( Game.Idle, getRandomWord model.wordSize words )
+
+                        Just wordToFind ->
+                            ( Game.Ongoing wordToFind [] "", Cmd.none )
+            in
+            ( { model | words = words, state = state }
+            , cmd
+            )
+
+        ( WordsReceivedForWordRef (Err _), _ ) ->
             notifyWarning I18n.LoadError ( model, Cmd.none )
 
 
@@ -1013,42 +1152,46 @@ viewLoader =
         ]
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view ({ wordSize, store, state } as model) =
-    layout model
-        (case state of
-            Game.Idle ->
-                [ viewLoader
-                , viewKeyboard store []
-                ]
+    { title = "wordlem"
+    , body =
+        [ layout model
+            (case state of
+                Game.Idle ->
+                    [ viewLoader
+                    , viewKeyboard store []
+                    ]
 
-            Game.Errored error ->
-                [ viewError store.lang error
-                , p [ class "text-center" ]
-                    [ newGameButton store.lang ]
-                ]
+                Game.Errored error ->
+                    [ viewError store.lang error
+                    , p [ class "text-center" ]
+                        [ newGameButton store.lang ]
+                    ]
 
-            Game.Won word guesses ->
-                [ viewBoard wordSize Nothing guesses
-                , endGameButtons store.lang word
-                , viewKeyboard store guesses
-                ]
+                Game.Won word guesses ->
+                    [ viewBoard wordSize Nothing guesses
+                    , endGameButtons store.lang word
+                    , viewKeyboard store guesses
+                    ]
 
-            Game.Lost word guesses ->
-                [ word
-                    |> String.toList
-                    |> List.map Game.Correct
-                    |> (\a -> a :: guesses)
-                    |> viewBoard wordSize Nothing
-                , endGameButtons store.lang word
-                , viewKeyboard store guesses
-                ]
+                Game.Lost word guesses ->
+                    [ word
+                        |> String.toList
+                        |> List.map Game.Correct
+                        |> (\a -> a :: guesses)
+                        |> viewBoard wordSize Nothing
+                    , endGameButtons store.lang word
+                    , viewKeyboard store guesses
+                    ]
 
-            Game.Ongoing _ guesses input ->
-                [ viewBoard wordSize (Just input) guesses
-                , viewKeyboard store guesses
-                ]
-        )
+                Game.Ongoing _ guesses input ->
+                    [ viewBoard wordSize (Just input) guesses
+                    , viewKeyboard store guesses
+                    ]
+            )
+        ]
+    }
 
 
 encodeAndSaveStore : Store -> Cmd Msg
@@ -1058,11 +1201,13 @@ encodeAndSaveStore =
 
 main : Program Flags Model Msg
 main =
-    Browser.element
+    Browser.application
         { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
         }
 
 
