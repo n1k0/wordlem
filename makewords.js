@@ -2,6 +2,7 @@ const fs = require("fs");
 
 const MIN_LENGTH = 5;
 const MAX_LENGTH = 7;
+const THRESHOLD = { en: 79206, fr: 0 };
 
 /**
  * For each language source file:
@@ -46,54 +47,22 @@ function parseLine(lang, line) {
   if (!rawWord || !rawFreq) return null;
   // frequency
   const freq = parseFloat(rawFreq.trim().replace(",", "."));
-  if (!freq) return null;
+  if (freq < THRESHOLD[lang]) return null;
   // word
-  const word = validate(lang, normalize(rawWord));
-  if (!word) return null;
-  return { word, freq };
+  return validate(lang, normalize(rawWord));
 }
 
-function findMinMax(words) {
-  return {
-    min: words.reduce((acc, { freq }) => {
-      return freq < acc ? freq : acc;
-    }, Infinity),
-    max: words.reduce((acc, { freq }) => {
-      return freq > acc ? freq : acc;
-    }, -Infinity),
-  };
+function dump(words) {
+  return words.join("\n") + "\n";
 }
 
-function computeRatios(lang, words) {
-  let ratioed = {};
-  const { min, max } = findMinMax(words);
-  for (const { word, freq } of words) {
-    const rFreq = ((freq / (max - min)) * 100).toFixed(2);
-    if (lang === "en" && rFreq < 0.02) {
-      continue;
-    }
-    if (!ratioed.hasOwnProperty(word)) {
-      ratioed[word] = 0;
-    }
-    if (rFreq > ratioed[word]) {
-      ratioed[word] = rFreq;
-    }
-  }
-  return ratioed;
-}
-
-function dump(wordsObj) {
-  return (
-    Object.keys(wordsObj)
-      .map((word) => `${word},${wordsObj[word]}`)
-      .join("\n") + "\n"
+function stats(words) {
+  return words.reduce(
+    (acc, word) => {
+      return { ...acc, [word.length]: (acc[word.length] || 0) + 1, total: acc.total + 1 };
+    },
+    { total: 0 },
   );
-}
-
-function stats(wordsObj) {
-  return Object.keys(wordsObj).reduce((acc, word) => {
-    return { ...acc, [word.length]: (acc[word.length] || 0) + 1 };
-  }, {});
 }
 
 function getFileLines(path) {
@@ -106,10 +75,9 @@ function getFileLines(path) {
 }
 
 function getWords(lang, path) {
-  const words = getFileLines(path)
+  return getFileLines(path)
     .map((s) => parseLine(lang, s))
     .filter((w) => w !== null);
-  return computeRatios(lang, words);
 }
 
 function processLang(lang) {

@@ -189,20 +189,5 @@ letterIs build char =
 
 parseWords : Int -> String -> List WordToFind
 parseWords wordSize =
-    let
-        parseParts parts =
-            case parts of
-                [ word, rawFreq ] ->
-                    rawFreq
-                        |> String.toFloat
-                        |> Maybe.map (\f -> ( word, f ))
-
-                _ ->
-                    Nothing
-    in
     String.lines
-        >> List.filterMap (String.split "," >> parseParts)
-        >> List.sortBy Tuple.second
-        >> List.map Tuple.first
         >> List.filter (String.length >> (==) wordSize)
-        >> List.reverse

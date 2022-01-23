@@ -59,9 +59,9 @@ suite =
                 ]
             ]
         , describe "parseWords"
-            [ "aaaaa,1.0001\nbbbbb,1.0002"
+            [ "aaaaa\nbbbbbb\nccccccc\nddddd"
                 |> parseWords 5
-                |> Expect.equal [ "bbbbb", "aaaaa" ]
+                |> Expect.equal [ "aaaaa", "ddddd" ]
                 |> asTest "should parse raw words list"
             ]
         ]

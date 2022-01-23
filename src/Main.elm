@@ -152,7 +152,7 @@ getRandomWord wordSize words =
     words
         |> List.filter (String.length >> (==) wordSize)
         -- Guessable words are to pick from topmost common words
-        |> List.take 600
+        |> List.take 1000
         |> randomWord
         |> Random.generate NewWord
 
@@ -288,6 +288,10 @@ update msg ({ store } as model) =
             ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Game.Idle ) ->
+            -- let
+            --     _ =
+            --         Debug.log "newWord" newWord
+            -- in
             ( { model | state = Game.Ongoing newWord [] "" }
             , defocusMenuButtons
             )
