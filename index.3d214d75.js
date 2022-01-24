@@ -13051,9 +13051,11 @@ type alias Process =
         var store = model.store;
         var modal = model.modal;
         var toasties = model.toasties;
-        return A2($elm$html$Html$div, _List_Nil, _List_fromArray([
+        return A2($elm$html$Html$main_, _List_fromArray([
+            $elm$html$Html$Attributes$class('App')
+        ]), _List_fromArray([
             A2($author$project$Notif$view, $author$project$Main$ToastyMsg, toasties),
-            A2($elm$html$Html$main_, _List_fromArray([
+            A2($elm$html$Html$div, _List_fromArray([
                 $elm$html$Html$Attributes$class('Game')
             ]), A2($elm$core$List$cons, $author$project$Main$viewHeader(model), content)),
             function() {

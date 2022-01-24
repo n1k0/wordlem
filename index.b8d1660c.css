@@ -10398,8 +10398,18 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+html {
+  height: 100%;
+}
 body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: hidden;
   touch-action: manipulation;
+}
+.App {
+  height: 100%;
 }
 .Header {
   max-width: 600px;
