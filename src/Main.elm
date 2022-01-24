@@ -850,9 +850,9 @@ viewLangStats lang langLogs =
 
 layout : Model -> List (Html Msg) -> Html Msg
 layout ({ store, modal, toasties } as model) content =
-    div []
+    main_ [ class "App" ]
         [ Notif.view ToastyMsg toasties
-        , main_ [ class "Game" ]
+        , div [ class "Game" ]
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
