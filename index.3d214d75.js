@@ -6356,6 +6356,12 @@ type alias Process =
     var $author$project$Main$CloseModal = {
         $: 'CloseModal'
     };
+    var $author$project$Main$KeyArrowDown = {
+        $: 'KeyArrowDown'
+    };
+    var $author$project$Main$KeyArrowUp = {
+        $: 'KeyArrowUp'
+    };
     var $author$project$Main$KeyPressed = function(a) {
         return {
             $: 'KeyPressed',
@@ -6432,13 +6438,15 @@ type alias Process =
         var onBackSpace = _v0.onBackSpace;
         var onEnter = _v0.onEnter;
         var onEscape = _v0.onEscape;
+        var onArrowUp = _v0.onArrowUp;
+        var onArrowDown = _v0.onArrowDown;
         return A2($elm$json$Json$Decode$andThen, function(key) {
             var _v1 = $elm$core$String$uncons($elm_community$string_extra$String$Extra$removeAccents($elm$core$String$toLower(key)));
             if (_v1.$ === 'Just' && _v1.a.b === '') {
                 var _v2 = _v1.a;
                 var _char = _v2.a;
                 return $elm$core$Char$isAlpha(_char) ? $elm$json$Json$Decode$succeed(onKeyPress(_char)) : $elm$json$Json$Decode$fail('discarded char');
-            } else return key === 'Backspace' ? $elm$json$Json$Decode$succeed(onBackSpace) : key === 'Enter' ? $elm$json$Json$Decode$succeed(onEnter) : key === 'Escape' ? $elm$json$Json$Decode$succeed(onEscape) : $elm$json$Json$Decode$fail('discarded key');
+            } else return key === 'ArrowUp' ? $elm$json$Json$Decode$succeed(onArrowUp) : key === 'ArrowDown' ? $elm$json$Json$Decode$succeed(onArrowDown) : key === 'Backspace' ? $elm$json$Json$Decode$succeed(onBackSpace) : key === 'Enter' ? $elm$json$Json$Decode$succeed(onEnter) : key === 'Escape' ? $elm$json$Json$Decode$succeed(onEscape) : $elm$json$Json$Decode$fail('discarded key');
         }, A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
     };
     var $elm$time$Time$Every = F2(function(a, b) {
@@ -6716,6 +6724,8 @@ type alias Process =
                         var _v2 = _v1.a;
                         var _v3 = _v1.b;
                         return $elm$browser$Browser$Events$onKeyDown($author$project$Event$decodeKey({
+                            onArrowDown: $author$project$Main$KeyArrowDown,
+                            onArrowUp: $author$project$Main$KeyArrowUp,
                             onBackSpace: $author$project$Main$BackSpace,
                             onEnter: $author$project$Main$Submit,
                             onEscape: $author$project$Main$Clear,
@@ -6724,6 +6734,8 @@ type alias Process =
                     } else {
                         var _v4 = _v1.a;
                         return $elm$browser$Browser$Events$onKeyDown($author$project$Event$decodeKey({
+                            onArrowDown: $author$project$Main$NoOp,
+                            onArrowUp: $author$project$Main$NoOp,
                             onBackSpace: $author$project$Main$CloseModal,
                             onEnter: $author$project$Main$NoOp,
                             onEscape: $author$project$Main$CloseModal,
@@ -6972,6 +6984,23 @@ type alias Process =
     var $author$project$Main$getRandomWord = F2(function(wordSize, words) {
         return A2($elm$random$Random$generate, $author$project$Main$NewWord, $author$project$Main$randomWord(A2($elm$core$List$take, 1000, A2($elm$core$List$filter, A2($elm$core$Basics$composeR, $elm$core$String$length, $elm$core$Basics$eq(wordSize)), words))));
     });
+    var $elm$core$String$fromList = _String_fromList;
+    var $author$project$Game$guessToString = A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
+        switch(letter.$){
+            case 'Correct':
+                var c = letter.a;
+                return c;
+            case 'Handled':
+                var c = letter.a;
+                return c;
+            case 'Misplaced':
+                var c = letter.a;
+                return c;
+            default:
+                var c = letter.a;
+                return c;
+        }
+    }), $elm$core$String$fromList);
     var $author$project$Main$handleHelpViewed = function(_v0) {
         var model = _v0.a;
         var store = model.store;
@@ -6987,6 +7016,9 @@ type alias Process =
                 $author$project$Main$encodeAndSaveStore(newStore)
             ])));
         } else return _Utils_Tuple2(model, cmds);
+    };
+    var $author$project$Game$isLastGuess = function(input) {
+        return A2($elm$core$Basics$composeR, $elm$core$List$head, A2($elm$core$Basics$composeR, $elm$core$Maybe$map($author$project$Game$guessToString), $elm$core$Basics$eq($elm$core$Maybe$Just(input))));
     };
     var $author$project$Store$addLog = F2(function(log, store) {
         var logs = store.logs;
@@ -7231,7 +7263,7 @@ type alias Process =
     var $author$project$Main$update = F2(function(msg, model) {
         var store = model.store;
         var _v0 = _Utils_Tuple2(msg, model.state);
-        _v0$11: while(true)switch(_v0.a.$){
+        _v0$15: while(true)switch(_v0.a.$){
             case 'BackSpace':
                 if (_v0.b.$ === 'Ongoing') {
                     var _v1 = _v0.a;
@@ -7264,19 +7296,46 @@ type alias Process =
                 return $author$project$Main$handleHelpViewed(_Utils_Tuple2(_Utils_update(model, {
                     modal: $elm$core$Maybe$Nothing
                 }), $author$project$Main$defocusMenuButtons));
+            case 'KeyArrowDown':
+                if (_v0.b.$ === 'Ongoing') {
+                    var _v8 = _v0.a;
+                    var _v9 = _v0.b;
+                    var word = _v9.a;
+                    var guesses = _v9.b;
+                    var input = _v9.c;
+                    return _Utils_Tuple2(_Utils_update(model, {
+                        state: A3($author$project$Game$Ongoing, word, guesses, A2($author$project$Game$isLastGuess, input, guesses) ? '' : input)
+                    }), $author$project$Main$scrollToBottom('board-container'));
+                } else {
+                    var _v10 = _v0.a;
+                    return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+                }
             case 'KeyPressed':
                 if (_v0.b.$ === 'Ongoing') {
                     var _char = _v0.a.a;
-                    var _v8 = _v0.b;
-                    var word = _v8.a;
-                    var guesses = _v8.b;
-                    var input = _v8.c;
+                    var _v11 = _v0.b;
+                    var word = _v11.a;
+                    var guesses = _v11.b;
+                    var input = _v11.c;
                     return _Utils_Tuple2(_Utils_update(model, {
                         state: A3($author$project$Game$Ongoing, word, guesses, A3($author$project$Main$addChar, model.wordSize, _char, input))
                     }), $author$project$Main$scrollToBottom('board-container'));
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+            case 'KeyArrowUp':
+                if (_v0.b.$ === 'Ongoing' && _v0.b.c === '') {
+                    var _v12 = _v0.a;
+                    var _v13 = _v0.b;
+                    var word = _v13.a;
+                    var guesses = _v13.b;
+                    return _Utils_Tuple2(_Utils_update(model, {
+                        state: A3($author$project$Game$Ongoing, word, guesses, A2($elm$core$Maybe$withDefault, '', A2($elm$core$Maybe$map, $author$project$Game$guessToString, $elm$core$List$head(guesses))))
+                    }), $author$project$Main$scrollToBottom('board-container'));
+                } else {
+                    var _v14 = _v0.a;
+                    return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+                }
             case 'NewGame':
-                var _v9 = _v0.a;
+                var _v15 = _v0.a;
                 return _Utils_Tuple2($author$project$Main$initialModel(store), $author$project$Main$startNewGame(store));
             case 'NewTime':
                 var time = _v0.a.a;
@@ -7287,22 +7346,22 @@ type alias Process =
                 if (_v0.a.a.$ === 'Just') {
                     if (_v0.b.$ === 'Idle') {
                         var newWord = _v0.a.a.a;
-                        var _v10 = _v0.b;
+                        var _v16 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, newWord, _List_Nil, '')
                         }), $author$project$Main$defocusMenuButtons);
-                    } else break _v0$11;
+                    } else break _v0$15;
                 } else {
                     if (_v0.b.$ === 'Idle') {
-                        var _v11 = _v0.a.a;
-                        var _v12 = _v0.b;
+                        var _v17 = _v0.a.a;
+                        var _v18 = _v0.b;
                         return _Utils_Tuple2(_Utils_update(model, {
                             state: $author$project$Game$Errored($author$project$Game$LoadError)
                         }), $elm$core$Platform$Cmd$none);
-                    } else break _v0$11;
+                    } else break _v0$15;
                 }
             case 'NoOp':
-                var _v13 = _v0.a;
+                var _v19 = _v0.a;
                 return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'OpenModal':
                 var modal = _v0.a.a;
@@ -7318,14 +7377,14 @@ type alias Process =
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'Submit':
                 if (_v0.b.$ === 'Ongoing') {
-                    var _v14 = _v0.a;
-                    var _v15 = _v0.b;
-                    var word = _v15.a;
-                    var guesses = _v15.b;
-                    var input = _v15.c;
-                    var _v16 = A4($author$project$Game$validateGuess, store.lang, model.words, word, input);
-                    if (_v16.$ === 'Ok') {
-                        var guess = _v16.a;
+                    var _v20 = _v0.a;
+                    var _v21 = _v0.b;
+                    var word = _v21.a;
+                    var guesses = _v21.b;
+                    var input = _v21.c;
+                    var _v22 = A4($author$project$Game$validateGuess, store.lang, model.words, word, input);
+                    if (_v22.$ === 'Ok') {
+                        var guess = _v22.a;
                         return $author$project$Main$logResult($author$project$Main$processStateNotif(_Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$checkGame, $author$project$Main$maxAttempts, word, A2($elm$core$List$cons, guess, guesses))
                         }), $elm$core$Platform$Cmd$batch(_List_fromArray([
@@ -7333,13 +7392,13 @@ type alias Process =
                             $author$project$Main$focus('btn-play-again')
                         ])))));
                     } else {
-                        var error = _v16.a;
+                        var error = _v22.a;
                         return A2($author$project$Main$notifyWarning, error, _Utils_Tuple2(_Utils_update(model, {
                             state: A3($author$project$Game$Ongoing, word, guesses, input)
                         }), $elm$core$Platform$Cmd$none));
                     }
                 } else {
-                    var _v17 = _v0.a;
+                    var _v23 = _v0.a;
                     return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
                 }
             case 'SwitchLang':
@@ -7381,7 +7440,7 @@ type alias Process =
                         $author$project$Main$encodeAndSaveStore(newStore)
                     ])));
                 } else {
-                    var _v18 = _v0.a.a;
+                    var _v24 = _v0.a.a;
                     var newStore = A2($author$project$Store$updateSettings, function(s) {
                         return _Utils_update(s, {
                             wordSize: $elm$core$Maybe$Nothing
@@ -7822,7 +7881,7 @@ type alias Process =
             $elm$html$Html$text($author$project$Main$charToText(_char))
         ]));
     });
-    var $author$project$Main$viewAttempt = function(wordSize) {
+    var $author$project$Main$viewGuess = function(wordSize) {
         return A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
             switch(letter.$){
                 case 'Misplaced':
@@ -7859,7 +7918,7 @@ type alias Process =
             A2($elm$html$Html$div, _List_fromArray([
                 $elm$html$Html$Attributes$class('BoardRowExample mb-3')
             ]), _List_fromArray([
-                A2($author$project$Main$viewAttempt, wordSize, demo)
+                A2($author$project$Main$viewGuess, wordSize, demo)
             ])),
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpInThisExample),
             A2($elm$html$Html$ul, _List_Nil, A2($elm$core$List$map, function(line) {
@@ -13113,7 +13172,6 @@ type alias Process =
             }()
         ]));
     });
-    var $elm$core$String$fromList = _String_fromList;
     var $elm$core$List$repeatHelp = F3(function(result, n, value) {
         repeatHelp: while(true){
             if (n <= 0) return result;
@@ -13160,7 +13218,7 @@ type alias Process =
                     $elm$core$String$fromInt($author$project$Main$maxAttempts)
                 ])))
             ]), A2($elm$core$List$filterMap, $elm$core$Basics$identity, $elm$core$List$concat(_List_fromArray([
-                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Main$viewAttempt(wordSize), $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
+                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Main$viewGuess(wordSize), $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
                 _List_fromArray([
                     A2($elm$core$Maybe$map, $author$project$Main$viewInput(wordSize), input)
                 ]),
