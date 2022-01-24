@@ -9,11 +9,13 @@ type alias Config msg =
     , onBackSpace : msg
     , onEnter : msg
     , onEscape : msg
+    , onArrowUp : msg
+    , onArrowDown : msg
     }
 
 
 decodeKey : Config msg -> Decoder msg
-decodeKey { onKeyPress, onBackSpace, onEnter, onEscape } =
+decodeKey { onKeyPress, onBackSpace, onEnter, onEscape, onArrowUp, onArrowDown } =
     Decode.field "key" Decode.string
         |> Decode.andThen
             (\key ->
@@ -26,7 +28,13 @@ decodeKey { onKeyPress, onBackSpace, onEnter, onEscape } =
                             Decode.fail "discarded char"
 
                     _ ->
-                        if key == "Backspace" then
+                        if key == "ArrowUp" then
+                            Decode.succeed onArrowUp
+
+                        else if key == "ArrowDown" then
+                            Decode.succeed onArrowDown
+
+                        else if key == "Backspace" then
                             Decode.succeed onBackSpace
 
                         else if key == "Enter" then

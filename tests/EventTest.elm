@@ -13,6 +13,8 @@ type TestMsg
     | BackSpace
     | Submit
     | CloseModal
+    | ArrowUp
+    | ArrowDown
 
 
 testDecodeKey : String -> Result Decode.Error TestMsg
@@ -25,6 +27,8 @@ testDecodeKey key =
                 , onBackSpace = BackSpace
                 , onEnter = Submit
                 , onEscape = CloseModal
+                , onArrowUp = ArrowUp
+                , onArrowDown = ArrowDown
                 }
             )
 
@@ -51,5 +55,11 @@ suite =
             , testDecodeKey "Escape"
                 |> Expect.equal (Ok CloseModal)
                 |> asTest "should decode the Escape key"
+            , testDecodeKey "ArrowUp"
+                |> Expect.equal (Ok ArrowUp)
+                |> asTest "should decode the ArrowUp key"
+            , testDecodeKey "ArrowDown"
+                |> Expect.equal (Ok ArrowDown)
+                |> asTest "should decode the ArrowDown key"
             ]
         ]

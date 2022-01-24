@@ -62,6 +62,8 @@ type Msg
     = BackSpace
     | Clear
     | CloseModal
+    | KeyArrowDown
+    | KeyArrowUp
     | KeyPressed Char
     | NewGame
     | NewTime Posix
@@ -285,12 +287,45 @@ update msg ({ store } as model) =
                 , defocusMenuButtons
                 )
 
+        ( KeyArrowDown, Game.Ongoing word guesses input ) ->
+            ( { model
+                | state =
+                    Game.Ongoing word
+                        guesses
+                        (if Game.isLastGuess input guesses then
+                            ""
+
+                         else
+                            input
+                        )
+              }
+            , scrollToBottom "board-container"
+            )
+
+        ( KeyArrowDown, _ ) ->
+            ( model, Cmd.none )
+
         ( KeyPressed char, Game.Ongoing word guesses input ) ->
             ( { model | state = Game.Ongoing word guesses (addChar model.wordSize char input) }
             , scrollToBottom "board-container"
             )
 
         ( KeyPressed _, _ ) ->
+            ( model, Cmd.none )
+
+        ( KeyArrowUp, Game.Ongoing word guesses "" ) ->
+            ( { model
+                | state =
+                    guesses
+                        |> List.head
+                        |> Maybe.map Game.guessToString
+                        |> Maybe.withDefault ""
+                        |> Game.Ongoing word guesses
+              }
+            , scrollToBottom "board-container"
+            )
+
+        ( KeyArrowUp, _ ) ->
             ( model, Cmd.none )
 
         ( NewGame, _ ) ->
@@ -454,8 +489,8 @@ charToText =
     Char.toUpper >> String.fromChar
 
 
-viewAttempt : Int -> Game.Guess -> Html Msg
-viewAttempt wordSize =
+viewGuess : Int -> Game.Guess -> Html Msg
+viewGuess wordSize =
     List.map
         (\letter ->
             case letter of
@@ -592,7 +627,7 @@ viewBoard wordSize input guesses =
     div [ class "BoardContainer", id "board-container" ]
         [ [ guesses
                 |> List.reverse
-                |> List.map (viewAttempt wordSize >> Just)
+                |> List.map (viewGuess wordSize >> Just)
           , [ input |> Maybe.map (viewInput wordSize) ]
           , List.range 0 remaining
                 |> List.map
@@ -676,7 +711,7 @@ viewHelp { lang } wordSize =
         |> I18n.paragraph lang
     , I18n.paragraph lang I18n.HelpKeyboard
     , div [ class "BoardRowExample mb-3" ]
-        [ viewAttempt wordSize demo ]
+        [ viewGuess wordSize demo ]
     , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])
@@ -1101,6 +1136,8 @@ subscriptions { modal, state } =
                         , onBackSpace = BackSpace
                         , onEnter = Submit
                         , onEscape = Clear
+                        , onArrowUp = KeyArrowUp
+                        , onArrowDown = KeyArrowDown
                         }
                     )
 
@@ -1111,6 +1148,8 @@ subscriptions { modal, state } =
                         , onBackSpace = CloseModal
                         , onEnter = NoOp
                         , onEscape = CloseModal
+                        , onArrowUp = NoOp
+                        , onArrowDown = NoOp
                         }
                     )
 

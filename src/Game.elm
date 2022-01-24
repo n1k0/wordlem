@@ -7,6 +7,8 @@ module Game exposing
     , UserInput
     , WordToFind
     , checkGame
+    , guessToString
+    , isLastGuess
     , letterIs
     , parseWords
     , validateGuess
@@ -191,3 +193,30 @@ parseWords : Int -> String -> List WordToFind
 parseWords wordSize =
     String.lines
         >> List.filter (String.length >> (==) wordSize)
+
+
+guessToString : Guess -> String
+guessToString =
+    List.map
+        (\letter ->
+            case letter of
+                Correct c ->
+                    c
+
+                Handled c ->
+                    c
+
+                Misplaced c ->
+                    c
+
+                Unused c ->
+                    c
+        )
+        >> String.fromList
+
+
+isLastGuess : UserInput -> List Guess -> Bool
+isLastGuess input =
+    List.head
+        >> Maybe.map guessToString
+        >> (==) (Just input)
