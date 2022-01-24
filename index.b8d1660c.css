@@ -10537,6 +10537,10 @@ body {
   padding: 0.5rem 0.25rem;
   line-height: 0;
 }
+.KeyboardKey:focus, .KeyboardKey:active {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
 .KeyboardKey:active,
 .KeyboardKey:focus {
   box-shadow: none;
