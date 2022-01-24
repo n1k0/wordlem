@@ -156,6 +156,11 @@ body {
   height: 7.3vh;
   padding: 0.5rem 0.25rem;
   line-height: 0;
+
+  &:focus, &:active {
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
 }
 
 .KeyboardKey:active,

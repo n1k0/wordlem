@@ -60,6 +60,7 @@ type Modal
 
 type Msg
     = BackSpace
+    | Clear
     | CloseModal
     | KeyPressed Char
     | NewGame
@@ -226,10 +227,15 @@ logResult ( { store, state, time } as model, cmds ) =
             ( model, cmds )
 
 
+focus : String -> Cmd Msg
+focus domId =
+    Dom.focus domId
+        |> Task.attempt (always NoOp)
+
+
 defocus : String -> Cmd Msg
 defocus domId =
-    Process.sleep 1
-        |> Task.andThen (\_ -> Dom.blur domId)
+    Dom.blur domId
         |> Task.attempt (always NoOp)
 
 
@@ -263,6 +269,14 @@ update msg ({ store } as model) =
             )
 
         ( BackSpace, _ ) ->
+            ( model, Cmd.none )
+
+        ( Clear, Game.Ongoing word guesses _ ) ->
+            ( { model | state = Game.Ongoing word guesses "" }
+            , Cmd.none
+            )
+
+        ( Clear, _ ) ->
             ( model, Cmd.none )
 
         ( CloseModal, _ ) ->
@@ -323,7 +337,10 @@ update msg ({ store } as model) =
             case Game.validateGuess store.lang model.words word input of
                 Ok guess ->
                     ( { model | state = Game.checkGame maxAttempts word (guess :: guesses) }
-                    , scrollToBottom "board-container"
+                    , Cmd.batch
+                        [ scrollToBottom "board-container"
+                        , focus "btn-play-again"
+                        ]
                     )
                         |> processStateNotif
                         |> logResult
@@ -471,7 +488,8 @@ viewBoardRow wordSize =
 newGameButton : Lang -> Html Msg
 newGameButton lang =
     button
-        [ class "btn btn-lg btn-success"
+        [ id "btn-play-again"
+        , class "btn btn-lg btn-success"
         , onClick NewGame
         ]
         [ Icon.icon Icon.PlayAgain [ class "me-1" ]
@@ -549,6 +567,7 @@ viewKeyState ( char, letter ) =
     button
         [ class (String.join " " [ baseClasses, classes ])
         , onClick msg
+        , tabindex -1
         ]
         [ case char of
             '⌫' ->
@@ -976,7 +995,7 @@ viewModal { lang } transationId content =
                         , button
                             [ type_ "button"
                             , class "btn fs-5 p-0"
-                            , attribute "aria-label" "Close"
+                            , attribute "aria-label" "Close (ESC)"
                             , onClick CloseModal
                             ]
                             [ Icon.icon Icon.Close [] ]
@@ -1070,17 +1089,27 @@ main =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { state } =
+subscriptions { modal, state } =
     Sub.batch
         [ Time.every 1000 NewTime
         , storeChanged (Store.fromJson >> StoreChanged)
-        , case state of
-            Game.Ongoing _ _ _ ->
+        , case ( state, modal ) of
+            ( Game.Ongoing _ _ _, Nothing ) ->
                 BE.onKeyDown
                     (Event.decodeKey
                         { onKeyPress = KeyPressed
                         , onBackSpace = BackSpace
                         , onEnter = Submit
+                        , onEscape = Clear
+                        }
+                    )
+
+            ( Game.Ongoing _ _ _, Just _ ) ->
+                BE.onKeyDown
+                    (Event.decodeKey
+                        { onKeyPress = always NoOp
+                        , onBackSpace = CloseModal
+                        , onEnter = NoOp
                         , onEscape = CloseModal
                         }
                     )
