@@ -205,7 +205,6 @@ plaisir
 parents
 aucun
 droit
-d'abord
 prenez
 arretez
 attend
@@ -938,7 +937,6 @@ casser
 vache
 poche
 manteau
-l'une
 chair
 lundi
 veste
@@ -9124,7 +9122,6 @@ glands
 goret
 gracie
 jugerez
-jusqu'a
 lancons
 limbes
 litiere
@@ -13062,7 +13059,6 @@ parades
 parlees
 patache
 pelee
-pin's
 pistage
 projos
 prepara
@@ -13497,7 +13493,6 @@ canyons
 caracul
 cariee
 carnier
-ch'timi
 chabrot
 chevir
 chechia
@@ -19439,7 +19434,6 @@ caudal
 causiez
 cernons
 chalut
-champ'
 cheiks
 chenaux
 chenets
@@ -20136,7 +20130,6 @@ besants
 betting
 biaiser
 biffin
-bin's
 biotite
 bittes
 bitures
