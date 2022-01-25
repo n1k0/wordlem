@@ -337,10 +337,6 @@ update msg ({ store } as model) =
             ( { model | time = time }, Cmd.none )
 
         ( NewWord (Just newWord), Game.Idle ) ->
-            -- let
-            --     _ =
-            --         Debug.log "newWord" newWord
-            -- in
             ( { model | state = Game.Ongoing newWord [] "" }
             , defocusMenuButtons
             )

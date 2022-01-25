@@ -15,8 +15,7 @@ const blacklist = [].concat(
 function validate(lang, word) {
   if (
     word &&
-    !word.includes("-") &&
-    !word.includes(" ") &&
+    /^[a-z]+$/gi.test(word) &&
     (lang === "fr" || !blacklist.includes(word)) &&
     word.length >= MIN_LENGTH &&
     word.length <= MAX_LENGTH
