@@ -5543,16 +5543,14 @@ type alias Process =
             case 'Help':
                 return A3($author$project$I18n$set, _List_Nil, 'Help', 'Aide');
             case 'HelpGamePitch':
-                var nbLetters = id.a.nbLetters;
                 var lang = id.a.lang;
                 var maxGuesses = id.a.maxGuesses;
                 return A3($author$project$I18n$set, _List_fromArray([
-                    $elm$core$String$fromInt(nbLetters),
                     $author$project$I18n$langToString(lang),
                     $elm$core$String$fromInt(maxGuesses)
-                ]), 'Guess a {0} letters {1} word in {2} guesses or less.', 'Devinez un mot {1} de {0} lettres en {2} essais ou moins.');
+                ]), 'Guess a {0} word in {1} guesses or less.', 'Devinez un mot {0} en {1} essais ou moins.');
             case 'HelpInThisExample':
-                return A3($author$project$I18n$set, _List_Nil, 'In this example:', 'Dans cet exemple\u00A0:');
+                return A3($author$project$I18n$set, _List_Nil, 'In this example, in sequential order:', 'Dans cet exemple, dans l\'ordre\u00A0:');
             case 'HelpInspiredBy':
                 var wordleUrl = id.a.wordleUrl;
                 var githubUrl = id.a.githubUrl;
@@ -5569,6 +5567,11 @@ type alias Process =
                 return A3($author$project$I18n$set, _List_fromArray([
                     letter
                 ]), '{0} is at the correct spot', '{0} est à la bonne position');
+            case 'HelpLetterHandled':
+                var letter = id.a.letter;
+                return A3($author$project$I18n$set, _List_fromArray([
+                    letter
+                ]), '{0} is already correctly placed', '{0} est déjà correctement placée');
             case 'HelpLetterMisplaced':
                 var letter = id.a.letter;
                 return A3($author$project$I18n$set, _List_fromArray([
@@ -7804,6 +7807,12 @@ type alias Process =
             a: a
         };
     };
+    var $author$project$I18n$HelpLetterHandled = function(a) {
+        return {
+            $: 'HelpLetterHandled',
+            a: a
+        };
+    };
     var $author$project$I18n$HelpLetterMisplaced = function(a) {
         return {
             $: 'HelpLetterMisplaced',
@@ -7839,7 +7848,7 @@ type alias Process =
                         });
                     default:
                         var c = letter.a;
-                        return $author$project$I18n$HelpLetterUnused({
+                        return $author$project$I18n$HelpLetterHandled({
                             letter: $author$project$Main$charToText(c)
                         });
                 }
@@ -7895,30 +7904,31 @@ type alias Process =
                     return A2($author$project$Main$viewTile, 'btn-dark', _char);
                 default:
                     var _char = letter.a;
-                    return A2($author$project$Main$viewTile, 'btn-secondary', _char);
+                    return A2($author$project$Main$viewTile, 'btn-dark handled', _char);
             }
         }), $author$project$Main$viewBoardRow(wordSize));
     };
     var $author$project$Main$viewHelp = F2(function(_v0, wordSize) {
         var lang = _v0.lang;
         var demo = _List_fromArray([
-            $author$project$Game$Correct(_Utils_chr('m')),
-            $author$project$Game$Misplaced(_Utils_chr('e')),
-            $author$project$Game$Unused(_Utils_chr('t')),
-            $author$project$Game$Correct(_Utils_chr('a')),
-            $author$project$Game$Unused(_Utils_chr('s'))
+            $author$project$Game$Correct(_Utils_chr('r')),
+            $author$project$Game$Unused(_Utils_chr('e')),
+            $author$project$Game$Misplaced(_Utils_chr('f')),
+            $author$project$Game$Handled(_Utils_chr('e')),
+            $author$project$Game$Handled(_Utils_chr('r')),
+            $author$project$Game$Handled(_Utils_chr('e')),
+            $author$project$Game$Correct(_Utils_chr('e'))
         ]);
         return _List_fromArray([
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpGamePitch({
                 lang: lang,
-                maxGuesses: $author$project$Main$maxAttempts,
-                nbLetters: wordSize
+                maxGuesses: $author$project$Main$maxAttempts
             })),
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboard),
             A2($elm$html$Html$div, _List_fromArray([
                 $elm$html$Html$Attributes$class('BoardRowExample mb-3')
             ]), _List_fromArray([
-                A2($author$project$Main$viewGuess, wordSize, demo)
+                A2($author$project$Main$viewGuess, $elm$core$List$length(demo), demo)
             ])),
             A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpInThisExample),
             A2($elm$html$Html$ul, _List_Nil, A2($elm$core$List$map, function(line) {
