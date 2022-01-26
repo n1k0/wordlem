@@ -537,7 +537,6 @@ cyrille
 cyrus
 dabney
 daffy
-daisy
 dalida
 dallas
 dalton
@@ -1339,6 +1338,7 @@ kalle
 kalman
 kalvin
 kamel
+kamiya
 kareem
 karel
 karen
@@ -2120,6 +2120,7 @@ rutter
 sabine
 sabrina
 said
+salama
 salem
 salim
 salima

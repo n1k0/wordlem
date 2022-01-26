@@ -2,7 +2,7 @@ const fs = require("fs");
 
 const MIN_LENGTH = 5;
 const MAX_LENGTH = 7;
-const THRESHOLD = { en: 100000, fr: 0 };
+const THRESHOLD = { en: 50000, fr: 0 };
 
 const blacklist = [].concat(
   // yeah I don't really want those to be indexed anywhere
