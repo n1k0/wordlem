@@ -35,12 +35,13 @@ type Id
     | GameLost
     | GameWin
     | Help
-    | HelpGamePitch { nbLetters : Int, lang : Lang, maxGuesses : Int }
+    | HelpGamePitch { lang : Lang, maxGuesses : Int }
     | HelpInspiredBy { wordleUrl : String, githubUrl : String }
     | HelpInThisExample
     | HelpKeyboard
     | HelpKeyboardLetter
     | HelpLetterCorrectlyPlaced { letter : String }
+    | HelpLetterHandled { letter : String }
     | HelpLetterMisplaced { letter : String }
     | HelpLetterUnused { letter : String }
     | LoadError
@@ -112,15 +113,15 @@ getSet id =
                 "Help"
                 "Aide"
 
-        HelpGamePitch { nbLetters, lang, maxGuesses } ->
-            set [ String.fromInt nbLetters, langToString lang, String.fromInt maxGuesses ]
-                "Guess a {0} letters {1} word in {2} guesses or less."
-                "Devinez un mot {1} de {0} lettres en {2} essais ou moins."
+        HelpGamePitch { lang, maxGuesses } ->
+            set [ langToString lang, String.fromInt maxGuesses ]
+                "Guess a {0} word in {1} guesses or less."
+                "Devinez un mot {0} en {1} essais ou moins."
 
         HelpInThisExample ->
             set []
-                "In this example:"
-                "Dans cet exemple\u{00A0}:"
+                "In this example, in sequential order:"
+                "Dans cet exemple, dans l'ordre\u{00A0}:"
 
         HelpInspiredBy { wordleUrl, githubUrl } ->
             set [ wordleUrl, githubUrl ]
@@ -141,6 +142,11 @@ getSet id =
             set [ letter ]
                 "{0} is at the correct spot"
                 "{0} est à la bonne position"
+
+        HelpLetterHandled { letter } ->
+            set [ letter ]
+                "{0} is already correctly placed"
+                "{0} est déjà correctement placée"
 
         HelpLetterMisplaced { letter } ->
             set [ letter ]

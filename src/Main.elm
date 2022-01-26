@@ -500,7 +500,8 @@ viewGuess wordSize =
                     viewTile "btn-dark" char
 
                 Game.Handled char ->
-                    viewTile "btn-secondary" char
+                    -- We may want to render these slightly differently
+                    viewTile "btn-dark handled" char
         )
         >> viewBoardRow wordSize
 
@@ -683,7 +684,7 @@ guessDescription lang =
                         I18n.HelpLetterUnused { letter = charToText c }
 
                     Game.Handled c ->
-                        I18n.HelpLetterUnused { letter = charToText c }
+                        I18n.HelpLetterHandled { letter = charToText c }
                 )
         )
 
@@ -692,22 +693,20 @@ viewHelp : Store -> Int -> List (Html Msg)
 viewHelp { lang } wordSize =
     let
         demo =
-            [ Game.Correct 'm'
-            , Game.Misplaced 'e'
-            , Game.Unused 't'
-            , Game.Correct 'a'
-            , Game.Unused 's'
+            [ Game.Correct 'r'
+            , Game.Unused 'e'
+            , Game.Misplaced 'f'
+            , Game.Handled 'e'
+            , Game.Handled 'r'
+            , Game.Handled 'e'
+            , Game.Correct 'e'
             ]
     in
-    [ I18n.HelpGamePitch
-        { nbLetters = wordSize
-        , lang = lang
-        , maxGuesses = maxAttempts
-        }
+    [ I18n.HelpGamePitch { lang = lang, maxGuesses = maxAttempts }
         |> I18n.paragraph lang
     , I18n.paragraph lang I18n.HelpKeyboard
     , div [ class "BoardRowExample mb-3" ]
-        [ viewGuess wordSize demo ]
+        [ viewGuess (List.length demo) demo ]
     , I18n.paragraph lang I18n.HelpInThisExample
     , guessDescription lang demo
         |> List.map (\line -> li [] [ text line ])

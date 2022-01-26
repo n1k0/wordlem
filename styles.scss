@@ -109,7 +109,7 @@ body {
 
   &Example {
     margin: 0 auto;
-    max-width: 350px;
+    max-width: 100%;
   }
 }
 
@@ -123,6 +123,20 @@ body {
   cursor: unset;
   font-size: 1.75rem;
   line-height: 1.75rem;
+
+  &.handled {
+    background-image: linear-gradient(
+      315deg,
+      rgba(255,255,255,.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,.15) 50%,
+      rgba(255,255,255,.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 1rem 1rem;
+  }
 
   @media screen and (max-height: 480px) {
     font-size: 1.4rem;
