@@ -8,11 +8,8 @@ port module Main exposing
 import Browser
 import Browser.Dom as Dom
 import Browser.Events as BE
-import Charts
 import Client
 import Event
-import FormatNumber
-import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Game
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -23,11 +20,11 @@ import Icon
 import Json.Decode as Decode
 import Keyboard
 import List.Extra as LE
-import Log exposing (Log)
 import Markdown
 import Notif exposing (Notif)
 import Process
 import Random
+import Stats
 import Store exposing (Store)
 import String.Interpolate exposing (interpolate)
 import Task
@@ -689,8 +686,8 @@ guessDescription lang =
         )
 
 
-viewHelp : Store -> Int -> List (Html Msg)
-viewHelp { lang } wordSize =
+viewHelp : Store -> List (Html Msg)
+viewHelp { lang } =
     let
         demo =
             [ Game.Correct 'r'
@@ -719,28 +716,6 @@ viewHelp { lang } wordSize =
         |> translate lang
         |> Markdown.toHtml [ class "Markdown" ]
     ]
-
-
-formatFloat : Int -> Float -> String
-formatFloat decimals =
-    FormatNumber.format { frenchLocale | decimals = Exact decimals }
-
-
-formatPercent : Float -> String
-formatPercent float =
-    formatFloat 0 float ++ "%"
-
-
-progressBar : Float -> Html Msg
-progressBar percent =
-    div
-        [ class "progress" ]
-        [ div
-            [ class "progress-bar bg-success"
-            , style "width" <| String.fromFloat percent ++ "%"
-            ]
-            []
-        ]
 
 
 viewSettings : Store -> List (Html Msg)
@@ -794,109 +769,6 @@ viewSettings { lang, settings } =
     ]
 
 
-viewStats : Store -> List (Html Msg)
-viewStats { lang, logs } =
-    case List.filter (.lang >> (==) lang) logs of
-        [] ->
-            [ I18n.StatsLangDataMissing { lang = lang }
-                |> I18n.htmlText lang
-            ]
-
-        logs_ ->
-            viewLangStats lang logs_
-
-
-viewLangStats : Lang -> List Log -> List (Html Msg)
-viewLangStats lang langLogs =
-    let
-        onlyVictories =
-            List.filter .victory
-
-        totalPlayed =
-            List.length langLogs
-
-        totalWins =
-            List.length (onlyVictories langLogs)
-
-        percentWin =
-            toFloat totalWins / toFloat totalPlayed * 100
-
-        totalGuesses =
-            langLogs |> onlyVictories |> List.map .guesses |> List.sum
-
-        guessAvg =
-            toFloat totalGuesses / toFloat totalWins
-
-        chartLogs =
-            langLogs
-                |> List.reverse
-                |> List.take 100
-
-        row nbGuess =
-            let
-                wins =
-                    langLogs
-                        |> onlyVictories
-                        |> List.filter (.guesses >> (==) nbGuess)
-                        |> List.length
-
-                percent =
-                    toFloat wins / toFloat totalWins * 100
-            in
-            tr []
-                [ th [ class "text-end" ] [ text (String.fromInt nbGuess) ]
-                , td [ class "text-end" ] [ wins |> String.fromInt |> text ]
-                , td [ class "text-end" ] [ text (formatPercent percent) ]
-                , td [ class "w-100" ] [ progressBar percent ]
-                ]
-
-        stat nodes =
-            div [ class "col-4 text-center mb-4" ]
-                nodes
-    in
-    [ div [ class "row" ]
-        [ stat
-            [ div [ class "fs-3" ] [ text (String.fromInt totalPlayed) ]
-            , small [] [ I18n.htmlText lang I18n.StatsGamesPlayed ]
-            ]
-        , stat
-            [ div [ class "fs-3" ] [ text (formatPercent percentWin) ]
-            , small [] [ I18n.htmlText lang I18n.StatsWinRate ]
-            ]
-        , if guessAvg > 0 then
-            stat
-                [ div [ class "fs-3" ] [ text (formatFloat 2 guessAvg) ]
-                , small [] [ I18n.htmlText lang I18n.StatsAverageGuesses ]
-                ]
-
-          else
-            text ""
-        ]
-    , div [ class "table-responsive" ]
-        [ h2 [ class "fs-5" ]
-            [ I18n.StatsGuessDistribution { lang = lang }
-                |> I18n.htmlText lang
-            ]
-        , table [ class "table" ]
-            [ List.range 1 6
-                |> List.map row
-                |> tbody []
-            ]
-        ]
-    , div []
-        [ h2 [ class "fs-5" ]
-            [ I18n.StatsGuessEvolution { lang = lang }
-                |> I18n.htmlText lang
-            ]
-        , I18n.StatsGuessEvolutionHelp
-            { lang = lang, length = List.length chartLogs }
-            |> I18n.paragraph lang
-        , chartLogs
-            |> Charts.logs
-        ]
-    ]
-
-
 layout : Model -> List (Html Msg) -> Html Msg
 layout ({ store, modal, toasties } as model) content =
     main_ [ class "App" ]
@@ -905,7 +777,9 @@ layout ({ store, modal, toasties } as model) content =
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
-                viewModal store I18n.Help (viewHelp store model.wordSize)
+                viewModal store
+                    I18n.Help
+                    (viewHelp store)
 
             Just SettingsModal ->
                 viewModal store
@@ -915,7 +789,7 @@ layout ({ store, modal, toasties } as model) content =
             Just StatsModal ->
                 viewModal store
                     (I18n.StatsLang { lang = store.lang })
-                    (viewStats store)
+                    (Stats.view store)
 
             Nothing ->
                 text ""
