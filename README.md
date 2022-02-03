@@ -1,6 +1,6 @@
 # Wordlem
 
-A simplistic port of the popular [Wordle game](https://www.powerlanguage.co.uk/wordle/) in [Elm](https://elm-lang.org/). Allows playing in French.
+A port of the popular [Wordle game](https://www.powerlanguage.co.uk/wordle/) in [Elm](https://elm-lang.org/), playable in both English & French and with 6 and 7 letters words.
 
 ![image](https://n1k0.github.io/wordlem/screenshots/card.png)
 
@@ -33,6 +33,13 @@ In no specific order:
 - [Evan Czaplicki](https://twitter.com/evancz) who created the most blissful language I ever handled, [Elm](https://elm-lang.org/)
 - [Lexique.org](http://www.lexique.org/shiny/openlexicon/) for the great resources on French language
 - [Peter Norvig](https://norvig.com/) for his compilation of the [330k most frequent English words](https://norvig.com/ngrams/count_1w.txt)
+
+## FAQ
+
+- Why can't I share my scores?
+  - Because I didn't want to add more noise to already noisy social networks 
+- Why no 8+ letters words?
+  - Because that would make the dictionary size a too big to download comfortably, but I may consider the option in the future.
 
 ## License
 
