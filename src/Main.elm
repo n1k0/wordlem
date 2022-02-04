@@ -530,15 +530,8 @@ definitionLink : Lang -> Game.WordToFind -> Html Msg
 definitionLink lang word =
     a
         [ class "btn btn-lg btn-info"
+        , href ("https://" ++ I18n.langToCode lang ++ ".wiktionary.org/wiki/" ++ word)
         , target "_blank"
-        , href
-            (case lang of
-                French ->
-                    "https://fr.wiktionary.org/wiki/" ++ word
-
-                English ->
-                    "https://en.wiktionary.org/wiki/" ++ word
-            )
         ]
         [ Icon.icon Icon.Definition [ class "me-1" ]
         , I18n.htmlText lang I18n.Definition
