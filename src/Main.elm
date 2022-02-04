@@ -907,22 +907,6 @@ viewModal { lang } transationId content =
         ]
 
 
-viewError : Lang -> Game.Error -> Html Msg
-viewError lang error =
-    div [ class "alert alert-danger m-3" ]
-        [ case error of
-            Game.DecodeError details ->
-                div []
-                    [ I18n.paragraph lang I18n.DecodeError
-                    , pre [ class "pb-3" ]
-                        [ text details ]
-                    ]
-
-            Game.LoadError ->
-                I18n.htmlText lang I18n.LoadError
-        ]
-
-
 viewLoader : Html Msg
 viewLoader =
     div [ class "Loader d-flex justify-content-center align-items-center" ]
@@ -942,7 +926,7 @@ view ({ wordSize, store, state } as model) =
                 ]
 
             Game.Errored error ->
-                [ viewError store.lang error
+                [ Game.viewError store.lang error
                 , p [ class "text-center" ]
                     [ newGameButton store.lang ]
                 ]

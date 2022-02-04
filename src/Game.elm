@@ -12,8 +12,11 @@ module Game exposing
     , letterIs
     , parseWords
     , validateGuess
+    , viewError
     )
 
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import I18n exposing (Lang)
 import String.Extra as SE
 
@@ -220,3 +223,19 @@ isLastGuess input =
     List.head
         >> Maybe.map guessToString
         >> (==) (Just input)
+
+
+viewError : Lang -> Error -> Html msg
+viewError lang error =
+    div [ class "alert alert-danger m-3" ]
+        [ case error of
+            DecodeError details ->
+                div []
+                    [ I18n.paragraph lang I18n.DecodeError
+                    , pre [ class "pb-3" ]
+                        [ text details ]
+                    ]
+
+            LoadError ->
+                I18n.htmlText lang I18n.LoadError
+        ]
