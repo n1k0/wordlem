@@ -476,12 +476,6 @@ notifyWarning i18nId ( model, cmds ) =
         |> Notif.add ToastyMsg (Notif.Warning (translate model.store.lang i18nId))
 
 
-charToText : Char -> String
-charToText =
-    -- FIXME: remove
-    Char.toUpper >> String.fromChar
-
-
 newGameButton : Lang -> Html Msg
 newGameButton lang =
     button
@@ -513,61 +507,6 @@ endGameButtons lang word =
             [ definitionLink lang word
             , newGameButton lang
             ]
-        ]
-
-
-viewKeyboard : Store -> Game.Board -> Html Msg
-viewKeyboard { lang, settings } guesses =
-    settings.layout
-        |> Keyboard.disposition lang
-        |> List.map
-            (div [ class "KeyboardRow" ]
-                << List.map (Keyboard.keyState guesses >> viewKeyState)
-            )
-        |> footer [ class "Keyboard" ]
-
-
-viewKeyState : Keyboard.KeyState -> Html Msg
-viewKeyState ( char, letter ) =
-    let
-        baseClasses =
-            "KeyboardKey btn"
-
-        ( classes, msg ) =
-            case letter of
-                Just (Game.Correct _) ->
-                    ( "btn-success", KeyPressed char )
-
-                Just (Game.Misplaced _) ->
-                    ( "btn-warning", KeyPressed char )
-
-                Just (Game.Unused _) ->
-                    ( "bg-dark text-light", KeyPressed char )
-
-                _ ->
-                    if char == '⌫' then
-                        ( "btn-info large-key", BackSpace )
-
-                    else if char == '⏎' then
-                        ( "btn-info large-key", Submit )
-
-                    else
-                        ( "btn-secondary", KeyPressed char )
-    in
-    button
-        [ class (String.join " " [ baseClasses, classes ])
-        , onClick msg
-        , tabindex -1
-        ]
-        [ case char of
-            '⌫' ->
-                Icon.icon Icon.Backspace []
-
-            '⏎' ->
-                Icon.icon Icon.Enter []
-
-            _ ->
-                text (charToText char)
         ]
 
 
@@ -729,11 +668,21 @@ viewLoader =
 
 view : Model -> Html Msg
 view ({ wordSize, store, state } as model) =
+    let
+        viewKeyboard =
+            Keyboard.view
+                { lang = store.lang
+                , layout = store.settings.layout
+                , backSpace = BackSpace
+                , keyPressed = KeyPressed
+                , submit = Submit
+                }
+    in
     layout model
         (case state of
             Game.Idle ->
                 [ viewLoader
-                , viewKeyboard store []
+                , viewKeyboard []
                 ]
 
             Game.Errored error ->
@@ -745,7 +694,7 @@ view ({ wordSize, store, state } as model) =
             Game.Won word guesses ->
                 [ Game.viewBoard maxAttempts wordSize Nothing guesses
                 , endGameButtons store.lang word
-                , viewKeyboard store guesses
+                , viewKeyboard guesses
                 ]
 
             Game.Lost word guesses ->
@@ -755,12 +704,12 @@ view ({ wordSize, store, state } as model) =
                     |> (\a -> a :: guesses)
                     |> Game.viewBoard maxAttempts wordSize Nothing
                 , endGameButtons store.lang word
-                , viewKeyboard store guesses
+                , viewKeyboard guesses
                 ]
 
             Game.Ongoing _ guesses input ->
                 [ Game.viewBoard maxAttempts wordSize (Just input) guesses
-                , viewKeyboard store guesses
+                , viewKeyboard guesses
                 ]
         )
 

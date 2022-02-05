@@ -7,10 +7,15 @@ module Keyboard exposing
     , keyState
     , layoutFromString
     , layoutToString
+    , view
     )
 
 import Game exposing (Letter)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import I18n exposing (Lang(..))
+import Icon
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
@@ -101,3 +106,67 @@ layoutFromString string =
 
         _ ->
             Auto
+
+
+type alias ViewConfig msg =
+    { lang : Lang
+    , layout : Layout
+    , backSpace : msg
+    , keyPressed : Char -> msg
+    , submit : msg
+    }
+
+
+view : ViewConfig msg -> Game.Board -> Html msg
+view config guesses =
+    config.layout
+        |> disposition config.lang
+        |> List.map
+            (div [ class "KeyboardRow" ]
+                << List.map (keyState guesses >> viewKeyState config)
+            )
+        |> footer [ class "Keyboard" ]
+
+
+viewKeyState : ViewConfig msg -> KeyState -> Html msg
+viewKeyState config ( char, letter ) =
+    let
+        baseClasses =
+            "KeyboardKey btn"
+
+        ( classes, msg ) =
+            case letter of
+                Just (Game.Correct _) ->
+                    ( "btn-success", config.keyPressed char )
+
+                Just (Game.Misplaced _) ->
+                    ( "btn-warning", config.keyPressed char )
+
+                Just (Game.Unused _) ->
+                    ( "bg-dark text-light", config.keyPressed char )
+
+                _ ->
+                    if char == '⌫' then
+                        ( "btn-info large-key", config.backSpace )
+
+                    else if char == '⏎' then
+                        ( "btn-info large-key", config.submit )
+
+                    else
+                        ( "btn-secondary", config.keyPressed char )
+    in
+    button
+        [ class (String.join " " [ baseClasses, classes ])
+        , onClick msg
+        , tabindex -1
+        ]
+        [ case char of
+            '⌫' ->
+                Icon.icon Icon.Backspace []
+
+            '⏎' ->
+                Icon.icon Icon.Enter []
+
+            _ ->
+                text (Game.charToText char)
+        ]
