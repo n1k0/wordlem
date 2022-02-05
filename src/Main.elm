@@ -11,6 +11,7 @@ import Browser.Events as BE
 import Client
 import Event
 import Game
+import Help
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -20,14 +21,12 @@ import Icon
 import Json.Decode as Decode
 import Keyboard
 import List.Extra as LE
-import Markdown
 import Notif exposing (Notif)
 import Process
 import Random
 import Settings
 import Stats
 import Store exposing (Store)
-import String.Interpolate exposing (interpolate)
 import Task
 import Time exposing (Posix)
 import Toasty
@@ -254,12 +253,6 @@ scrollToBottom id =
         |> Task.attempt (always NoOp)
 
 
-addChar : Int -> Char -> Game.UserInput -> Game.UserInput
-addChar wordSize char input =
-    (input ++ String.fromChar char)
-        |> String.slice 0 wordSize
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ store } as model) =
     case ( msg, model.state ) of
@@ -304,7 +297,12 @@ update msg ({ store } as model) =
             ( model, Cmd.none )
 
         ( KeyPressed char, Game.Ongoing word guesses input ) ->
-            ( { model | state = Game.Ongoing word guesses (addChar model.wordSize char input) }
+            ( { model
+                | state =
+                    input
+                        |> Game.addChar model.wordSize char
+                        |> Game.Ongoing word guesses
+              }
             , scrollToBottom "board-container"
             )
 
@@ -480,39 +478,8 @@ notifyWarning i18nId ( model, cmds ) =
 
 charToText : Char -> String
 charToText =
+    -- FIXME: remove
     Char.toUpper >> String.fromChar
-
-
-viewGuess : Int -> Game.Guess -> Html Msg
-viewGuess wordSize =
-    List.map
-        (\letter ->
-            case letter of
-                Game.Misplaced char ->
-                    viewTile "btn-warning" char
-
-                Game.Correct char ->
-                    viewTile "btn-success" char
-
-                Game.Unused char ->
-                    viewTile "btn-dark" char
-
-                Game.Handled char ->
-                    -- We may want to render these slightly differently
-                    viewTile "btn-dark handled" char
-        )
-        >> viewBoardRow wordSize
-
-
-viewBoardRow : Int -> List (Html Msg) -> Html Msg
-viewBoardRow wordSize =
-    div
-        [ class "BoardRow"
-        , style "grid-template-columns"
-            (interpolate "repeat({0}, 1fr)"
-                [ String.fromInt wordSize ]
-            )
-        ]
 
 
 newGameButton : Lang -> Html Msg
@@ -604,114 +571,6 @@ viewKeyState ( char, letter ) =
         ]
 
 
-viewBoard : Int -> Maybe Game.UserInput -> Game.Board -> Html Msg
-viewBoard wordSize input guesses =
-    let
-        remaining =
-            maxAttempts
-                - List.length guesses
-                - (input |> Maybe.map (always 2) |> Maybe.withDefault 1)
-    in
-    div [ class "BoardContainer", id "board-container" ]
-        [ [ guesses
-                |> List.reverse
-                |> List.map (viewGuess wordSize >> Just)
-          , [ input |> Maybe.map (viewInput wordSize) ]
-          , List.range 0 remaining
-                |> List.map
-                    (\_ ->
-                        List.repeat wordSize '\u{00A0}'
-                            |> String.fromList
-                            |> viewInput wordSize
-                            |> Just
-                    )
-          ]
-            |> List.concat
-            |> List.filterMap identity
-            |> div
-                [ class <| "Board Board-" ++ String.fromInt wordSize
-                , style "grid-template-rows"
-                    (interpolate "repeat({0}, 1fr)"
-                        [ String.fromInt maxAttempts ]
-                    )
-                ]
-        ]
-
-
-viewTile : String -> Char -> Html Msg
-viewTile classes char =
-    div
-        [ class <| "btn BoardTile rounded-0 " ++ classes ]
-        [ text (charToText char) ]
-
-
-viewInput : Int -> Game.UserInput -> Html Msg
-viewInput wordSize input =
-    let
-        chars =
-            String.toList input
-
-        spots =
-            chars ++ LE.initialize (wordSize - List.length chars) (always '\u{00A0}')
-    in
-    spots
-        |> List.map (viewTile "btn-secondary")
-        |> viewBoardRow wordSize
-
-
-guessDescription : Lang -> Game.Guess -> List String
-guessDescription lang =
-    List.map
-        (\letter ->
-            translate lang
-                (case letter of
-                    Game.Correct c ->
-                        I18n.HelpLetterCorrectlyPlaced { letter = charToText c }
-
-                    Game.Misplaced c ->
-                        I18n.HelpLetterMisplaced { letter = charToText c }
-
-                    Game.Unused c ->
-                        I18n.HelpLetterUnused { letter = charToText c }
-
-                    Game.Handled c ->
-                        I18n.HelpLetterHandled { letter = charToText c }
-                )
-        )
-
-
-viewHelp : Store -> List (Html Msg)
-viewHelp { lang } =
-    let
-        demo =
-            [ Game.Correct 'r'
-            , Game.Unused 'e'
-            , Game.Misplaced 'f'
-            , Game.Handled 'e'
-            , Game.Handled 'r'
-            , Game.Handled 'e'
-            , Game.Correct 'e'
-            ]
-    in
-    [ I18n.HelpGamePitch { lang = lang, maxGuesses = maxAttempts }
-        |> I18n.paragraph lang
-    , I18n.paragraph lang I18n.HelpKeyboard
-    , div [ class "BoardRowExample mb-3" ]
-        [ viewGuess (List.length demo) demo ]
-    , I18n.paragraph lang I18n.HelpInThisExample
-    , guessDescription lang demo
-        |> List.map (\line -> li [] [ text line ])
-        |> ul []
-    , I18n.paragraph lang I18n.HelpKeyboardLetter
-    , I18n.HelpInspiredBy
-        { wordleUrl = "https://www.powerlanguage.co.uk/wordle/"
-        , githubUrl = "https://github.com/n1k0/wordlem"
-        }
-        |> translate lang
-        |> Markdown.toHtml [ class "Markdown" ]
-    ]
-
-
 layout : Model -> List (Html Msg) -> Html Msg
 layout ({ store, modal, toasties } as model) content =
     main_ [ class "App" ]
@@ -720,9 +579,8 @@ layout ({ store, modal, toasties } as model) content =
             (viewHeader model :: content)
         , case modal of
             Just HelpModal ->
-                viewModal store
-                    I18n.Help
-                    (viewHelp store)
+                Help.view store.lang maxAttempts
+                    |> viewModal store I18n.Help
 
             Just SettingsModal ->
                 store.settings
@@ -734,9 +592,8 @@ layout ({ store, modal, toasties } as model) content =
                     |> viewModal store I18n.Settings
 
             Just StatsModal ->
-                viewModal store
-                    (I18n.StatsLang { lang = store.lang })
-                    (Stats.view store)
+                Stats.view store
+                    |> viewModal store (I18n.StatsLang { lang = store.lang })
 
             Nothing ->
                 text ""
@@ -886,7 +743,7 @@ view ({ wordSize, store, state } as model) =
                 ]
 
             Game.Won word guesses ->
-                [ viewBoard wordSize Nothing guesses
+                [ Game.viewBoard maxAttempts wordSize Nothing guesses
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
@@ -896,13 +753,13 @@ view ({ wordSize, store, state } as model) =
                     |> String.toList
                     |> List.map Game.Correct
                     |> (\a -> a :: guesses)
-                    |> viewBoard wordSize Nothing
+                    |> Game.viewBoard maxAttempts wordSize Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard store guesses
                 ]
 
             Game.Ongoing _ guesses input ->
-                [ viewBoard wordSize (Just input) guesses
+                [ Game.viewBoard maxAttempts wordSize (Just input) guesses
                 , viewKeyboard store guesses
                 ]
         )
