@@ -6773,7 +6773,7 @@ type alias Process =
     var $elm$core$String$fromChar = function(_char) {
         return A2($elm$core$String$cons, _char, '');
     };
-    var $author$project$Main$addChar = F3(function(wordSize, _char, input) {
+    var $author$project$Game$addChar = F3(function(wordSize, _char, input) {
         return A3($elm$core$String$slice, 0, wordSize, _Utils_ap(input, $elm$core$String$fromChar(_char)));
     });
     var $author$project$Game$Lost = F2(function(a, b) {
@@ -7321,7 +7321,7 @@ type alias Process =
                     var guesses = _v11.b;
                     var input = _v11.c;
                     return _Utils_Tuple2(_Utils_update(model, {
-                        state: A3($author$project$Game$Ongoing, word, guesses, A3($author$project$Main$addChar, model.wordSize, _char, input))
+                        state: A3($author$project$Game$Ongoing, word, guesses, A3($author$project$Game$addChar, model.wordSize, _char, input))
                     }), $author$project$Main$scrollToBottom('board-container'));
                 } else return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
             case 'KeyArrowUp':
@@ -7526,11 +7526,8 @@ type alias Process =
     var $author$project$Main$definitionLink = F2(function(lang, word) {
         return A2($elm$html$Html$a, _List_fromArray([
             $elm$html$Html$Attributes$class('btn btn-lg btn-info'),
-            $elm$html$Html$Attributes$target('_blank'),
-            $elm$html$Html$Attributes$href(function() {
-                if (lang.$ === 'French') return 'https://fr.wiktionary.org/wiki/' + word;
-                else return 'https://en.wiktionary.org/wiki/' + word;
-            }())
+            $elm$html$Html$Attributes$href('https://' + ($author$project$I18n$langToCode(lang) + ('.wiktionary.org/wiki/' + word))),
+            $elm$html$Html$Attributes$target('_blank')
         ]), _List_fromArray([
             A2($author$project$Icon$icon, $author$project$Icon$Definition, _List_fromArray([
                 $elm$html$Html$Attributes$class('me-1')
@@ -7599,12 +7596,188 @@ type alias Process =
             a: a
         };
     };
+    var $author$project$Main$SwitchLayout = function(a) {
+        return {
+            $: 'SwitchLayout',
+            a: a
+        };
+    };
+    var $author$project$Main$SwitchWordSize = function(a) {
+        return {
+            $: 'SwitchWordSize',
+            a: a
+        };
+    };
     var $elm$html$Html$main_ = _VirtualDom_node('main');
+    var $author$project$I18n$HelpGamePitch = function(a) {
+        return {
+            $: 'HelpGamePitch',
+            a: a
+        };
+    };
+    var $author$project$I18n$HelpInThisExample = {
+        $: 'HelpInThisExample'
+    };
+    var $author$project$I18n$HelpInspiredBy = function(a) {
+        return {
+            $: 'HelpInspiredBy',
+            a: a
+        };
+    };
+    var $author$project$I18n$HelpKeyboard = {
+        $: 'HelpKeyboard'
+    };
+    var $author$project$I18n$HelpKeyboardLetter = {
+        $: 'HelpKeyboardLetter'
+    };
+    var $author$project$I18n$HelpLetterCorrectlyPlaced = function(a) {
+        return {
+            $: 'HelpLetterCorrectlyPlaced',
+            a: a
+        };
+    };
+    var $author$project$I18n$HelpLetterHandled = function(a) {
+        return {
+            $: 'HelpLetterHandled',
+            a: a
+        };
+    };
+    var $author$project$I18n$HelpLetterMisplaced = function(a) {
+        return {
+            $: 'HelpLetterMisplaced',
+            a: a
+        };
+    };
+    var $author$project$I18n$HelpLetterUnused = function(a) {
+        return {
+            $: 'HelpLetterUnused',
+            a: a
+        };
+    };
+    var $elm$core$Char$toUpper = _Char_toUpper;
+    var $author$project$Game$charToText = A2($elm$core$Basics$composeR, $elm$core$Char$toUpper, $elm$core$String$fromChar);
+    var $author$project$Help$guessDescription = function(lang) {
+        return $elm$core$List$map(function(letter) {
+            return A2($author$project$I18n$translate, lang, function() {
+                switch(letter.$){
+                    case 'Correct':
+                        var c = letter.a;
+                        return $author$project$I18n$HelpLetterCorrectlyPlaced({
+                            letter: $author$project$Game$charToText(c)
+                        });
+                    case 'Misplaced':
+                        var c = letter.a;
+                        return $author$project$I18n$HelpLetterMisplaced({
+                            letter: $author$project$Game$charToText(c)
+                        });
+                    case 'Unused':
+                        var c = letter.a;
+                        return $author$project$I18n$HelpLetterUnused({
+                            letter: $author$project$Game$charToText(c)
+                        });
+                    default:
+                        var c = letter.a;
+                        return $author$project$I18n$HelpLetterHandled({
+                            letter: $author$project$Game$charToText(c)
+                        });
+                }
+            }());
+        });
+    };
+    var $elm$html$Html$li = _VirtualDom_node('li');
+    var $elm$html$Html$p = _VirtualDom_node('p');
+    var $author$project$I18n$paragraph = F2(function(lang, id) {
+        return A2($elm$html$Html$p, _List_Nil, _List_fromArray([
+            A2($author$project$I18n$htmlText, lang, id)
+        ]));
+    });
+    var $elm_explorations$markdown$Markdown$defaultOptions = {
+        defaultHighlighting: $elm$core$Maybe$Nothing,
+        githubFlavored: $elm$core$Maybe$Just({
+            breaks: false,
+            tables: false
+        }),
+        sanitize: true,
+        smartypants: false
+    };
+    var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+    var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
+    var $elm$html$Html$ul = _VirtualDom_node('ul');
+    var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+    var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+    var $author$project$Game$viewBoardRow = function(wordSize) {
+        return $elm$html$Html$div(_List_fromArray([
+            $elm$html$Html$Attributes$class('BoardRow'),
+            A2($elm$html$Html$Attributes$style, 'grid-template-columns', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
+                $elm$core$String$fromInt(wordSize)
+            ])))
+        ]));
+    };
+    var $author$project$Game$viewTile = F2(function(classes, _char) {
+        return A2($elm$html$Html$div, _List_fromArray([
+            $elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
+        ]), _List_fromArray([
+            $elm$html$Html$text($author$project$Game$charToText(_char))
+        ]));
+    });
+    var $author$project$Game$viewGuess = function(wordSize) {
+        return A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
+            switch(letter.$){
+                case 'Misplaced':
+                    var _char = letter.a;
+                    return A2($author$project$Game$viewTile, 'btn-warning', _char);
+                case 'Correct':
+                    var _char = letter.a;
+                    return A2($author$project$Game$viewTile, 'btn-success', _char);
+                case 'Unused':
+                    var _char = letter.a;
+                    return A2($author$project$Game$viewTile, 'btn-dark', _char);
+                default:
+                    var _char = letter.a;
+                    return A2($author$project$Game$viewTile, 'btn-dark handled', _char);
+            }
+        }), $author$project$Game$viewBoardRow(wordSize));
+    };
+    var $author$project$Help$view = F2(function(lang, maxAttempts) {
+        var demo = _List_fromArray([
+            $author$project$Game$Correct(_Utils_chr('r')),
+            $author$project$Game$Unused(_Utils_chr('e')),
+            $author$project$Game$Misplaced(_Utils_chr('f')),
+            $author$project$Game$Handled(_Utils_chr('e')),
+            $author$project$Game$Handled(_Utils_chr('r')),
+            $author$project$Game$Handled(_Utils_chr('e')),
+            $author$project$Game$Correct(_Utils_chr('e'))
+        ]);
+        return _List_fromArray([
+            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpGamePitch({
+                lang: lang,
+                maxGuesses: maxAttempts
+            })),
+            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboard),
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('BoardRowExample mb-3')
+            ]), _List_fromArray([
+                A2($author$project$Game$viewGuess, $elm$core$List$length(demo), demo)
+            ])),
+            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpInThisExample),
+            A2($elm$html$Html$ul, _List_Nil, A2($elm$core$List$map, function(line) {
+                return A2($elm$html$Html$li, _List_Nil, _List_fromArray([
+                    $elm$html$Html$text(line)
+                ]));
+            }, A2($author$project$Help$guessDescription, lang, demo))),
+            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboardLetter),
+            A2($elm_explorations$markdown$Markdown$toHtml, _List_fromArray([
+                $elm$html$Html$Attributes$class('Markdown')
+            ]), A2($author$project$I18n$translate, lang, $author$project$I18n$HelpInspiredBy({
+                githubUrl: 'https://github.com/n1k0/wordlem',
+                wordleUrl: 'https://www.powerlanguage.co.uk/wordle/'
+            })))
+        ]);
+    });
     var $elm$core$List$isEmpty = function(xs) {
         if (!xs.b) return true;
         else return false;
     };
-    var $elm$html$Html$li = _VirtualDom_node('li');
     var $pablen$toasty$Toasty$itemContainer = F4(function(_v0, tagger, _v1, toastView) {
         var cfg = _v0.a;
         var id = _v1.a;
@@ -7657,364 +7830,6 @@ type alias Process =
         ]));
     };
     var $author$project$Notif$view = A2($pablen$toasty$Toasty$view, $author$project$Notif$config, $author$project$Notif$viewNotif);
-    var $author$project$Icon$Help = {
-        $: 'Help'
-    };
-    var $author$project$Main$OpenModal = function(a) {
-        return {
-            $: 'OpenModal',
-            a: a
-        };
-    };
-    var $author$project$Icon$Settings = {
-        $: 'Settings'
-    };
-    var $author$project$Main$SettingsModal = {
-        $: 'SettingsModal'
-    };
-    var $author$project$Icon$Stats = {
-        $: 'Stats'
-    };
-    var $author$project$I18n$StatsButton = {
-        $: 'StatsButton'
-    };
-    var $author$project$Main$StatsModal = {
-        $: 'StatsModal'
-    };
-    var $author$project$Main$SwitchLang = function(a) {
-        return {
-            $: 'SwitchLang',
-            a: a
-        };
-    };
-    var $elm$core$Tuple$second = function(_v0) {
-        var y = _v0.b;
-        return y;
-    };
-    var $elm$html$Html$Attributes$classList = function(classes) {
-        return $elm$html$Html$Attributes$class(A2($elm$core$String$join, ' ', A2($elm$core$List$map, $elm$core$Tuple$first, A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
-    };
-    var $elm$html$Html$h1 = _VirtualDom_node('h1');
-    var $elm$html$Html$nav = _VirtualDom_node('nav');
-    var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-    var $author$project$Main$viewHeader = function(_v0) {
-        var store = _v0.store;
-        var modal = _v0.modal;
-        var btnClass = function(active) {
-            return $elm$html$Html$Attributes$classList(_List_fromArray([
-                _Utils_Tuple2('btn-dark', !active),
-                _Utils_Tuple2('btn-primary', active)
-            ]));
-        };
-        return A2($elm$html$Html$nav, _List_fromArray([
-            $elm$html$Html$Attributes$class('navbar sticky-top navbar-dark bg-dark')
-        ]), _List_fromArray([
-            A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('Header container-fluid flex-nowrap py-sm-1')
-            ]), _List_fromArray([
-                A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('HeaderLogo text-white fw-bold')
-                ]), _List_fromArray([
-                    A2($elm$html$Html$h1, _List_fromArray([
-                        $elm$html$Html$Attributes$class('visually-hidden')
-                    ]), _List_fromArray([
-                        $elm$html$Html$text('Wordlem')
-                    ]))
-                ])),
-                A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('d-flex flex-fill justify-content-evenly text-center')
-                ]), _List_fromArray([
-                    A2($elm$html$Html$button, _List_fromArray([
-                        $elm$html$Html$Attributes$type_('button'),
-                        $elm$html$Html$Attributes$id('btn-lang-en'),
-                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-                        btnClass(_Utils_eq(store.lang, $author$project$I18n$English)),
-                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$English))
-                    ]), _List_fromArray([
-                        $elm$html$Html$text('English')
-                    ])),
-                    A2($elm$html$Html$button, _List_fromArray([
-                        $elm$html$Html$Attributes$type_('button'),
-                        $elm$html$Html$Attributes$id('btn-lang-fr'),
-                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
-                        btnClass(_Utils_eq(store.lang, $author$project$I18n$French)),
-                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$French))
-                    ]), _List_fromArray([
-                        $elm$html$Html$text('Français')
-                    ]))
-                ])),
-                A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('d-flex justify-content-end')
-                ]), _List_fromArray([
-                    A2($elm$html$Html$button, _List_fromArray([
-                        $elm$html$Html$Attributes$type_('button'),
-                        $elm$html$Html$Attributes$id('btn-stats'),
-                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
-                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal)),
-                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$StatsButton))
-                    ]), _List_fromArray([
-                        A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_Nil)
-                    ])),
-                    A2($elm$html$Html$button, _List_fromArray([
-                        $elm$html$Html$Attributes$type_('button'),
-                        $elm$html$Html$Attributes$id('btn-help'),
-                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
-                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal)),
-                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Help))
-                    ]), _List_fromArray([
-                        A2($author$project$Icon$icon, $author$project$Icon$Help, _List_Nil)
-                    ])),
-                    A2($elm$html$Html$button, _List_fromArray([
-                        $elm$html$Html$Attributes$type_('button'),
-                        $elm$html$Html$Attributes$id('btn-settings'),
-                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
-                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$SettingsModal))),
-                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal)),
-                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Settings))
-                    ]), _List_fromArray([
-                        A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_Nil)
-                    ]))
-                ]))
-            ]))
-        ]));
-    };
-    var $author$project$I18n$HelpGamePitch = function(a) {
-        return {
-            $: 'HelpGamePitch',
-            a: a
-        };
-    };
-    var $author$project$I18n$HelpInThisExample = {
-        $: 'HelpInThisExample'
-    };
-    var $author$project$I18n$HelpInspiredBy = function(a) {
-        return {
-            $: 'HelpInspiredBy',
-            a: a
-        };
-    };
-    var $author$project$I18n$HelpKeyboard = {
-        $: 'HelpKeyboard'
-    };
-    var $author$project$I18n$HelpKeyboardLetter = {
-        $: 'HelpKeyboardLetter'
-    };
-    var $author$project$I18n$HelpLetterCorrectlyPlaced = function(a) {
-        return {
-            $: 'HelpLetterCorrectlyPlaced',
-            a: a
-        };
-    };
-    var $author$project$I18n$HelpLetterHandled = function(a) {
-        return {
-            $: 'HelpLetterHandled',
-            a: a
-        };
-    };
-    var $author$project$I18n$HelpLetterMisplaced = function(a) {
-        return {
-            $: 'HelpLetterMisplaced',
-            a: a
-        };
-    };
-    var $author$project$I18n$HelpLetterUnused = function(a) {
-        return {
-            $: 'HelpLetterUnused',
-            a: a
-        };
-    };
-    var $elm$core$Char$toUpper = _Char_toUpper;
-    var $author$project$Main$charToText = A2($elm$core$Basics$composeR, $elm$core$Char$toUpper, $elm$core$String$fromChar);
-    var $author$project$Main$guessDescription = function(lang) {
-        return $elm$core$List$map(function(letter) {
-            return A2($author$project$I18n$translate, lang, function() {
-                switch(letter.$){
-                    case 'Correct':
-                        var c = letter.a;
-                        return $author$project$I18n$HelpLetterCorrectlyPlaced({
-                            letter: $author$project$Main$charToText(c)
-                        });
-                    case 'Misplaced':
-                        var c = letter.a;
-                        return $author$project$I18n$HelpLetterMisplaced({
-                            letter: $author$project$Main$charToText(c)
-                        });
-                    case 'Unused':
-                        var c = letter.a;
-                        return $author$project$I18n$HelpLetterUnused({
-                            letter: $author$project$Main$charToText(c)
-                        });
-                    default:
-                        var c = letter.a;
-                        return $author$project$I18n$HelpLetterHandled({
-                            letter: $author$project$Main$charToText(c)
-                        });
-                }
-            }());
-        });
-    };
-    var $elm$html$Html$p = _VirtualDom_node('p');
-    var $author$project$I18n$paragraph = F2(function(lang, id) {
-        return A2($elm$html$Html$p, _List_Nil, _List_fromArray([
-            A2($author$project$I18n$htmlText, lang, id)
-        ]));
-    });
-    var $elm_explorations$markdown$Markdown$defaultOptions = {
-        defaultHighlighting: $elm$core$Maybe$Nothing,
-        githubFlavored: $elm$core$Maybe$Just({
-            breaks: false,
-            tables: false
-        }),
-        sanitize: true,
-        smartypants: false
-    };
-    var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
-    var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
-    var $elm$html$Html$ul = _VirtualDom_node('ul');
-    var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-    var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-    var $author$project$Main$viewBoardRow = function(wordSize) {
-        return $elm$html$Html$div(_List_fromArray([
-            $elm$html$Html$Attributes$class('BoardRow'),
-            A2($elm$html$Html$Attributes$style, 'grid-template-columns', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
-                $elm$core$String$fromInt(wordSize)
-            ])))
-        ]));
-    };
-    var $author$project$Main$viewTile = F2(function(classes, _char) {
-        return A2($elm$html$Html$div, _List_fromArray([
-            $elm$html$Html$Attributes$class('btn BoardTile rounded-0 ' + classes)
-        ]), _List_fromArray([
-            $elm$html$Html$text($author$project$Main$charToText(_char))
-        ]));
-    });
-    var $author$project$Main$viewGuess = function(wordSize) {
-        return A2($elm$core$Basics$composeR, $elm$core$List$map(function(letter) {
-            switch(letter.$){
-                case 'Misplaced':
-                    var _char = letter.a;
-                    return A2($author$project$Main$viewTile, 'btn-warning', _char);
-                case 'Correct':
-                    var _char = letter.a;
-                    return A2($author$project$Main$viewTile, 'btn-success', _char);
-                case 'Unused':
-                    var _char = letter.a;
-                    return A2($author$project$Main$viewTile, 'btn-dark', _char);
-                default:
-                    var _char = letter.a;
-                    return A2($author$project$Main$viewTile, 'btn-dark handled', _char);
-            }
-        }), $author$project$Main$viewBoardRow(wordSize));
-    };
-    var $author$project$Main$viewHelp = F2(function(_v0, wordSize) {
-        var lang = _v0.lang;
-        var demo = _List_fromArray([
-            $author$project$Game$Correct(_Utils_chr('r')),
-            $author$project$Game$Unused(_Utils_chr('e')),
-            $author$project$Game$Misplaced(_Utils_chr('f')),
-            $author$project$Game$Handled(_Utils_chr('e')),
-            $author$project$Game$Handled(_Utils_chr('r')),
-            $author$project$Game$Handled(_Utils_chr('e')),
-            $author$project$Game$Correct(_Utils_chr('e'))
-        ]);
-        return _List_fromArray([
-            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpGamePitch({
-                lang: lang,
-                maxGuesses: $author$project$Main$maxAttempts
-            })),
-            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboard),
-            A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('BoardRowExample mb-3')
-            ]), _List_fromArray([
-                A2($author$project$Main$viewGuess, $elm$core$List$length(demo), demo)
-            ])),
-            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpInThisExample),
-            A2($elm$html$Html$ul, _List_Nil, A2($elm$core$List$map, function(line) {
-                return A2($elm$html$Html$li, _List_Nil, _List_fromArray([
-                    $elm$html$Html$text(line)
-                ]));
-            }, A2($author$project$Main$guessDescription, lang, demo))),
-            A2($author$project$I18n$paragraph, lang, $author$project$I18n$HelpKeyboardLetter),
-            A2($elm_explorations$markdown$Markdown$toHtml, _List_fromArray([
-                $elm$html$Html$Attributes$class('Markdown')
-            ]), A2($author$project$I18n$translate, lang, $author$project$I18n$HelpInspiredBy({
-                githubUrl: 'https://github.com/n1k0/wordlem',
-                wordleUrl: 'https://www.powerlanguage.co.uk/wordle/'
-            })))
-        ]);
-    });
-    var $author$project$Icon$Close = {
-        $: 'Close'
-    };
-    var $elm$virtual_dom$VirtualDom$Custom = function(a) {
-        return {
-            $: 'Custom',
-            a: a
-        };
-    };
-    var $elm$html$Html$Events$custom = F2(function(event, decoder) {
-        return A2($elm$virtual_dom$VirtualDom$on, event, $elm$virtual_dom$VirtualDom$Custom(decoder));
-    });
-    var $elm$html$Html$h6 = _VirtualDom_node('h6');
-    var $author$project$Main$viewModal = F3(function(_v0, transationId, content) {
-        var lang = _v0.lang;
-        var modalContentAttrs = _List_fromArray([
-            $elm$html$Html$Attributes$class('modal-content'),
-            A2($elm$html$Html$Events$custom, 'mouseup', $elm$json$Json$Decode$succeed({
-                message: $author$project$Main$NoOp,
-                preventDefault: true,
-                stopPropagation: true
-            }))
-        ]);
-        return A2($elm$html$Html$div, _List_fromArray([
-            $elm$html$Html$Attributes$class('d-block')
-        ]), _List_fromArray([
-            A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('modal d-block fade show'),
-                A2($elm$html$Html$Attributes$attribute, 'tabindex', '-1'),
-                A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true'),
-                A2($elm$html$Html$Attributes$attribute, 'role', 'dialog'),
-                A2($elm$html$Html$Events$custom, 'mouseup', $elm$json$Json$Decode$succeed({
-                    message: $author$project$Main$CloseModal,
-                    preventDefault: true,
-                    stopPropagation: true
-                }))
-            ]), _List_fromArray([
-                A2($elm$html$Html$div, _List_fromArray([
-                    $elm$html$Html$Attributes$class('modal-dialog modal-dialog-centered modal-dialog-scrollable'),
-                    A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true')
-                ]), _List_fromArray([
-                    A2($elm$html$Html$div, modalContentAttrs, _List_fromArray([
-                        A2($elm$html$Html$div, _List_fromArray([
-                            $elm$html$Html$Attributes$class('modal-header')
-                        ]), _List_fromArray([
-                            A2($elm$html$Html$h6, _List_fromArray([
-                                $elm$html$Html$Attributes$class('modal-title')
-                            ]), _List_fromArray([
-                                A2($author$project$I18n$htmlText, lang, transationId)
-                            ])),
-                            A2($elm$html$Html$button, _List_fromArray([
-                                $elm$html$Html$Attributes$type_('button'),
-                                $elm$html$Html$Attributes$class('btn fs-5 p-0'),
-                                A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Close (ESC)'),
-                                $elm$html$Html$Events$onClick($author$project$Main$CloseModal)
-                            ]), _List_fromArray([
-                                A2($author$project$Icon$icon, $author$project$Icon$Close, _List_Nil)
-                            ]))
-                        ])),
-                        A2($elm$html$Html$div, _List_fromArray([
-                            $elm$html$Html$Attributes$class('modal-body no-scroll-chaining')
-                        ]), content)
-                    ]))
-                ]))
-            ])),
-            A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('modal-backdrop fade show')
-            ]), _List_Nil)
-        ]));
-    });
     var $author$project$I18n$SettingsKeyboardLayout = {
         $: 'SettingsKeyboardLayout'
     };
@@ -8029,18 +7844,6 @@ type alias Process =
     };
     var $author$project$I18n$SettingsWordSizeRandom = {
         $: 'SettingsWordSizeRandom'
-    };
-    var $author$project$Main$SwitchLayout = function(a) {
-        return {
-            $: 'SwitchLayout',
-            a: a
-        };
-    };
-    var $author$project$Main$SwitchWordSize = function(a) {
-        return {
-            $: 'SwitchWordSize',
-            a: a
-        };
     };
     var $elm$html$Html$label = _VirtualDom_node('label');
     var $elm$html$Html$Events$alwaysStop = function(x) {
@@ -8069,9 +7872,10 @@ type alias Process =
     });
     var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
     var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-    var $author$project$Main$viewSettings = function(_v0) {
+    var $author$project$Settings$view = F2(function(_v0, settings) {
         var lang = _v0.lang;
-        var settings = _v0.settings;
+        var switchLayout = _v0.switchLayout;
+        var switchWordSize = _v0.switchWordSize;
         return _List_fromArray([
             A2($elm$html$Html$div, _List_fromArray([
                 $elm$html$Html$Attributes$class('mb-3')
@@ -8081,7 +7885,7 @@ type alias Process =
                 ])),
                 A2($elm$html$Html$select, _List_fromArray([
                     $elm$html$Html$Attributes$class('form-select w-100 mt-1'),
-                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $author$project$Keyboard$layoutFromString, $author$project$Main$SwitchLayout))
+                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $author$project$Keyboard$layoutFromString, switchLayout))
                 ]), A2($elm$core$List$map, function(l) {
                     return A2($elm$html$Html$option, _List_fromArray([
                         $elm$html$Html$Attributes$value($author$project$Keyboard$layoutToString(l)),
@@ -8103,7 +7907,7 @@ type alias Process =
                 ])),
                 A2($elm$html$Html$select, _List_fromArray([
                     $elm$html$Html$Attributes$class('form-select w-100 mt-1'),
-                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $elm$core$String$toInt, $author$project$Main$SwitchWordSize))
+                    $elm$html$Html$Events$onInput(A2($elm$core$Basics$composeR, $elm$core$String$toInt, switchWordSize))
                 ]), A2($elm$core$List$map, function(_v1) {
                     var wordSize = _v1.a;
                     var i18n = _v1.b;
@@ -8127,7 +7931,7 @@ type alias Process =
                 ])))
             ]))
         ]);
-    };
+    });
     var $author$project$I18n$StatsLangDataMissing = function(a) {
         return {
             $: 'StatsLangDataMissing',
@@ -8237,6 +8041,10 @@ type alias Process =
                 return A2($cuducos$elm_format_number$FormatNumber$Parser$addZerosToFit, min, digits);
         }
     });
+    var $elm$core$Tuple$second = function(_v0) {
+        var y = _v0.b;
+        return y;
+    };
     var $elm$core$String$fromFloat = _String_fromNumber;
     var $myrho$elm_round$Round$addSign = F2(function(signed, str) {
         var isNotZero = A2($elm$core$List$any, function(c) {
@@ -8462,13 +8270,13 @@ type alias Process =
         decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(3),
         thousandSeparator: '\u202F'
     });
-    var $author$project$Main$formatFloat = function(decimals) {
+    var $author$project$Stats$formatFloat = function(decimals) {
         return $cuducos$elm_format_number$FormatNumber$format(_Utils_update($cuducos$elm_format_number$FormatNumber$Locales$frenchLocale, {
             decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(decimals)
         }));
     };
-    var $author$project$Main$formatPercent = function(_float) {
-        return A2($author$project$Main$formatFloat, 0, _float) + '%';
+    var $author$project$Stats$formatPercent = function(_float) {
+        return A2($author$project$Stats$formatFloat, 0, _float) + '%';
     };
     var $elm$html$Html$h2 = _VirtualDom_node('h2');
     var $terezka$elm_charts$Internal$Property$Property = function(a) {
@@ -13012,7 +12820,7 @@ type alias Process =
             ]), data)
         ]));
     };
-    var $author$project$Main$progressBar = function(percent) {
+    var $author$project$Stats$progressBar = function(percent) {
         return A2($elm$html$Html$div, _List_fromArray([
             $elm$html$Html$Attributes$class('progress')
         ]), _List_fromArray([
@@ -13025,11 +12833,11 @@ type alias Process =
     var $elm$html$Html$small = _VirtualDom_node('small');
     var $elm$html$Html$tbody = _VirtualDom_node('tbody');
     var $elm$html$Html$th = _VirtualDom_node('th');
-    var $author$project$Main$viewLangStats = F2(function(lang, langLogs) {
+    var $author$project$Stats$viewLangStats = F2(function(lang, langLogs) {
         var totalPlayed = $elm$core$List$length(langLogs);
         var stat = function(nodes) {
             return A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('col-4 text-center mb-4')
+                $elm$html$Html$Attributes$class('col-4 text-center lh-1 mb-4')
             ]), nodes);
         };
         var onlyVictories = $elm$core$List$filter(function($) {
@@ -13059,12 +12867,12 @@ type alias Process =
                 A2($elm$html$Html$td, _List_fromArray([
                     $elm$html$Html$Attributes$class('text-end')
                 ]), _List_fromArray([
-                    $elm$html$Html$text($author$project$Main$formatPercent(percent))
+                    $elm$html$Html$text($author$project$Stats$formatPercent(percent))
                 ])),
                 A2($elm$html$Html$td, _List_fromArray([
                     $elm$html$Html$Attributes$class('w-100')
                 ]), _List_fromArray([
-                    $author$project$Main$progressBar(percent)
+                    $author$project$Stats$progressBar(percent)
                 ]))
             ]));
         };
@@ -13088,7 +12896,7 @@ type alias Process =
                     A2($elm$html$Html$div, _List_fromArray([
                         $elm$html$Html$Attributes$class('fs-3')
                     ]), _List_fromArray([
-                        $elm$html$Html$text($author$project$Main$formatPercent(percentWin))
+                        $elm$html$Html$text($author$project$Stats$formatPercent(percentWin))
                     ])),
                     A2($elm$html$Html$small, _List_Nil, _List_fromArray([
                         A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsWinRate)
@@ -13098,7 +12906,7 @@ type alias Process =
                     A2($elm$html$Html$div, _List_fromArray([
                         $elm$html$Html$Attributes$class('fs-3')
                     ]), _List_fromArray([
-                        $elm$html$Html$text(A2($author$project$Main$formatFloat, 2, guessAvg))
+                        $elm$html$Html$text(A2($author$project$Stats$formatFloat, 2, guessAvg))
                     ])),
                     A2($elm$html$Html$small, _List_Nil, _List_fromArray([
                         A2($author$project$I18n$htmlText, lang, $author$project$I18n$StatsAverageGuesses)
@@ -13137,7 +12945,7 @@ type alias Process =
             ]))
         ]);
     });
-    var $author$project$Main$viewStats = function(_v0) {
+    var $author$project$Stats$view = function(_v0) {
         var lang = _v0.lang;
         var logs = _v0.logs;
         var _v1 = A2($elm$core$List$filter, A2($elm$core$Basics$composeR, function($) {
@@ -13150,9 +12958,198 @@ type alias Process =
         ]);
         else {
             var logs_ = _v1;
-            return A2($author$project$Main$viewLangStats, lang, logs_);
+            return A2($author$project$Stats$viewLangStats, lang, logs_);
         }
     };
+    var $author$project$Icon$Help = {
+        $: 'Help'
+    };
+    var $author$project$Main$OpenModal = function(a) {
+        return {
+            $: 'OpenModal',
+            a: a
+        };
+    };
+    var $author$project$Icon$Settings = {
+        $: 'Settings'
+    };
+    var $author$project$Main$SettingsModal = {
+        $: 'SettingsModal'
+    };
+    var $author$project$Icon$Stats = {
+        $: 'Stats'
+    };
+    var $author$project$I18n$StatsButton = {
+        $: 'StatsButton'
+    };
+    var $author$project$Main$StatsModal = {
+        $: 'StatsModal'
+    };
+    var $author$project$Main$SwitchLang = function(a) {
+        return {
+            $: 'SwitchLang',
+            a: a
+        };
+    };
+    var $elm$html$Html$Attributes$classList = function(classes) {
+        return $elm$html$Html$Attributes$class(A2($elm$core$String$join, ' ', A2($elm$core$List$map, $elm$core$Tuple$first, A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+    };
+    var $elm$html$Html$h1 = _VirtualDom_node('h1');
+    var $elm$html$Html$nav = _VirtualDom_node('nav');
+    var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+    var $author$project$Main$viewHeader = function(_v0) {
+        var store = _v0.store;
+        var modal = _v0.modal;
+        var btnClass = function(active) {
+            return $elm$html$Html$Attributes$classList(_List_fromArray([
+                _Utils_Tuple2('btn-dark', !active),
+                _Utils_Tuple2('btn-primary', active)
+            ]));
+        };
+        return A2($elm$html$Html$nav, _List_fromArray([
+            $elm$html$Html$Attributes$class('navbar sticky-top navbar-dark bg-dark')
+        ]), _List_fromArray([
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('Header container-fluid flex-nowrap py-sm-1')
+            ]), _List_fromArray([
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('HeaderLogo text-white fw-bold')
+                ]), _List_fromArray([
+                    A2($elm$html$Html$h1, _List_fromArray([
+                        $elm$html$Html$Attributes$class('visually-hidden')
+                    ]), _List_fromArray([
+                        $elm$html$Html$text('Wordlem')
+                    ]))
+                ])),
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('d-flex flex-fill justify-content-evenly text-center')
+                ]), _List_fromArray([
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-lang-en'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
+                        btnClass(_Utils_eq(store.lang, $author$project$I18n$English)),
+                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$English))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text('English')
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-lang-fr'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm text-truncate'),
+                        btnClass(_Utils_eq(store.lang, $author$project$I18n$French)),
+                        $elm$html$Html$Events$onClick($author$project$Main$SwitchLang($author$project$I18n$French))
+                    ]), _List_fromArray([
+                        $elm$html$Html$text('Français')
+                    ]))
+                ])),
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('d-flex justify-content-end')
+                ]), _List_fromArray([
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-stats'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$StatsModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$StatsModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$StatsButton))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Stats, _List_Nil)
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-help'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$HelpModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$HelpModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Help))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Help, _List_Nil)
+                    ])),
+                    A2($elm$html$Html$button, _List_fromArray([
+                        $elm$html$Html$Attributes$type_('button'),
+                        $elm$html$Html$Attributes$id('btn-settings'),
+                        $elm$html$Html$Attributes$class('HeaderButton btn btn-sm d-flex align-items-center'),
+                        btnClass(_Utils_eq(modal, $elm$core$Maybe$Just($author$project$Main$SettingsModal))),
+                        $elm$html$Html$Events$onClick($author$project$Main$OpenModal($author$project$Main$SettingsModal)),
+                        A2($elm$html$Html$Attributes$attribute, 'aria-label', A2($author$project$I18n$translate, store.lang, $author$project$I18n$Settings))
+                    ]), _List_fromArray([
+                        A2($author$project$Icon$icon, $author$project$Icon$Settings, _List_Nil)
+                    ]))
+                ]))
+            ]))
+        ]));
+    };
+    var $author$project$Icon$Close = {
+        $: 'Close'
+    };
+    var $elm$virtual_dom$VirtualDom$Custom = function(a) {
+        return {
+            $: 'Custom',
+            a: a
+        };
+    };
+    var $elm$html$Html$Events$custom = F2(function(event, decoder) {
+        return A2($elm$virtual_dom$VirtualDom$on, event, $elm$virtual_dom$VirtualDom$Custom(decoder));
+    });
+    var $elm$html$Html$h6 = _VirtualDom_node('h6');
+    var $author$project$Main$viewModal = F3(function(_v0, transationId, content) {
+        var lang = _v0.lang;
+        var modalContentAttrs = _List_fromArray([
+            $elm$html$Html$Attributes$class('modal-content'),
+            A2($elm$html$Html$Events$custom, 'mouseup', $elm$json$Json$Decode$succeed({
+                message: $author$project$Main$NoOp,
+                preventDefault: true,
+                stopPropagation: true
+            }))
+        ]);
+        return A2($elm$html$Html$div, _List_fromArray([
+            $elm$html$Html$Attributes$class('d-block')
+        ]), _List_fromArray([
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('modal d-block fade show'),
+                A2($elm$html$Html$Attributes$attribute, 'tabindex', '-1'),
+                A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true'),
+                A2($elm$html$Html$Attributes$attribute, 'role', 'dialog'),
+                A2($elm$html$Html$Events$custom, 'mouseup', $elm$json$Json$Decode$succeed({
+                    message: $author$project$Main$CloseModal,
+                    preventDefault: true,
+                    stopPropagation: true
+                }))
+            ]), _List_fromArray([
+                A2($elm$html$Html$div, _List_fromArray([
+                    $elm$html$Html$Attributes$class('modal-dialog modal-dialog-centered modal-dialog-scrollable'),
+                    A2($elm$html$Html$Attributes$attribute, 'aria-modal', 'true')
+                ]), _List_fromArray([
+                    A2($elm$html$Html$div, modalContentAttrs, _List_fromArray([
+                        A2($elm$html$Html$div, _List_fromArray([
+                            $elm$html$Html$Attributes$class('modal-header')
+                        ]), _List_fromArray([
+                            A2($elm$html$Html$h6, _List_fromArray([
+                                $elm$html$Html$Attributes$class('modal-title')
+                            ]), _List_fromArray([
+                                A2($author$project$I18n$htmlText, lang, transationId)
+                            ])),
+                            A2($elm$html$Html$button, _List_fromArray([
+                                $elm$html$Html$Attributes$type_('button'),
+                                $elm$html$Html$Attributes$class('btn fs-5 p-0'),
+                                A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Close (ESC)'),
+                                $elm$html$Html$Events$onClick($author$project$Main$CloseModal)
+                            ]), _List_fromArray([
+                                A2($author$project$Icon$icon, $author$project$Icon$Close, _List_Nil)
+                            ]))
+                        ])),
+                        A2($elm$html$Html$div, _List_fromArray([
+                            $elm$html$Html$Attributes$class('modal-body no-scroll-chaining')
+                        ]), content)
+                    ]))
+                ]))
+            ])),
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('modal-backdrop fade show')
+            ]), _List_Nil)
+        ]));
+    });
     var $author$project$Main$layout = F2(function(model, content) {
         var store = model.store;
         var modal = model.modal;
@@ -13168,96 +13165,21 @@ type alias Process =
                 if (modal.$ === 'Just') switch(modal.a.$){
                     case 'HelpModal':
                         var _v1 = modal.a;
-                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Help, A2($author$project$Main$viewHelp, store, model.wordSize));
+                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Help, A2($author$project$Help$view, store.lang, $author$project$Main$maxAttempts));
                     case 'SettingsModal':
                         var _v2 = modal.a;
-                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Settings, $author$project$Main$viewSettings(store));
+                        return A3($author$project$Main$viewModal, store, $author$project$I18n$Settings, A2($author$project$Settings$view, {
+                            lang: store.lang,
+                            switchLayout: $author$project$Main$SwitchLayout,
+                            switchWordSize: $author$project$Main$SwitchWordSize
+                        }, store.settings));
                     default:
                         var _v3 = modal.a;
                         return A3($author$project$Main$viewModal, store, $author$project$I18n$StatsLang({
                             lang: store.lang
-                        }), $author$project$Main$viewStats(store));
+                        }), $author$project$Stats$view(store));
                 }
                 else return $elm$html$Html$text('');
-            }()
-        ]));
-    });
-    var $elm$core$List$repeatHelp = F3(function(result, n, value) {
-        repeatHelp: while(true){
-            if (n <= 0) return result;
-            else {
-                var $temp$result = A2($elm$core$List$cons, value, result), $temp$n = n - 1, $temp$value = value;
-                result = $temp$result;
-                n = $temp$n;
-                value = $temp$value;
-                continue repeatHelp;
-            }
-        }
-    });
-    var $elm$core$List$repeat = F2(function(n, value) {
-        return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
-    });
-    var $elm_community$list_extra$List$Extra$initialize = F2(function(n, f) {
-        var step = F2(function(i, acc) {
-            step: while(true){
-                if (i < 0) return acc;
-                else {
-                    var $temp$i = i - 1, $temp$acc = A2($elm$core$List$cons, f(i), acc);
-                    i = $temp$i;
-                    acc = $temp$acc;
-                    continue step;
-                }
-            }
-        });
-        return A2(step, n - 1, _List_Nil);
-    });
-    var $author$project$Main$viewInput = F2(function(wordSize, input) {
-        var chars = $elm$core$String$toList(input);
-        var spots = _Utils_ap(chars, A2($elm_community$list_extra$List$Extra$initialize, wordSize - $elm$core$List$length(chars), $elm$core$Basics$always(_Utils_chr('\u00A0'))));
-        return A2($author$project$Main$viewBoardRow, wordSize, A2($elm$core$List$map, $author$project$Main$viewTile('btn-secondary'), spots));
-    });
-    var $author$project$Main$viewBoard = F3(function(wordSize, input, guesses) {
-        var remaining = $author$project$Main$maxAttempts - $elm$core$List$length(guesses) - A2($elm$core$Maybe$withDefault, 1, A2($elm$core$Maybe$map, $elm$core$Basics$always(2), input));
-        return A2($elm$html$Html$div, _List_fromArray([
-            $elm$html$Html$Attributes$class('BoardContainer'),
-            $elm$html$Html$Attributes$id('board-container')
-        ]), _List_fromArray([
-            A2($elm$html$Html$div, _List_fromArray([
-                $elm$html$Html$Attributes$class('Board Board-' + $elm$core$String$fromInt(wordSize)),
-                A2($elm$html$Html$Attributes$style, 'grid-template-rows', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
-                    $elm$core$String$fromInt($author$project$Main$maxAttempts)
-                ])))
-            ]), A2($elm$core$List$filterMap, $elm$core$Basics$identity, $elm$core$List$concat(_List_fromArray([
-                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Main$viewGuess(wordSize), $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
-                _List_fromArray([
-                    A2($elm$core$Maybe$map, $author$project$Main$viewInput(wordSize), input)
-                ]),
-                A2($elm$core$List$map, function(_v0) {
-                    return $elm$core$Maybe$Just(A2($author$project$Main$viewInput, wordSize, $elm$core$String$fromList(A2($elm$core$List$repeat, wordSize, _Utils_chr('\u00A0')))));
-                }, A2($elm$core$List$range, 0, remaining))
-            ]))))
-        ]));
-    });
-    var $author$project$I18n$DecodeError = {
-        $: 'DecodeError'
-    };
-    var $elm$html$Html$pre = _VirtualDom_node('pre');
-    var $author$project$Main$viewError = F2(function(lang, error) {
-        return A2($elm$html$Html$div, _List_fromArray([
-            $elm$html$Html$Attributes$class('alert alert-danger m-3')
-        ]), _List_fromArray([
-            function() {
-                if (error.$ === 'DecodeError') {
-                    var details = error.a;
-                    return A2($elm$html$Html$div, _List_Nil, _List_fromArray([
-                        A2($author$project$I18n$paragraph, lang, $author$project$I18n$DecodeError),
-                        A2($elm$html$Html$pre, _List_fromArray([
-                            $elm$html$Html$Attributes$class('pb-3')
-                        ]), _List_fromArray([
-                            $elm$html$Html$text(details)
-                        ]))
-                    ]));
-                } else return A2($author$project$I18n$htmlText, lang, $author$project$I18n$LoadError);
             }()
         ]));
     });
@@ -13299,7 +13221,7 @@ type alias Process =
     var $elm$html$Html$Attributes$tabindex = function(n) {
         return A2(_VirtualDom_attribute, 'tabIndex', $elm$core$String$fromInt(n));
     };
-    var $author$project$Main$viewKeyState = function(_v0) {
+    var $author$project$Keyboard$viewKeyState = F2(function(config, _v0) {
         var _char = _v0.a;
         var letter = _v0.b;
         var baseClasses = 'KeyboardKey btn';
@@ -13307,17 +13229,17 @@ type alias Process =
             _v2$3: while(true){
                 if (letter.$ === 'Just') switch(letter.a.$){
                     case 'Correct':
-                        return _Utils_Tuple2('btn-success', $author$project$Main$KeyPressed(_char));
+                        return _Utils_Tuple2('btn-success', config.keyPressed(_char));
                     case 'Misplaced':
-                        return _Utils_Tuple2('btn-warning', $author$project$Main$KeyPressed(_char));
+                        return _Utils_Tuple2('btn-warning', config.keyPressed(_char));
                     case 'Unused':
-                        return _Utils_Tuple2('bg-dark text-light', $author$project$Main$KeyPressed(_char));
+                        return _Utils_Tuple2('bg-dark text-light', config.keyPressed(_char));
                     default:
                         break _v2$3;
                 }
                 else break _v2$3;
             }
-            return _Utils_eq(_char, _Utils_chr('⌫')) ? _Utils_Tuple2('btn-info large-key', $author$project$Main$BackSpace) : _Utils_eq(_char, _Utils_chr('⏎')) ? _Utils_Tuple2('btn-info large-key', $author$project$Main$Submit) : _Utils_Tuple2('btn-secondary', $author$project$Main$KeyPressed(_char));
+            return _Utils_eq(_char, _Utils_chr('⌫')) ? _Utils_Tuple2('btn-info large-key', config.backSpace) : _Utils_eq(_char, _Utils_chr('⏎')) ? _Utils_Tuple2('btn-info large-key', config.submit) : _Utils_Tuple2('btn-secondary', config.keyPressed(_char));
         }();
         var classes = _v1.a;
         var msg = _v1.b;
@@ -13336,19 +13258,96 @@ type alias Process =
                     case '⏎':
                         return A2($author$project$Icon$icon, $author$project$Icon$Enter, _List_Nil);
                     default:
-                        return $elm$html$Html$text($author$project$Main$charToText(_char));
+                        return $elm$html$Html$text($author$project$Game$charToText(_char));
                 }
             }()
         ]));
-    };
-    var $author$project$Main$viewKeyboard = F2(function(_v0, guesses) {
-        var lang = _v0.lang;
-        var settings = _v0.settings;
+    });
+    var $author$project$Keyboard$view = F2(function(config, guesses) {
         return A2($elm$html$Html$footer, _List_fromArray([
             $elm$html$Html$Attributes$class('Keyboard')
         ]), A2($elm$core$List$map, A2($elm$core$Basics$composeL, $elm$html$Html$div(_List_fromArray([
             $elm$html$Html$Attributes$class('KeyboardRow')
-        ])), $elm$core$List$map(A2($elm$core$Basics$composeR, $author$project$Keyboard$keyState(guesses), $author$project$Main$viewKeyState))), A2($author$project$Keyboard$disposition, lang, settings.layout)));
+        ])), $elm$core$List$map(A2($elm$core$Basics$composeR, $author$project$Keyboard$keyState(guesses), $author$project$Keyboard$viewKeyState(config)))), A2($author$project$Keyboard$disposition, config.lang, config.layout)));
+    });
+    var $elm$core$List$repeatHelp = F3(function(result, n, value) {
+        repeatHelp: while(true){
+            if (n <= 0) return result;
+            else {
+                var $temp$result = A2($elm$core$List$cons, value, result), $temp$n = n - 1, $temp$value = value;
+                result = $temp$result;
+                n = $temp$n;
+                value = $temp$value;
+                continue repeatHelp;
+            }
+        }
+    });
+    var $elm$core$List$repeat = F2(function(n, value) {
+        return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+    });
+    var $elm_community$list_extra$List$Extra$initialize = F2(function(n, f) {
+        var step = F2(function(i, acc) {
+            step: while(true){
+                if (i < 0) return acc;
+                else {
+                    var $temp$i = i - 1, $temp$acc = A2($elm$core$List$cons, f(i), acc);
+                    i = $temp$i;
+                    acc = $temp$acc;
+                    continue step;
+                }
+            }
+        });
+        return A2(step, n - 1, _List_Nil);
+    });
+    var $author$project$Game$viewInput = F2(function(wordSize, input) {
+        var chars = $elm$core$String$toList(input);
+        var spots = _Utils_ap(chars, A2($elm_community$list_extra$List$Extra$initialize, wordSize - $elm$core$List$length(chars), $elm$core$Basics$always(_Utils_chr('\u00A0'))));
+        return A2($author$project$Game$viewBoardRow, wordSize, A2($elm$core$List$map, $author$project$Game$viewTile('btn-secondary'), spots));
+    });
+    var $author$project$Game$viewBoard = F4(function(maxAttempts, wordSize, input, guesses) {
+        var remaining = maxAttempts - $elm$core$List$length(guesses) - A2($elm$core$Maybe$withDefault, 1, A2($elm$core$Maybe$map, $elm$core$Basics$always(2), input));
+        return A2($elm$html$Html$div, _List_fromArray([
+            $elm$html$Html$Attributes$class('BoardContainer'),
+            $elm$html$Html$Attributes$id('board-container')
+        ]), _List_fromArray([
+            A2($elm$html$Html$div, _List_fromArray([
+                $elm$html$Html$Attributes$class('Board Board-' + $elm$core$String$fromInt(wordSize)),
+                A2($elm$html$Html$Attributes$style, 'grid-template-rows', A2($lukewestby$elm_string_interpolate$String$Interpolate$interpolate, 'repeat({0}, 1fr)', _List_fromArray([
+                    $elm$core$String$fromInt(maxAttempts)
+                ])))
+            ]), A2($elm$core$List$filterMap, $elm$core$Basics$identity, $elm$core$List$concat(_List_fromArray([
+                A2($elm$core$List$map, A2($elm$core$Basics$composeR, $author$project$Game$viewGuess(wordSize), $elm$core$Maybe$Just), $elm$core$List$reverse(guesses)),
+                _List_fromArray([
+                    A2($elm$core$Maybe$map, $author$project$Game$viewInput(wordSize), input)
+                ]),
+                A2($elm$core$List$map, function(_v0) {
+                    return $elm$core$Maybe$Just(A2($author$project$Game$viewInput, wordSize, $elm$core$String$fromList(A2($elm$core$List$repeat, wordSize, _Utils_chr('\u00A0')))));
+                }, A2($elm$core$List$range, 0, remaining))
+            ]))))
+        ]));
+    });
+    var $author$project$I18n$DecodeError = {
+        $: 'DecodeError'
+    };
+    var $elm$html$Html$pre = _VirtualDom_node('pre');
+    var $author$project$Game$viewError = F2(function(lang, error) {
+        return A2($elm$html$Html$div, _List_fromArray([
+            $elm$html$Html$Attributes$class('alert alert-danger m-3')
+        ]), _List_fromArray([
+            function() {
+                if (error.$ === 'DecodeError') {
+                    var details = error.a;
+                    return A2($elm$html$Html$div, _List_Nil, _List_fromArray([
+                        A2($author$project$I18n$paragraph, lang, $author$project$I18n$DecodeError),
+                        A2($elm$html$Html$pre, _List_fromArray([
+                            $elm$html$Html$Attributes$class('pb-3')
+                        ]), _List_fromArray([
+                            $elm$html$Html$text(details)
+                        ]))
+                    ]));
+                } else return A2($author$project$I18n$htmlText, lang, $author$project$I18n$LoadError);
+            }()
+        ]));
     });
     var $elm$html$Html$span = _VirtualDom_node('span');
     var $author$project$Main$viewLoader = A2($elm$html$Html$div, _List_fromArray([
@@ -13368,17 +13367,24 @@ type alias Process =
         var wordSize = model.wordSize;
         var store = model.store;
         var state = model.state;
+        var viewKeyboard = $author$project$Keyboard$view({
+            backSpace: $author$project$Main$BackSpace,
+            keyPressed: $author$project$Main$KeyPressed,
+            lang: store.lang,
+            layout: store.settings.layout,
+            submit: $author$project$Main$Submit
+        });
         return A2($author$project$Main$layout, model, function() {
             switch(state.$){
                 case 'Idle':
                     return _List_fromArray([
                         $author$project$Main$viewLoader,
-                        A2($author$project$Main$viewKeyboard, store, _List_Nil)
+                        viewKeyboard(_List_Nil)
                     ]);
                 case 'Errored':
                     var error = state.a;
                     return _List_fromArray([
-                        A2($author$project$Main$viewError, store.lang, error),
+                        A2($author$project$Game$viewError, store.lang, error),
                         A2($elm$html$Html$p, _List_fromArray([
                             $elm$html$Html$Attributes$class('text-center')
                         ]), _List_fromArray([
@@ -13389,26 +13395,26 @@ type alias Process =
                     var word = state.a;
                     var guesses = state.b;
                     return _List_fromArray([
-                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Nothing, guesses),
+                        A4($author$project$Game$viewBoard, $author$project$Main$maxAttempts, wordSize, $elm$core$Maybe$Nothing, guesses),
                         A2($author$project$Main$endGameButtons, store.lang, word),
-                        A2($author$project$Main$viewKeyboard, store, guesses)
+                        viewKeyboard(guesses)
                     ]);
                 case 'Lost':
                     var word = state.a;
                     var guesses = state.b;
                     return _List_fromArray([
-                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Nothing, function(a) {
+                        A4($author$project$Game$viewBoard, $author$project$Main$maxAttempts, wordSize, $elm$core$Maybe$Nothing, function(a) {
                             return A2($elm$core$List$cons, a, guesses);
                         }(A2($elm$core$List$map, $author$project$Game$Correct, $elm$core$String$toList(word)))),
                         A2($author$project$Main$endGameButtons, store.lang, word),
-                        A2($author$project$Main$viewKeyboard, store, guesses)
+                        viewKeyboard(guesses)
                     ]);
                 default:
                     var guesses = state.b;
                     var input = state.c;
                     return _List_fromArray([
-                        A3($author$project$Main$viewBoard, wordSize, $elm$core$Maybe$Just(input), guesses),
-                        A2($author$project$Main$viewKeyboard, store, guesses)
+                        A4($author$project$Game$viewBoard, $author$project$Main$maxAttempts, wordSize, $elm$core$Maybe$Just(input), guesses),
+                        viewKeyboard(guesses)
                     ]);
             }
         }());
