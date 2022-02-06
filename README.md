@@ -37,9 +37,9 @@ In no specific order:
 ## FAQ
 
 - Why can't I share my scores?
-  - Because I didn't want to add more noise to already noisy social networks 
+  - Aren't you overwhelmed with Wordle scores alrady? I didn't want to add more automated noise to already noisy social networks. If you enjoy Wordlem, feel free to tell your friends though.
 - Why no 8+ letters words?
-  - Because that would make the dictionary size a too big to download comfortably, but I may consider the option in the future.
+  - Because that would make the dictionary size too big to download comfortably, but I may consider the option in the future.
 
 ## License
 
