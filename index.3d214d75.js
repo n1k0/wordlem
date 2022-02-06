@@ -7476,6 +7476,9 @@ type alias Process =
         }
         return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
     });
+    var $author$project$Game$appendSolution = function(word) {
+        return $elm$core$List$cons(A2($elm$core$List$map, $author$project$Game$Correct, $elm$core$String$toList(word)));
+    };
     var $author$project$I18n$Definition = {
         $: 'Definition'
     };
@@ -13403,9 +13406,7 @@ type alias Process =
                     var word = state.a;
                     var guesses = state.b;
                     return _List_fromArray([
-                        A4($author$project$Game$viewBoard, $author$project$Main$maxAttempts, wordSize, $elm$core$Maybe$Nothing, function(a) {
-                            return A2($elm$core$List$cons, a, guesses);
-                        }(A2($elm$core$List$map, $author$project$Game$Correct, $elm$core$String$toList(word)))),
+                        A4($author$project$Game$viewBoard, $author$project$Main$maxAttempts, wordSize, $elm$core$Maybe$Nothing, A2($author$project$Game$appendSolution, word, guesses)),
                         A2($author$project$Main$endGameButtons, store.lang, word),
                         viewKeyboard(guesses)
                     ]);
