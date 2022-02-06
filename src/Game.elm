@@ -6,6 +6,7 @@ module Game exposing
     , State(..)
     , WordToFind
     , addChar
+    , appendSolution
     , charToText
     , checkGame
     , guessToString
@@ -236,9 +237,16 @@ isLastGuess input =
         >> (==) (Just input)
 
 
+appendSolution : String -> List Guess -> List Guess
+appendSolution word =
+    word
+        |> String.toList
+        |> List.map Correct
+        |> (::)
+
+
 charToText : Char -> String
 charToText =
-    -- FIXME: remove
     Char.toUpper >> String.fromChar
 
 

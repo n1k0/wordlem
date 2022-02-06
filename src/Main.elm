@@ -692,23 +692,23 @@ view ({ wordSize, store, state } as model) =
                 ]
 
             Game.Won word guesses ->
-                [ Game.viewBoard maxAttempts wordSize Nothing guesses
+                [ guesses
+                    |> Game.viewBoard maxAttempts wordSize Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard guesses
                 ]
 
             Game.Lost word guesses ->
-                [ word
-                    |> String.toList
-                    |> List.map Game.Correct
-                    |> (\a -> a :: guesses)
+                [ guesses
+                    |> Game.appendSolution word
                     |> Game.viewBoard maxAttempts wordSize Nothing
                 , endGameButtons store.lang word
                 , viewKeyboard guesses
                 ]
 
             Game.Ongoing _ guesses input ->
-                [ Game.viewBoard maxAttempts wordSize (Just input) guesses
+                [ guesses
+                    |> Game.viewBoard maxAttempts wordSize (Just input)
                 , viewKeyboard guesses
                 ]
         )
