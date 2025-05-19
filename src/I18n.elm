@@ -130,7 +130,7 @@ getSet id =
 
         HelpKeyboard ->
             set []
-                "Use your dekstop computer keyboard to enter words, or the virtual one at the bottom."
+                "Use your desktop computer keyboard to enter words, or the virtual one at the bottom."
                 "Utilisez le clavier de votre ordinateur pour saisir vos propositions, ou celui proposé au bas de l'écran."
 
         HelpKeyboardLetter ->
